@@ -22,3 +22,8 @@ repos:
         additional_dependencies:
           - eslint
           - eslint-config-next
+
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: v3.7.4
+    hooks:
+      - id: prettier
