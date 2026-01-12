@@ -19,7 +19,7 @@ class BackendClient:
             )
             response.raise_for_status()
             data = response.json()
-            return data["data"]["id"]
+            return data["data"]["session_id"]
 
     async def update_session_status(self, session_id: str, status: str) -> None:
         """Update session status."""
