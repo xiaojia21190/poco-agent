@@ -32,7 +32,7 @@ class SessionUpdateRequest(BaseModel):
 class SessionResponse(BaseModel):
     """Session response."""
 
-    id: UUID
+    session_id: UUID = Field(validation_alias="id")
     user_id: str
     sdk_session_id: str | None
     config_snapshot: dict[str, Any] | None
@@ -41,4 +41,4 @@ class SessionResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)

@@ -1,10 +1,13 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, Integer, Numeric, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models import Base, TimestampMixin
-from app.models.agent_session import AgentSession
+
+if TYPE_CHECKING:
+    from app.models.agent_session import AgentSession
 
 
 class UsageLog(Base, TimestampMixin):

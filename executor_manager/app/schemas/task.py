@@ -41,6 +41,10 @@ class SessionStatusResponse(BaseModel):
     """Session status response (proxied from backend)."""
 
     session_id: str
+    user_id: str
+    sdk_session_id: str | None = None
+    config_snapshot: dict | None = None
+    workspace_archive_url: str | None = None
     status: str
     created_at: datetime
-    updated_at: datetime | None = None
+    updated_at: datetime
