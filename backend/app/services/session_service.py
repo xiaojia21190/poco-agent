@@ -3,6 +3,8 @@ import uuid
 
 from sqlalchemy.orm import Session
 
+from app.core.errors.error_codes import ErrorCode
+from app.core.errors.exceptions import AppException
 from app.models.agent_session import AgentSession
 from app.repositories.session_repository import SessionRepository
 from app.schemas.session import SessionCreateRequest, SessionUpdateRequest
@@ -35,11 +37,14 @@ class SessionService:
         """Gets a session by ID.
 
         Raises:
-            ValueError: If session not found.
+            AppException: If session not found.
         """
         db_session = SessionRepository.get_by_id(db, session_id)
         if not db_session:
-            raise ValueError(f"Session not found: {session_id}")
+            raise AppException(
+                error_code=ErrorCode.NOT_FOUND,
+                message=f"Session not found: {session_id}",
+            )
         return db_session
 
     def update_session(

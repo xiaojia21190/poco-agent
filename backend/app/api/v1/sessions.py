@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
@@ -37,11 +37,7 @@ async def get_session(
     db: Session = Depends(get_db),
 ) -> JSONResponse:
     """Gets session details."""
-    try:
-        db_session = session_service.get_session(db, session_id)
-    except ValueError:
-        raise HTTPException(status_code=404, detail="Session not found")
-
+    db_session = session_service.get_session(db, session_id)
     return Response.success(
         data=SessionResponse.model_validate(db_session),
         message="Session retrieved successfully",
@@ -55,11 +51,7 @@ async def update_session(
     db: Session = Depends(get_db),
 ) -> JSONResponse:
     """Updates a session."""
-    try:
-        db_session = session_service.update_session(db, session_id, request)
-    except ValueError:
-        raise HTTPException(status_code=404, detail="Session not found")
-
+    db_session = session_service.update_session(db, session_id, request)
     return Response.success(
         data=SessionResponse.model_validate(db_session),
         message="Session updated successfully",
