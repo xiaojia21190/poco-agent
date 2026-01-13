@@ -1,0 +1,58 @@
+{
+  "welcome": "Welcome to OpenCoWork",
+  "description": "A multi-service AI agent execution platform",
+  "home": "Home",
+  "language": "Language",
+
+  "sidebar": {
+    "newTask": "New Task",
+    "search": "Search",
+    "library": "Library",
+    "projects": "Projects",
+    "addProject": "Add project",
+    "allTasks": "All Tasks",
+    "filterTasks": "Filter tasks",
+    "deleteTask": "Delete task",
+    "shareTitle": "Share OpenCoWork with friends",
+    "shareDesc": "Get 500 points each",
+    "user": "User",
+    "plan": "Pro Plan"
+  },
+
+  "header": {
+    "workspace": "OpenCoWork 1.0",
+    "switchWorkspace": "Switch workspace",
+    "notifications": "Notifications",
+    "more": "More"
+  },
+
+  "hero": {
+    "title": "What can I do for you?",
+    "subtitle": "Assign a task, or ask any question.",
+    "attachFile": "Add attachment",
+    "voiceInput": "Voice input",
+    "send": "Send",
+    "placeholder": "Assign a task or ask any question",
+    "tools": "Connect your tools to OpenCoWork"
+  },
+
+  "prompts": {
+    "createSlides": "Create slides",
+    "createWebsite": "Create website",
+    "developApp": "Develop app",
+    "design": "Design",
+    "more": "More"
+  },
+
+  "hints": {
+    "send": "Send",
+    "newLine": "Shift + Enter to new line"
+  },
+
+  "status": {
+    "pending": "Pending",
+    "running": "Running",
+    "completed": "Completed",
+    "failed": "Failed"
+  }
+}

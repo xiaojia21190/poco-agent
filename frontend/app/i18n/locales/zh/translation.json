@@ -1,0 +1,58 @@
+{
+  "welcome": "欢迎使用 OpenCoWork",
+  "description": "多服务 AI 智能体执行平台",
+  "home": "首页",
+  "language": "语言",
+
+  "sidebar": {
+    "newTask": "新建任务",
+    "search": "搜索",
+    "library": "库",
+    "projects": "项目",
+    "addProject": "添加项目",
+    "allTasks": "所有任务",
+    "filterTasks": "筛选任务",
+    "deleteTask": "删除任务",
+    "shareTitle": "与好友分享 OpenCoWork",
+    "shareDesc": "各得 500 积分",
+    "user": "用户",
+    "plan": "专业版"
+  },
+
+  "header": {
+    "workspace": "OpenCoWork 1.0",
+    "switchWorkspace": "切换工作区",
+    "notifications": "通知",
+    "more": "更多"
+  },
+
+  "hero": {
+    "title": "我能为你做什么？",
+    "subtitle": "分配一个任务，或提出任何问题。",
+    "attachFile": "添加附件",
+    "voiceInput": "语音输入",
+    "send": "发送",
+    "placeholder": "分配一个任务或提出任何问题",
+    "tools": "将你的工具连接到 OpenCoWork"
+  },
+
+  "prompts": {
+    "createSlides": "制作幻灯片",
+    "createWebsite": "创建网站",
+    "developApp": "开发应用",
+    "design": "设计",
+    "more": "更多"
+  },
+
+  "hints": {
+    "send": "发送",
+    "newLine": "换行"
+  },
+
+  "status": {
+    "pending": "待处理",
+    "running": "进行中",
+    "completed": "已完成",
+    "failed": "失败"
+  }
+}
