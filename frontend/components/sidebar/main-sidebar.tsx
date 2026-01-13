@@ -42,10 +42,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-import type {
-  ProjectItem,
-  TaskHistoryItem,
-} from "@/app/[lng]/home/model/types";
+import type { ProjectItem, TaskHistoryItem } from "@/lib/api-types";
 import { TaskHistoryList } from "./task-history-list";
 import { CollapsibleProjectItem } from "./collapsible-project-item";
 import { GlobalSearchDialog } from "@/components/search/global-search-dialog";
@@ -77,6 +74,7 @@ function DroppableAllTasksGroup({
   onMoveTaskToProject?: (taskId: string, projectId: string | null) => void;
   projects: ProjectItem[];
 }) {
+  const { t } = useT("translation");
   const { setNodeRef, isOver } = useDroppable({
     id: "all-tasks",
     data: {
@@ -105,7 +103,7 @@ function DroppableAllTasksGroup({
         />
         {isOver && (
           <div className="flex items-center justify-center p-2 text-xs text-primary bg-primary/5 rounded border border-dashed border-primary/20 mt-1">
-            移出项目
+            {t("sidebar.removeFromProject")}
           </div>
         )}
       </SidebarGroupContent>

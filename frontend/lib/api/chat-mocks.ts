@@ -1,81 +1,14 @@
+import { ChatSession, UsageStats } from "../api-types";
 import type { TFunction } from "i18next";
 
-import type {
-  ChatSession,
-  ProjectItem,
-  TaskHistoryItem,
-  UsageStats,
-} from "./types";
-
-export function createMockProjects(t: TFunction): ProjectItem[] {
-  return [
-    {
-      id: "p-1",
-      name: t("mocks.projects.newProject"),
-      taskCount: 2,
-      icon: "📁",
-    },
-    {
-      id: "p-2",
-      name: "前端重构",
-      taskCount: 3,
-      icon: "⚛️",
-    },
-    {
-      id: "p-3",
-      name: "API 开发",
-      taskCount: 1,
-      icon: "🔧",
-    },
-  ];
-}
-
-export function createMockTaskHistory(t: TFunction): TaskHistoryItem[] {
-  return [
-    {
-      id: "1",
-      title: t("mocks.taskHistory.refactorFrontend"),
-      status: "completed",
-      timestamp: t("mocks.timestamps.twoMinutesAgo"),
-      projectId: "p-2", // 关联到"前端重构"项目
-    },
-    {
-      id: "2",
-      title: t("mocks.taskHistory.researchClaude"),
-      status: "running",
-      timestamp: t("mocks.timestamps.oneHourAgo"),
-      projectId: null, // 未关联到项目
-    },
-    {
-      id: "3",
-      title: "实现用户认证功能",
-      status: "pending",
-      timestamp: t("mocks.timestamps.justNow"),
-      projectId: "p-2", // 关联到"前端重构"项目
-    },
-    {
-      id: "4",
-      title: "优化数据库查询",
-      status: "completed",
-      timestamp: t("mocks.timestamps.twoMinutesAgo"),
-      projectId: "p-3", // 关联到"API 开发"项目
-    },
-    {
-      id: "5",
-      title: "添加单元测试",
-      status: "pending",
-      timestamp: t("mocks.timestamps.oneHourAgo"),
-      projectId: "p-2", // 关联到"前端重构"项目
-    },
-  ];
-}
-
 // Chat-related mock data
-export function createMockChatSession(t: TFunction): ChatSession {
+export function createMockChatSession(
+  t: TFunction = ((s: string) => s) as TFunction,
+): ChatSession {
   return {
     id: "session-1",
     taskId: "1",
-    title: t("mocks.taskHistory.refactorFrontend"),
+    title: t("mocks.taskHistory.refactorFrontend") || "前端重构",
     status: "completed",
     model: "claude-sonnet-4.5",
     createdAt: "2024-01-13T10:00:00Z",

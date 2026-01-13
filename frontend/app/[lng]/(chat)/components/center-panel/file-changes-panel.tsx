@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { FileChangesHeader } from "./file-changes-header";
 import { FileChangesList } from "./file-changes-list";
 import { useT } from "@/app/i18n/client";
-import type { WorkspaceState } from "../../model/execution-types";
+import type { WorkspaceState } from "@/lib/api-types";
 
 interface FileChangesPanelProps {
   workspaceState?: WorkspaceState;

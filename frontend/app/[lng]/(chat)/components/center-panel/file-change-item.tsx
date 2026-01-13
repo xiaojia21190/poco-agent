@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useT } from "@/app/i18n/client";
-import type { FileChange, FileChangeStatus } from "../../model/execution-types";
+import type { FileChange, FileChangeStatus } from "@/lib/api-types";
 
 interface FileChangeItemProps {
   fileChange: FileChange;

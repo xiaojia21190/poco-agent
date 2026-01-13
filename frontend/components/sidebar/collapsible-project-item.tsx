@@ -5,10 +5,7 @@ import { ChevronDown, ChevronRight, Folder } from "lucide-react";
 import { useDroppable } from "@dnd-kit/core";
 import { cn } from "@/lib/utils";
 import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import type {
-  ProjectItem,
-  TaskHistoryItem,
-} from "@/app/[lng]/home/model/types";
+import type { ProjectItem, TaskHistoryItem } from "@/lib/api-types";
 import { TaskHistoryList } from "./task-history-list";
 
 interface CollapsibleProjectItemProps {

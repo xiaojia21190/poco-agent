@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { useChatSession } from "../hooks/use-chat-session";
 import { AVAILABLE_MODELS } from "@/app/[lng]/home/model/constants";
-import type { ModelInfo } from "@/app/[lng]/home/model/types";
+import type { ModelInfo } from "@/lib/api-types";
 
 import { ChatHeader } from "./chat-header";
 import { ChatMessageList } from "./chat-message-list";

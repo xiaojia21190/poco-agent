@@ -7,9 +7,8 @@ import { useT } from "@/app/i18n/client";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 import { useAutosizeTextarea } from "../hooks/use-autosize-textarea";
-import { useTaskHistory } from "../hooks/use-task-history";
-import { createMockProjects, createMockTaskHistory } from "../model/mocks";
-import type { ProjectItem } from "../model/types";
+import { useTaskHistory } from "@/hooks/use-task-history";
+import { useProjects } from "@/hooks/use-projects";
 
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { HomeHeader } from "./home-header";
@@ -24,12 +23,8 @@ export function HomePage() {
 
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 
-  const [projects, setProjects] = React.useState<ProjectItem[]>(() =>
-    createMockProjects(t),
-  );
-  const { taskHistory, addTask, removeTask, moveTask } = useTaskHistory(() =>
-    createMockTaskHistory(t),
-  );
+  const { projects, addProject } = useProjects();
+  const { taskHistory, addTask, removeTask, moveTask } = useTaskHistory();
 
   const [inputValue, setInputValue] = React.useState("");
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -69,17 +64,12 @@ export function HomePage() {
     router.push(`/chat/${sessionId}`);
   }, [addTask, inputValue, t, router]);
 
-  const handleCreateProject = React.useCallback((name: string) => {
-    setProjects((prev) => [
-      ...prev,
-      {
-        id: `project-${Date.now()}`,
-        name,
-        taskCount: 0,
-        icon: "📁",
-      },
-    ]);
-  }, []);
+  const handleCreateProject = React.useCallback(
+    (name: string) => {
+      addProject(name);
+    },
+    [addProject],
+  );
 
   const handleRenameTask = React.useCallback(
     (taskId: string, newName: string) => {

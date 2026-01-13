@@ -3,9 +3,8 @@
 import * as React from "react";
 import { ChatPanel } from "./left-panel/chat-panel";
 import { ArtifactsPanel } from "./center-panel/artifacts-panel";
-import { StatusPanel } from "./right-panel/status-panel";
 import { MobileExecutionView } from "./mobile-execution-view";
-import { useExecutionSession } from "../hooks/use-execution-session";
+import { useChat } from "@/hooks/use-chat";
 import { useT } from "@/app/i18n/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -15,7 +14,7 @@ interface ExecutionContainerProps {
 
 export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
   const { t } = useT("translation");
-  const { session, isLoading, error } = useExecutionSession(sessionId);
+  const { session, isLoading, error } = useChat(sessionId);
   const isMobile = useIsMobile();
 
   // Loading state
@@ -49,26 +48,22 @@ export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
     return <MobileExecutionView session={session} />;
   }
 
-  // Desktop three-column layout
+  // Desktop two-column layout
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* Left panel - Chat (40%) */}
-      <div className="w-[40%] min-w-0 border-r border-border flex flex-col">
-        <ChatPanel session={session} />
-      </div>
-
-      {/* Center panel - Artifacts (35%) */}
-      <div className="w-[35%] min-w-0 border-r border-border flex flex-col bg-muted/30">
-        <ArtifactsPanel artifacts={session?.state_patch.artifacts} />
-      </div>
-
-      {/* Right panel - Status (25%) */}
-      <div className="w-[25%] min-w-0 flex flex-col bg-muted/30">
-        <StatusPanel
+      {/* Left panel - Chat with status cards (45%) */}
+      <div className="w-[45%] min-w-0 border-r border-border flex flex-col">
+        <ChatPanel
+          session={session}
           statePatch={session?.state_patch}
           progress={session?.progress}
           currentStep={session?.state_patch.current_step}
         />
+      </div>
+
+      {/* Right panel - Artifacts (55%) */}
+      <div className="w-[55%] min-w-0 flex flex-col bg-muted/30">
+        <ArtifactsPanel artifacts={session?.state_patch.artifacts} />
       </div>
     </div>
   );

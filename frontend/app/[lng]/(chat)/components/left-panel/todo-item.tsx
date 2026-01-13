@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { CheckCircle2, Circle, Loader2 } from "lucide-react";
-import type { TodoItem as TodoItemType } from "../../model/execution-types";
+import type { TodoItem as TodoItemType } from "@/lib/api-types";
 
 interface TodoItemProps {
   todo: TodoItemType;

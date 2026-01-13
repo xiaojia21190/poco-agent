@@ -9,8 +9,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { ChatPanel } from "./left-panel/chat-panel";
 import { ArtifactsPanel } from "./center-panel/artifacts-panel";
-import { StatusPanel } from "./right-panel/status-panel";
-import type { ExecutionSession } from "../model/execution-types";
+import type { ExecutionSession } from "@/lib/api-types";
 import { useT } from "@/app/i18n/client";
 
 interface MobileExecutionViewProps {
@@ -33,11 +32,7 @@ export function MobileExecutionView({ session }: MobileExecutionViewProps) {
           pagination={{
             clickable: true,
             renderBullet: (index: number, className: string) => {
-              const titles = [
-                t("mobile.chat"),
-                t("mobile.artifacts"),
-                t("mobile.status"),
-              ];
+              const titles = [t("mobile.chat"), t("mobile.artifacts")];
               return `<span class="${className}">${titles[index]}</span>`;
             },
           }}
@@ -54,7 +49,12 @@ export function MobileExecutionView({ session }: MobileExecutionViewProps) {
             <div
               className={`h-full ${activeIndex === 0 ? "bg-background" : "bg-muted/50"}`}
             >
-              <ChatPanel session={session} />
+              <ChatPanel
+                session={session}
+                statePatch={session?.state_patch}
+                progress={session?.progress}
+                currentStep={session?.state_patch.current_step}
+              />
             </div>
           </SwiperSlide>
           <SwiperSlide className="h-full">
@@ -62,17 +62,6 @@ export function MobileExecutionView({ session }: MobileExecutionViewProps) {
               className={`h-full ${activeIndex === 1 ? "bg-background" : "bg-muted/50"}`}
             >
               <ArtifactsPanel artifacts={session?.state_patch.artifacts} />
-            </div>
-          </SwiperSlide>
-          <SwiperSlide className="h-full">
-            <div
-              className={`h-full ${activeIndex === 2 ? "bg-background" : "bg-muted/50"}`}
-            >
-              <StatusPanel
-                statePatch={session?.state_patch}
-                progress={session?.progress}
-                currentStep={session?.state_patch.current_step}
-              />
             </div>
           </SwiperSlide>
         </Swiper>

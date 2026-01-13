@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { TaskHistoryItem } from "../model/types";
+import type { TaskHistoryItem } from "@/lib/api-types";
 
 export function useProjectTasks(
   initialTasksFn?: () => TaskHistoryItem[],
@@ -28,7 +28,7 @@ export function useProjectTasks(
         title,
         status: "pending",
         timestamp: metadata?.timestamp || new Date().toISOString(),
-        projectId: metadata?.projectId || projectId || null,
+        projectId: metadata?.projectId || projectId || undefined,
       };
 
       setTasks((prev) => [newTask, ...prev]);
@@ -44,7 +44,7 @@ export function useProjectTasks(
 
   // 更新任务项目关联
   const updateTaskProject = React.useCallback(
-    (taskId: string, newProjectId: string | null) => {
+    (taskId: string, newProjectId: string | undefined) => {
       setTasks((prev) =>
         prev.map((task) =>
           task.id === taskId ? { ...task, projectId: newProjectId } : task,

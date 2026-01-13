@@ -2,23 +2,17 @@
 
 import * as React from "react";
 
-import {
-  ArrowUp,
-  Mic,
-  MoreHorizontal,
-  Plus,
-  SlidersHorizontal,
-} from "lucide-react";
+import { ArrowUp, Mic, Plus, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useT } from "@/app/i18n/client";
-import { CONNECTED_TOOLS } from "@/app/[lng]/home/model/constants";
 
 interface ChatInputProps {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
   disabled?: boolean;
+  hasMessages?: boolean;
 }
 
 export function ChatInput({
@@ -26,6 +20,7 @@ export function ChatInput({
   onChange,
   onSend,
   disabled,
+  hasMessages = false,
 }: ChatInputProps) {
   const { t } = useT("translation");
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -59,9 +54,9 @@ export function ChatInput({
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={t("hero.placeholder")}
+              placeholder={hasMessages ? "" : t("hero.placeholder")}
               disabled={disabled}
-              className="min-h-[60px] max-h-[40vh] w-full resize-none border-0 bg-input/50 p-0 text-base shadow-none placeholder:text-muted-foreground/50 focus-visible:ring-0"
+              className="min-h-[60px] max-h-[40vh] w-full resize-none border-0 p-0 text-base shadow-none placeholder:text-muted-foreground/50 focus-visible:ring-0"
               rows={1}
             />
           </div>
@@ -112,32 +107,6 @@ export function ChatInput({
                 title={t("hero.send")}
               >
                 <ArrowUp className="size-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Connected tools bar */}
-          <div className="flex items-center justify-between border-t border-border px-4 py-2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <SlidersHorizontal className="size-3.5" />
-              <span>{t("hero.tools")}</span>
-            </div>
-            <div className="flex items-center gap-0.5">
-              {CONNECTED_TOOLS.slice(0, 6).map((tool) => (
-                <div
-                  key={tool.id}
-                  className="flex size-6 cursor-pointer items-center justify-center rounded-full text-sm transition-colors hover:bg-accent"
-                  title={tool.name}
-                >
-                  {tool.icon}
-                </div>
-              ))}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-6 rounded-full text-muted-foreground hover:text-foreground"
-              >
-                <MoreHorizontal className="size-3.5" />
               </Button>
             </div>
           </div>

@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import { Bell, ChevronDown, Coins } from "lucide-react";
+import { ChevronDown, Coins } from "lucide-react";
 
 import { useT } from "@/app/i18n/client";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ interface HomeHeaderProps {
 
 export function HomeHeader({ onOpenSettings }: HomeHeaderProps) {
   const { t } = useT("translation");
-  const router = useRouter();
   const { credits, isLoading } = useUserAccount();
 
   return (
@@ -36,15 +34,6 @@ export function HomeHeader({ onOpenSettings }: HomeHeaderProps) {
         </Button>
       </div>
       <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push("/notifications")}
-          className="size-8"
-          title={t("header.notifications")}
-        >
-          <Bell className="size-4" />
-        </Button>
         <CreditsPopover
           trigger={
             <Button

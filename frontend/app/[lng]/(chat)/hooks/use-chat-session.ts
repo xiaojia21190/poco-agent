@@ -4,13 +4,9 @@ import * as React from "react";
 
 import { useT } from "@/app/i18n/client";
 import { STREAMING_CHAR_DELAY } from "@/app/[lng]/home/model/constants";
-import { createMockNewChatSession } from "@/app/[lng]/home/model/mocks";
+import { createMockNewChatSession } from "@/lib/api/chat-mocks";
 import { createMockNewSession } from "../model/execution-mocks";
-import type {
-  ChatMessage,
-  ChatSession,
-  MessageRole,
-} from "@/app/[lng]/home/model/types";
+import type { ChatMessage, ChatSession, MessageRole } from "@/lib/api-types";
 
 export function useChatSession(taskId: string, isNewChat: boolean = false) {
   const { t } = useT("translation");

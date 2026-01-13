@@ -2,34 +2,21 @@
 
 import * as React from "react";
 
-import { useT } from "@/app/i18n/client";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { LibraryHeader } from "./components/library-header";
 import { LibraryGrid } from "./components/library-grid";
 
-import {
-  createMockProjects,
-  createMockTaskHistory,
-} from "@/app/[lng]/home/model/mocks";
-import type {
-  ProjectItem,
-  TaskHistoryItem,
-} from "@/app/[lng]/home/model/types";
+import { useProjects } from "@/hooks/use-projects";
+import { useTaskHistory } from "@/hooks/use-task-history";
 
 import { SettingsDialog } from "@/components/settings/settings-dialog";
 
 export default function LibraryPage() {
-  const { t } = useT("translation");
-
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
-  const [projects, setProjects] = React.useState<ProjectItem[]>(() =>
-    createMockProjects(t),
-  );
-  const [taskHistory] = React.useState<TaskHistoryItem[]>(() =>
-    createMockTaskHistory(t),
-  );
+  const { projects, addProject } = useProjects();
+  const { taskHistory, removeTask } = useTaskHistory();
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -39,19 +26,8 @@ export default function LibraryPage() {
           taskHistory={taskHistory}
           // Passing undefined will trigger the default navigation in AppSidebar
           onNewTask={undefined}
-          onDeleteTask={() => {}}
-          onCreateProject={(name) => {
-            // Mock create project for library page to show responsiveness
-            setProjects((prev) => [
-              ...prev,
-              {
-                id: `project-${Date.now()}`,
-                name,
-                taskCount: 0,
-                icon: "📁",
-              },
-            ]);
-          }}
+          onDeleteTask={removeTask}
+          onCreateProject={addProject}
           onOpenSettings={() => setIsSettingsOpen(true)}
         />
 

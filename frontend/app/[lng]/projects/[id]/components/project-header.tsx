@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import type { ProjectItem } from "../../../home/model/types";
+import type { ProjectItem } from "@/lib/api-types";
 
 interface ProjectHeaderProps {
   project: ProjectItem;

@@ -9,7 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
-import type { UsageStats } from "@/app/[lng]/home/model/types";
+import type { UsageStats } from "@/lib/api-types";
 
 interface UsageTooltipProps {
   stats: UsageStats;

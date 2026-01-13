@@ -1,6 +1,6 @@
 // Mock data for execution session demo
 
-import type { ExecutionSession } from "./execution-types";
+import type { ExecutionSession } from "@/lib/api-types";
 
 /**
  * 生成随机UUID

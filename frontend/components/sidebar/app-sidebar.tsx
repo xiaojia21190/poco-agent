@@ -6,10 +6,7 @@ import { GlobalSearchDialog } from "@/components/search/global-search-dialog";
 import { useSearchDialog } from "@/hooks/use-search-dialog";
 import { CreateProjectDialog } from "@/components/project/create-project-dialog";
 import { MainSidebar } from "./main-sidebar";
-import type {
-  ProjectItem,
-  TaskHistoryItem,
-} from "@/app/[lng]/home/model/types";
+import type { ProjectItem, TaskHistoryItem } from "@/lib/api-types";
 
 interface AppSidebarProps {
   projects: ProjectItem[];

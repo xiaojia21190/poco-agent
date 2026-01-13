@@ -1,37 +1,6 @@
 import { useState, useEffect } from "react";
-
-export interface UserProfile {
-  id: string;
-  email: string;
-  avatar?: string;
-  plan: "free" | "pro" | "team";
-  planName: string; // Display name e.g. "免费版"
-}
-
-export interface UserCredits {
-  total: number | string;
-  free: number | string;
-  dailyRefreshCurrent: number;
-  dailyRefreshMax: number;
-  refreshTime: string; // e.g. "08:00"
-}
-
-// Mock Data Definitions
-const MOCK_PROFILE: UserProfile = {
-  id: "u_123456",
-  email: "user@opencowork.com",
-  avatar: "",
-  plan: "free",
-  planName: "免费",
-};
-
-const MOCK_CREDITS: UserCredits = {
-  total: "∞",
-  free: "∞",
-  dailyRefreshCurrent: 9999,
-  dailyRefreshMax: 9999,
-  refreshTime: "08:00",
-};
+import { userApi } from "@/lib/api/user";
+import type { UserProfile, UserCredits } from "@/lib/api-types";
 
 export function useUserAccount() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -39,17 +8,15 @@ export function useUserAccount() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate API fetch delay
     const fetchUserData = async () => {
       try {
-        // TODO: Replace with actual API calls
-        // const profileRes = await fetch('/api/user/profile');
-        // const creditsRes = await fetch('/api/user/credits');
+        const [profileData, creditsData] = await Promise.all([
+          userApi.getProfile(),
+          userApi.getCredits(),
+        ]);
 
-        await new Promise((resolve) => setTimeout(resolve, 500)); // Mock delay
-
-        setProfile(MOCK_PROFILE);
-        setCredits(MOCK_CREDITS);
+        setProfile(profileData);
+        setCredits(creditsData);
       } catch (error) {
         console.error("Failed to fetch user data", error);
       } finally {

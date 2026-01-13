@@ -2,13 +2,11 @@
 
 import * as React from "react";
 
-import { Bell } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { ModelSelector } from "./model-selector";
 import { UsageTooltip } from "./usage-tooltip";
-import { createMockUsageStats } from "@/app/[lng]/home/model/mocks";
-import type { ModelInfo } from "@/app/[lng]/home/model/types";
+import { createMockUsageStats } from "@/lib/api/chat-mocks";
+import type { ModelInfo } from "@/lib/api-types";
 
 interface ChatHeaderProps {
   model: ModelInfo;
@@ -32,15 +30,11 @@ export function ChatHeader({ model, onModelChange, title }: ChatHeaderProps) {
         )}
       </div>
 
-      {/* Right side - Usage, notifications, avatar */}
+      {/* Right side - Usage and avatar */}
       <div className="flex items-center gap-4">
         <UsageTooltip stats={usageStats} />
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="size-5" />
-          <span className="absolute top-1 right-1 size-2 bg-red-500 rounded-full" />
-        </Button>
         <Avatar className="size-8">
-          <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
+          <AvatarFallback className="bg-muted text-muted-foreground text-xs font-medium">
             U
           </AvatarFallback>
         </Avatar>

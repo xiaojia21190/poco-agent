@@ -34,7 +34,7 @@ export function UserMenu({ trigger, onOpenSettings }: UserMenuProps) {
       <HoverCardTrigger asChild>
         {trigger || (
           <Avatar className="size-8 cursor-pointer">
-            <AvatarFallback className="bg-primary text-xs text-primary-foreground">
+            <AvatarFallback className="bg-muted text-xs text-muted-foreground">
               U
             </AvatarFallback>
           </Avatar>

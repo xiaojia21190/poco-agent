@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { AVAILABLE_MODELS } from "@/app/[lng]/home/model/constants";
-import type { ModelInfo } from "@/app/[lng]/home/model/types";
+import type { ModelInfo } from "@/lib/api-types";
 
 interface ModelSelectorProps {
   model: ModelInfo;

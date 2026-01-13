@@ -28,7 +28,7 @@ import { RenameTaskDialog } from "@/components/task/rename-task-dialog";
 import { MoveTaskToProjectDialog } from "@/components/task/move-task-to-project-dialog";
 
 import { TASK_STATUS_META } from "@/app/[lng]/home/model/constants";
-import type { TaskHistoryItem } from "@/app/[lng]/home/model/types";
+import type { TaskHistoryItem } from "@/lib/api-types";
 
 interface Project {
   id: string;

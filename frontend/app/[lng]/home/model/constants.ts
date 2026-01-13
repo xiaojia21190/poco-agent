@@ -7,12 +7,9 @@ import {
   Presentation,
 } from "lucide-react";
 
-import type {
-  ConnectedTool,
-  MessageStatus,
-  ModelInfo,
-  TaskStatus,
-} from "./types";
+import type { ConnectedTool, MessageStatus, ModelInfo } from "@/lib/api-types";
+
+type TaskStatus = "pending" | "running" | "completed" | "failed";
 
 export type QuickAction = {
   id: string;

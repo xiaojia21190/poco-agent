@@ -22,8 +22,8 @@ export function SkillsHeader() {
         >
           <ArrowLeft className="size-5" />
         </Button>
-        <div className="flex items-center justify-center p-2 rounded-lg bg-primary/10">
-          <Puzzle className="size-5 text-primary" />
+        <div className="flex items-center justify-center p-2 rounded-lg bg-muted">
+          <Puzzle className="size-5 text-foreground" />
         </div>
         <div className="flex items-center gap-2">
           <span className="text-lg font-bold tracking-tight">

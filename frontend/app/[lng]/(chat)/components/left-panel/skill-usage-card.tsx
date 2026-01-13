@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, Loader2, XCircle, Clock, Zap } from "lucide-react";
 import { useT } from "@/app/i18n/client";
-import type { SkillUse } from "../../model/execution-types";
+import type { SkillUse } from "@/lib/api-types";
 
 interface SkillUsageCardProps {
   skills: SkillUse[];
@@ -55,7 +55,7 @@ export function SkillUsageCard({ skills }: SkillUsageCardProps) {
     <Card className="overflow-hidden flex flex-col h-full">
       <CardHeader className="py-3 px-4 shrink-0">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
-          <Zap className="size-4 text-primary" />
+          <Zap className="size-4 text-foreground" />
           <span className="flex-1">技能使用</span>
           <Badge variant="outline" className="text-xs">
             {skills.length}

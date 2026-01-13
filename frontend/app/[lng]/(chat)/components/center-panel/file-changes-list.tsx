@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { FileChangeItem } from "./file-change-item";
-import type { FileChange } from "../../model/execution-types";
+import type { FileChange } from "@/lib/api-types";
 
 interface FileChangesListProps {
   fileChanges: FileChange[];

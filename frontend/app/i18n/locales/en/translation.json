@@ -13,10 +13,6 @@
     "addProject": "Add project",
     "allTasks": "Task List",
     "filterTasks": "Filter tasks",
-    "notifications": {
-      "title": "What's New",
-      "subtitle": "Latest updates and simplified version history"
-    },
     "settings": "Settings",
     "deleteTask": "Delete task",
     "rename": "Rename",
@@ -25,6 +21,7 @@
     "shareTitle": "Share OpenCoWork with friends",
     "shareDesc": "Get 500 points each",
     "user": "User",
+    "removeFromProject": "Remove from project",
     "plan": "Pro Plan"
   },
   "header": {
@@ -53,12 +50,6 @@
     "send": "Send",
     "newLine": "New line",
     "separator": ","
-  },
-  "status": {
-    "pending": "Pending",
-    "running": "Running",
-    "completed": "Completed",
-    "failed": "Failed"
   },
   "mocks": {
     "projects": {

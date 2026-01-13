@@ -2,12 +2,14 @@
 
 import * as React from "react";
 
-import type { TaskHistoryItem, TaskStatus } from "../model/types";
+import type { TaskHistoryItem } from "@/lib/api-types";
+
+type TaskStatus = "pending" | "running" | "completed" | "failed";
 
 type AddTaskOptions = {
   status?: TaskStatus;
   timestamp?: string;
-  projectId?: string | null;
+  projectId?: string;
 };
 
 const MAX_TASK_TITLE_LEN = 50;
@@ -29,7 +31,7 @@ export function useTaskHistory(getInitialTasks: () => TaskHistoryItem[]) {
         id: Date.now().toString(),
         title: displayTitle,
         status: options.status ?? "pending",
-        timestamp: options.timestamp,
+        timestamp: options.timestamp ?? new Date().toISOString(),
         projectId: options.projectId,
       };
 
@@ -44,7 +46,7 @@ export function useTaskHistory(getInitialTasks: () => TaskHistoryItem[]) {
   }, []);
 
   const moveTask = React.useCallback(
-    (taskId: string, projectId: string | null) => {
+    (taskId: string, projectId: string | undefined) => {
       setTaskHistory((prev) =>
         prev.map((task) =>
           task.id === taskId ? { ...task, projectId } : task,

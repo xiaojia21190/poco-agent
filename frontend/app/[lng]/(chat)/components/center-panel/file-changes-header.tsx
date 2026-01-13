@@ -4,7 +4,7 @@ import * as React from "react";
 import { GitBranch, GitCommit, Plus, Minus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useT } from "@/app/i18n/client";
-import type { WorkspaceState } from "../../model/execution-types";
+import type { WorkspaceState } from "@/lib/api-types";
 
 interface FileChangesHeaderProps {
   workspaceState: WorkspaceState;

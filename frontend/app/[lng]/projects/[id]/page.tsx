@@ -7,12 +7,8 @@ import { useT } from "@/app/i18n/client";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 import { useAutosizeTextarea } from "../../home/hooks/use-autosize-textarea";
-import { useTaskHistory } from "../../home/hooks/use-task-history";
-import {
-  createMockProjects,
-  createMockTaskHistory,
-} from "../../home/model/mocks";
-import type { ProjectItem } from "../../home/model/types";
+import { useTaskHistory } from "@/hooks/use-task-history";
+import { useProjects } from "@/hooks/use-projects";
 
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { ProjectHeader } from "./components/project-header";
@@ -26,16 +22,13 @@ export default function ProjectPage() {
   const params = useParams();
   const projectId = params.id as string;
 
-  const [projects] = React.useState<ProjectItem[]>(() => createMockProjects(t));
+  const { projects, addProject } = useProjects();
   const currentProject = React.useMemo(
     () => projects.find((p) => p.id === projectId) || projects[0],
     [projects, projectId],
   );
 
-  // 获取所有任务（不只是当前项目的任务）
-  const { taskHistory, addTask, removeTask } = useTaskHistory(() =>
-    createMockTaskHistory(t),
-  );
+  const { taskHistory, addTask, removeTask, moveTask } = useTaskHistory();
 
   const [inputValue, setInputValue] = React.useState("");
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -77,19 +70,6 @@ export default function ProjectPage() {
     [],
   );
 
-  const handleMoveTaskToProject = React.useCallback(
-    (taskId: string, newProjectId: string | null) => {
-      // TODO: Implement move task to project logic
-      console.log("Move task:", taskId, "to project:", newProjectId);
-    },
-    [],
-  );
-
-  const handleCreateProject = React.useCallback((name: string) => {
-    // TODO: Implement create project logic
-    console.log("Create project:", name);
-  }, []);
-
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-svh w-full overflow-hidden bg-background">
@@ -99,8 +79,8 @@ export default function ProjectPage() {
           onNewTask={handleNewTask}
           onDeleteTask={removeTask}
           onRenameTask={handleRenameTask}
-          onMoveTaskToProject={handleMoveTaskToProject}
-          onCreateProject={handleCreateProject}
+          onMoveTaskToProject={moveTask}
+          onCreateProject={addProject}
         />
 
         <SidebarInset className="flex flex-col bg-muted/30">

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Server, Check, X, AlertTriangle } from "lucide-react";
 import { useT } from "@/app/i18n/client";
-import type { McpStatusItem } from "../../model/execution-types";
+import type { McpStatusItem } from "@/lib/api-types";
 
 interface McpStatusCardProps {
   mcpStatuses: McpStatusItem[];

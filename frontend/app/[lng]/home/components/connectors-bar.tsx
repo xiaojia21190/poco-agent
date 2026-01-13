@@ -5,7 +5,7 @@ import { Plug, Plus, Search, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -83,7 +83,7 @@ function ConnectorsDialog({
           <>
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#333]">
-              <h2 className="text-lg font-semibold">连接器</h2>
+              <DialogTitle>连接器</DialogTitle>
             </div>
 
             {/* Main Content */}
@@ -205,7 +205,9 @@ function ConnectorDetail({
           <connector.icon className="size-12" />
         </div>
 
-        <h2 className="text-2xl font-bold mb-4">{connector.title}</h2>
+        <DialogTitle className="text-2xl font-bold mb-4">
+          {connector.title}
+        </DialogTitle>
         <p className="text-muted-foreground max-w-md mb-8">
           {connector.description}
         </p>

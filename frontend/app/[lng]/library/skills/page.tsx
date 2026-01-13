@@ -2,29 +2,18 @@
 
 import * as React from "react";
 
-import { useT } from "@/app/i18n/client";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 
 import { SkillsHeader } from "./components/skills-header";
 import { SkillsGrid } from "./components/skills-grid";
 
-import {
-  createMockProjects,
-  createMockTaskHistory,
-} from "@/app/[lng]/home/model/mocks";
-import type {
-  ProjectItem,
-  TaskHistoryItem,
-} from "@/app/[lng]/home/model/types";
+import { useProjects } from "@/hooks/use-projects";
+import { useTaskHistory } from "@/hooks/use-task-history";
 
 export default function SkillsPage() {
-  const { t } = useT("translation");
-
-  const [projects] = React.useState<ProjectItem[]>(() => createMockProjects(t));
-  const [taskHistory] = React.useState<TaskHistoryItem[]>(() =>
-    createMockTaskHistory(t),
-  );
+  const { projects, addProject } = useProjects();
+  const { taskHistory, removeTask } = useTaskHistory();
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -33,7 +22,8 @@ export default function SkillsPage() {
           projects={projects}
           taskHistory={taskHistory}
           onNewTask={() => {}}
-          onDeleteTask={() => {}}
+          onDeleteTask={removeTask}
+          onCreateProject={addProject}
         />
 
         <SidebarInset className="flex flex-col bg-muted/30">

@@ -13,10 +13,6 @@
     "addProject": "添加项目",
     "allTasks": "任务清单",
     "filterTasks": "筛选任务",
-    "notifications": {
-      "title": "更新日志",
-      "subtitle": "最新动态与版本历史记录"
-    },
     "settings": "设置",
     "deleteTask": "删除任务",
     "rename": "重命名",
@@ -25,6 +21,7 @@
     "shareTitle": "与好友分享 OpenCoWork",
     "shareDesc": "各得 500 积分",
     "user": "用户",
+    "removeFromProject": "移出项目",
     "plan": "专业版"
   },
   "header": {
@@ -53,12 +50,6 @@
     "send": "发送",
     "newLine": "换行",
     "separator": "，"
-  },
-  "status": {
-    "pending": "待处理",
-    "running": "进行中",
-    "completed": "已完成",
-    "failed": "失败"
   },
   "mocks": {
     "projects": {

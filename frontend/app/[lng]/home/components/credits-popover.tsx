@@ -87,7 +87,7 @@ export function CreditsPopover({
           <div className="p-4 pt-0">
             <Button
               variant="ghost"
-              className="h-auto p-0 text-muted-foreground hover:text-primary text-xs flex items-center gap-1 hover:bg-transparent"
+              className="h-auto p-0 text-muted-foreground hover:text-foreground text-xs flex items-center gap-1 hover:bg-transparent"
             >
               查看使用情况
               <ChevronRight className="size-3" />
