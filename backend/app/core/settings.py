@@ -5,14 +5,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    app_name: str = Field(default="Toto Backend")
+    app_name: str = Field(default="OpenCoWork Backend")
     app_version: str = Field(default="0.1.0")
     debug: bool = Field(default=False)
 
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8000)
 
-    database_url: str = Field(default="sqlite:///./toto.db")
+    database_url: str = Field(default="sqlite:///./opencowork.db")
 
     cors_origins: list[str] = Field(
         default=["http://localhost:3000", "http://127.0.0.1:3000"]

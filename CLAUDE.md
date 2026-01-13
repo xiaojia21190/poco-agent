@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Toto is a multi-service AI agent execution platform that orchestrates Claude AI agents to perform coding tasks. The system consists of four main components:
+OpenCoWork is a multi-service AI agent execution platform that orchestrates Claude AI agents to perform coding tasks. The system consists of four main components:
 
 - **Frontend** (Next.js 16) - Web UI for task management and monitoring
 - **Backend** (FastAPI) - API server, database management, and session orchestration
@@ -199,6 +199,7 @@ Global handlers in `app/core/errors/exception_handlers.py` process:
 ## Important Notes
 
 - The workspace mount path in `executor/app/core/engine.py` is hardcoded to `/Users/qychen/01-Develop/toto`
+
 - APScheduler uses in-memory job storage (jobs lost on restart)
 - Callback endpoints use token-based authentication
 - Git operations support GitHub and GitLab platforms
