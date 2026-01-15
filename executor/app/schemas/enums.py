@@ -4,6 +4,7 @@ from enum import Enum
 class FileStatus(str, Enum):
     """File change status in Git."""
 
+    ADDED = "added"
     MODIFIED = "modified"
     STAGED = "staged"
     DELETED = "deleted"

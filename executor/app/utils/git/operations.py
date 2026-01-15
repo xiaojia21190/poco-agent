@@ -238,14 +238,27 @@ def get_current_branch(cwd: str | Path | None = None) -> str:
     Raises:
         GitNotRepositoryError: If not a git repository
     """
+    try:
+        result = _run_git_command(
+            ["symbolic-ref", "--short", "HEAD"], cwd=cwd, check=True
+        )
+        branch = result.stdout.strip()
+        if branch:
+            return branch
+    except GitCommandError:
+        pass
+
     result = _run_git_command(
         ["rev-parse", "--abbrev-ref", "HEAD"], cwd=cwd, check=True
     )
     branch = result.stdout.strip()
 
     if branch == "HEAD":
-        result = _run_git_command(["rev-parse", "HEAD"], cwd=cwd, check=True)
-        branch = result.stdout.strip()
+        try:
+            result = _run_git_command(["rev-parse", "HEAD"], cwd=cwd, check=True)
+            branch = result.stdout.strip()
+        except GitCommandError:
+            return "HEAD"
 
     return branch
 
@@ -369,7 +382,7 @@ def get_status(cwd: str | Path | None = None) -> GitStatus:
     branch = get_current_branch(cwd)
 
     result = _run_git_command(
-        ["status", "--porcelain=v1", "-z"],
+        ["status", "--porcelain=v1", "--untracked-files=all", "-z"],
         cwd=cwd,
         check=True,
     )

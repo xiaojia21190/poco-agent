@@ -91,6 +91,16 @@ class WorkspaceHook(AgentHook):
                 )
             )
 
+        for file in git_status.untracked:
+            file_changes.append(
+                FileChange(
+                    path=file,
+                    status=FileStatus.ADDED,
+                    added_lines=0,
+                    deleted_lines=0,
+                )
+            )
+
         for file in git_status.deleted:
             file_changes.append(
                 FileChange(

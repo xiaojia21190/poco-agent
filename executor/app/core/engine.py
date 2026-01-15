@@ -23,7 +23,7 @@ class AgentExecutor:
 
     async def execute(self, prompt: str, config: TaskConfig):
         await self.workspace.prepare(config)
-        ctx = ExecutionContext(self.session_id, str(self.workspace.root_path))
+        ctx = ExecutionContext(self.session_id, str(self.workspace.work_path))
 
         try:
             await self.hooks.run_on_setup(ctx)
