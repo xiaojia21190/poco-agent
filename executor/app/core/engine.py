@@ -32,6 +32,8 @@ class AgentExecutor:
             if input_hint:
                 prompt = f"{input_hint}\n\n{prompt}"
 
+            prompt = f"{prompt}\n\nCurrent working directory: {ctx.cwd}"
+
             options = ClaudeAgentOptions(
                 cwd=ctx.cwd,
                 resume=self.sdk_session_id,
