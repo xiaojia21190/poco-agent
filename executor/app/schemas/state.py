@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.enums import FileStatus, TodoStatus
 
@@ -16,8 +16,10 @@ class TodoItem(BaseModel):
 class McpStatus(BaseModel):
     """Status of an MCP server connection."""
 
-    name: str
+    server_name: str = Field(validation_alias="name")
     status: str
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class FileChange(BaseModel):

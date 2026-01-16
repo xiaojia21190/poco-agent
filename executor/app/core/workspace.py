@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_GIT_EXCLUDES = [
     ".claude_data/",
+    ".claude/",
 ]
 
 
