@@ -42,15 +42,19 @@ Poco embraces the **MCP/Skills** ecosystem so you can connect tools, data source
 
 Demo1: use three prompts to build a classic google game with doubao's head 😂
 
-![demo](https://github.com/user-attachments/assets/0ef59c4c-8363-44a6-b9ed-7005ccfd71cb)
+![Demo1](https://github.com/user-attachments/assets/0ef59c4c-8363-44a6-b9ed-7005ccfd71cb)
 
-Demo2: poco can handle different types of files.
+Demo2: AskUserTool and file operations
 
-![demo2-2](https://github.com/user-attachments/assets/8135dab4-6396-4af8-97af-6f665853fb56)
+![Demo2](https://github.com/user-attachments/assets/98920a1f-fd41-46d4-803d-9c35aaa33b4c)
 
-Demo3: works fine on mobile devices.
+Demo3: poco can handle different types of files.
 
-![mobile-1](https://github.com/user-attachments/assets/ccf680bb-358c-4fc9-ad97-50f75b5ea3ac)
+![Demo3](https://github.com/user-attachments/assets/8135dab4-6396-4af8-97af-6f665853fb56)
+
+Demo4: works fine on mobile devices.
+
+![Demo4](https://github.com/user-attachments/assets/ccf680bb-358c-4fc9-ad97-50f75b5ea3ac)
 
 ## Community
 
