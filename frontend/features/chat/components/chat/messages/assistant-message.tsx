@@ -70,14 +70,14 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
           <span className="text-[10px] text-muted-foreground/40 shrink-0">
             {message.timestamp && !isNaN(new Date(message.timestamp).getTime())
               ? new Date(message.timestamp).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
+                hour: "2-digit",
+                minute: "2-digit",
+              })
               : null}
           </span>
         </div>
 
-        <div className="text-foreground leading-relaxed text-sm break-words w-full min-w-0">
+        <div className="text-foreground text-base break-words w-full min-w-0">
           <MessageContent content={message.content} />
           {message.status === "streaming" && <TypingIndicator />}
         </div>
@@ -100,11 +100,10 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
           <Button
             variant="ghost"
             size="icon"
-            className={`size-7 hover:text-foreground ${
-              isLiked
+            className={`size-7 hover:text-foreground ${isLiked
                 ? "text-primary hover:text-primary/90"
                 : "text-muted-foreground"
-            }`}
+              }`}
             onClick={onLike}
             title="Like response"
           >

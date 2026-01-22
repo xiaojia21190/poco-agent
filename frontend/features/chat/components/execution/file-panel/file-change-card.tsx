@@ -15,12 +15,12 @@ import type { FileChange } from "@/features/chat/types";
 interface FileChangeCardProps {
   change: FileChange;
   sessionStatus?:
-    | "running"
-    | "accepted"
-    | "completed"
-    | "failed"
-    | "cancelled"
-    | "stopped";
+  | "running"
+  | "accepted"
+  | "completed"
+  | "failed"
+  | "cancelled"
+  | "stopped";
   onFileClick?: () => void;
 }
 
@@ -99,23 +99,23 @@ export function FileChangeCard({
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden w-full max-w-full">
+    <div className="rounded-lg border border-border bg-card overflow-hidden w-full">
       {/* Header with path and status */}
-      <div className="flex items-center gap-3 px-4 py-3 min-w-0 overflow-hidden w-full max-w-full">
+      <div className="flex items-center gap-3 px-4 py-3 min-w-0">
         <StatusIcon className={`size-5 shrink-0 ${statusConfig.color}`} />
 
-        <div className="flex-1 min-w-0 overflow-hidden w-full max-w-full">
+        <div className="flex-1 min-w-0">
           {change.status === "renamed" && change.old_path ? (
-            <div className="flex items-center gap-2 min-w-0 overflow-hidden w-full max-w-full">
+            <div className="flex items-center gap-2 min-w-0">
               <span
-                className="text-sm font-medium flex-1 min-w-0 max-w-full truncate text-muted-foreground line-through"
+                className="text-sm font-medium flex-1 min-w-0 truncate text-muted-foreground line-through"
                 title={change.old_path}
               >
                 {truncatePath(change.old_path)}
               </span>
               <ArrowRight className="size-3.5 text-muted-foreground shrink-0" />
               <span
-                className="text-sm font-medium flex-1 min-w-0 max-w-full truncate"
+                className="text-sm font-medium flex-1 min-w-0 truncate"
                 title={change.path}
               >
                 {truncatePath(change.path)}
@@ -123,7 +123,7 @@ export function FileChangeCard({
             </div>
           ) : (
             <p
-              className="text-sm font-medium min-w-0 max-w-full truncate"
+              className="text-sm font-medium min-w-0 truncate"
               title={change.path}
             >
               {truncatePath(change.path)}
@@ -135,11 +135,10 @@ export function FileChangeCard({
         <Button
           variant="ghost"
           size="icon"
-          className={`shrink-0 size-8 ${
-            isSessionRunning
+          className={`shrink-0 size-8 ${isSessionRunning
               ? "opacity-50 cursor-not-allowed"
               : "hover:bg-muted"
-          }`}
+            }`}
           onClick={handlePreviewClick}
           disabled={isSessionRunning}
           title={isSessionRunning ? "执行中，暂不可预览" : "预览文件"}
@@ -154,7 +153,7 @@ export function FileChangeCard({
 
       {/* Line changes statistics */}
       {hasLineChanges && (
-        <div className="flex items-center gap-4 px-4 py-2 bg-muted/30 text-xs min-w-0 overflow-hidden w-full max-w-full">
+        <div className="flex items-center gap-4 px-4 py-2 bg-muted/30 text-xs">
           {addedLines > 0 && (
             <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 shrink-0">
               <Plus className="size-3 shrink-0" />
@@ -177,13 +176,13 @@ export function FileChangeCard({
 
       {/* Diff preview (if available) */}
       {change.diff && (
-        <div className="px-4 py-3 border-t border-border min-w-0 overflow-hidden w-full max-w-full">
-          <details className="group min-w-0 overflow-hidden w-full max-w-full">
+        <div className="px-4 py-3 border-t border-border">
+          <details className="group">
             <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground transition-colors truncate">
               查看差异
             </summary>
-            <pre className="mt-2 text-xs font-mono bg-muted/50 rounded p-2 overflow-x-auto whitespace-pre max-h-40 overflow-y-auto min-w-0 w-full max-w-full">
-              <code className="block min-w-0 overflow-hidden">
+            <pre className="mt-2 text-xs font-mono bg-muted/50 rounded p-2 overflow-x-auto whitespace-pre max-h-40 overflow-y-auto">
+              <code className="block">
                 {change.diff}
               </code>
             </pre>

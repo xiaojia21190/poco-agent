@@ -66,7 +66,7 @@ export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
     <div className="flex h-screen overflow-hidden bg-background">
       <ResizablePanelGroup direction="horizontal">
         {/* Left panel - Chat with status cards (45%) */}
-        <ResizablePanel defaultSize={45} minSize={0}>
+        <ResizablePanel defaultSize={45} minSize={20}>
           <div className="h-full flex flex-col min-w-0">
             <ChatPanel
               session={session}
@@ -81,7 +81,7 @@ export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
         <ResizableHandle withHandle />
 
         {/* Right panel - Artifacts (55%) */}
-        <ResizablePanel defaultSize={55} minSize={0}>
+        <ResizablePanel defaultSize={55} minSize={20}>
           <div className="h-full flex flex-col bg-muted/30 min-w-0">
             <ArtifactsPanel
               fileChanges={session?.state_patch.workspace_state?.file_changes}

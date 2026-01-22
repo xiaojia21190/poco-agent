@@ -60,7 +60,7 @@ export function MessageContent({
   // If content is string, render as before
   if (typeof content === "string") {
     return (
-      <div className="prose prose-sm dark:prose-invert max-w-none break-words break-all w-full min-w-0 [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_p]:break-words [&_p]:break-all [&_*]:break-words [&_*]:break-all">
+      <div className="prose prose-base dark:prose-invert max-w-none break-words break-all w-full min-w-0 [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_p]:break-words [&_p]:break-all [&_*]:break-words [&_*]:break-all">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkBreaks]}
           components={{
@@ -78,22 +78,49 @@ export function MessageContent({
               </a>
             ),
             h1: ({ children }) => (
-              <h1 className="text-2xl font-bold mb-4 mt-6 text-foreground">
+              <h1 className="text-xl font-bold mb-4 mt-6 text-foreground">
                 {children}
               </h1>
             ),
             h2: ({ children }) => (
-              <h2 className="text-xl font-bold mb-3 mt-5 text-foreground">
+              <h2 className="text-lg font-bold mb-3 mt-5 text-foreground">
                 {children}
               </h2>
             ),
             h3: ({ children }) => (
-              <h3 className="text-lg font-bold mb-2 mt-4 text-foreground">
+              <h3 className="text-base font-bold mb-2 mt-4 text-foreground">
                 {children}
               </h3>
             ),
-            hr: () => <hr className="my-6 border-border" />,
+            hr: () => <hr className="my-4 border-border" />,
             img: ImgBlock,
+            table: ({ children }) => (
+              <div className="overflow-x-auto my-4 rounded-lg border border-border">
+                <table className="w-full border-collapse text-sm">
+                  {children}
+                </table>
+              </div>
+            ),
+            thead: ({ children }) => (
+              <thead className="bg-muted/50">
+                {children}
+              </thead>
+            ),
+            tbody: ({ children }) => (
+              <tbody className="divide-y divide-border">
+                {children}
+              </tbody>
+            ),
+            th: ({ children }) => (
+              <th className="border-b border-border px-4 py-3 text-left font-semibold text-foreground">
+                {children}
+              </th>
+            ),
+            td: ({ children }) => (
+              <td className="border-b border-border px-4 py-3 text-foreground">
+                {children}
+              </td>
+            ),
           }}
         >
           {textContent}
@@ -139,7 +166,7 @@ export function MessageContent({
           return (
             <div
               key={index}
-              className="prose prose-sm dark:prose-invert max-w-none break-words break-all w-full min-w-0 [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_p]:break-words [&_p]:break-all [&_*]:break-words [&_*]:break-all"
+              className="prose prose-base dark:prose-invert max-w-none break-words break-all w-full min-w-0 [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_p]:break-words [&_p]:break-all [&_*]:break-words [&_*]:break-all"
             >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkBreaks]}
@@ -158,22 +185,49 @@ export function MessageContent({
                     </a>
                   ),
                   h1: ({ children }) => (
-                    <h1 className="text-2xl font-bold mb-4 mt-6 text-foreground">
+                    <h1 className="text-xl font-bold mb-4 mt-6 text-foreground">
                       {children}
                     </h1>
                   ),
                   h2: ({ children }) => (
-                    <h2 className="text-xl font-bold mb-3 mt-5 text-foreground">
+                    <h2 className="text-lg font-bold mb-3 mt-5 text-foreground">
                       {children}
                     </h2>
                   ),
                   h3: ({ children }) => (
-                    <h3 className="text-lg font-bold mb-2 mt-4 text-foreground">
+                    <h3 className="text-base font-bold mb-2 mt-4 text-foreground">
                       {children}
                     </h3>
                   ),
-                  hr: () => <hr className="my-6 border-border" />,
+                  hr: () => <hr className="my-4 border-border" />,
                   img: ImgBlock,
+                  table: ({ children }) => (
+                    <div className="overflow-x-auto my-4 rounded-lg border border-border">
+                      <table className="w-full border-collapse text-sm">
+                        {children}
+                      </table>
+                    </div>
+                  ),
+                  thead: ({ children }) => (
+                    <thead className="bg-muted/50">
+                      {children}
+                    </thead>
+                  ),
+                  tbody: ({ children }) => (
+                    <tbody className="divide-y divide-border">
+                      {children}
+                    </tbody>
+                  ),
+                  th: ({ children }) => (
+                    <th className="border-b border-border px-4 py-3 text-left font-semibold text-foreground">
+                      {children}
+                    </th>
+                  ),
+                  td: ({ children }) => (
+                    <td className="border-b border-border px-4 py-3 text-foreground">
+                      {children}
+                    </td>
+                  ),
                 }}
               >
                 {text}

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Pencil, Trash2, User, Wrench } from "lucide-react";
+import { CheckCircle2, CircleOff, Loader2, Pencil, Trash2, User, Wrench } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -104,14 +104,17 @@ export function EnvVarsGrid({
                     <Badge variant="outline" className="text-xs">
                       {t("library.envVars.scope.system", "系统")}
                     </Badge>
-                    <Badge
-                      variant={envVar.is_set ? "secondary" : "outline"}
-                      className="text-xs"
-                    >
-                      {envVar.is_set
-                        ? t("library.envVars.status.set", "已设置")
-                        : t("library.envVars.status.unset", "未设置")}
-                    </Badge>
+                    <div className="flex items-center">
+                      {envVar.is_set ? (
+                        <span title={t("library.envVars.status.set", "已设置")}>
+                          <CheckCircle2 className="size-4 text-muted-foreground" />
+                        </span>
+                      ) : (
+                        <span title={t("library.envVars.status.unset", "未设置")}>
+                          <CircleOff className="size-4 text-muted-foreground" />
+                        </span>
+                      )}
+                    </div>
                     {isOverridden && (
                       <Badge variant="secondary" className="text-xs">
                         {t("library.envVars.status.overridden", "已被个人覆盖")}
@@ -172,9 +175,11 @@ export function EnvVarsGrid({
                     <Badge variant="outline" className="text-xs">
                       {t("library.envVars.scope.user", "个人")}
                     </Badge>
-                    <Badge variant="secondary" className="text-xs">
-                      {t("library.envVars.status.set", "已设置")}
-                    </Badge>
+                    <div className="flex items-center">
+                      <span title={t("library.envVars.status.set", "已设置")}>
+                        <CheckCircle2 className="size-4 text-muted-foreground" />
+                      </span>
+                    </div>
                     {overridesSystem && (
                       <Badge variant="secondary" className="text-xs">
                         {t(

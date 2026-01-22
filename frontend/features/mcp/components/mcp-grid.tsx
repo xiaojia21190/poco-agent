@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -50,44 +50,38 @@ export function McpGrid({
           return (
             <div
               key={server.id}
-              className={`flex items-center gap-4 rounded-xl border px-4 py-3 ${
-                install
-                  ? "border-border/70 bg-card"
-                  : "border-border/40 bg-muted/20"
-              }`}
+              className={`flex items-center gap-4 rounded-xl border px-4 py-3 ${install
+                ? "border-border/70 bg-card"
+                : "border-border/40 bg-muted/20"
+                }`}
             >
               <div className="flex-1 min-w-0">
-                <div className="font-medium">{server.name}</div>
-                <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-medium">{server.name}</span>
                   <Badge
                     variant="outline"
                     className="text-xs text-muted-foreground"
                   >
-                    {server.scope === "system" ? "系统" : "用户"}
+                    {server.scope === "system" ? "系统" : "个人"}
                   </Badge>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 flex-shrink-0">
-                {isLoading ? (
-                  <Loader2 className="size-4 animate-spin text-muted-foreground" />
-                ) : (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8"
-                      onClick={() => onEditServer?.(server)}
-                      title="设置"
-                    >
-                      <Settings className="size-4" />
-                    </Button>
-                    <Switch
-                      checked={isEnabled}
-                      onCheckedChange={() => onToggleInstall?.(server.id)}
-                    />
-                  </>
-                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="size-8"
+                  onClick={() => onEditServer?.(server)}
+                  title="设置"
+                >
+                  <Settings className="size-4" />
+                </Button>
+                <Switch
+                  checked={isEnabled}
+                  onCheckedChange={() => onToggleInstall?.(server.id)}
+                  disabled={isLoading}
+                />
               </div>
             </div>
           );

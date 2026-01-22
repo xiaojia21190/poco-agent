@@ -3,12 +3,15 @@
 import * as React from "react";
 import {
   Trash2,
-  Loader2,
   Upload,
   Package,
   User,
   RefreshCw,
   Download,
+  Zap,
+  Code,
+  FileText,
+  Beaker,
 } from "lucide-react";
 
 import { Switch } from "@/components/ui/switch";
@@ -17,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import type { SkillPreset, UserSkillInstall } from "@/features/skills/types";
 
 // Mock data for presets
-const MOCK_PRESETS: SkillPreset[] = [
+export const MOCK_PRESETS: SkillPreset[] = [
   {
     id: 1,
     name: "planning-with-files",
@@ -86,7 +89,7 @@ const MOCK_PRESETS: SkillPreset[] = [
 
 // Mock data for installs
 // Mock data for installs
-const MOCK_INSTALLS: UserSkillInstall[] = [
+export const MOCK_INSTALLS: UserSkillInstall[] = [
   {
     id: 1,
     user_id: "user1",
@@ -129,6 +132,7 @@ interface SkillsGridProps {
   onUninstall?: (installId: number) => void;
   onUpdate?: (installId: number) => void;
   onUploadToPreset?: (installId: number) => void;
+  onToggleEnabled?: (installId: number, enabled: boolean) => void;
 }
 
 export function SkillsGrid({
@@ -139,9 +143,10 @@ export function SkillsGrid({
   onUninstall,
   onUpdate,
   onUploadToPreset,
+  onToggleEnabled,
 }: SkillsGridProps) {
-  const presets = propPresets?.length ? propPresets : MOCK_PRESETS;
-  const installs = propInstalls?.length ? propInstalls : MOCK_INSTALLS;
+  const presets = propPresets && propPresets.length > 0 ? propPresets : MOCK_PRESETS;
+  const installs = propInstalls && propInstalls.length > 0 ? propInstalls : MOCK_INSTALLS;
 
   const installByPresetId = React.useMemo(() => {
     const map = new Map<number, UserSkillInstall>();
@@ -159,6 +164,37 @@ export function SkillsGrid({
 
   const installedCount = installs.length;
   const enabledCount = installs.filter((i) => i.enabled).length;
+
+  const CategoryIcon = ({ category }: { category: string }) => {
+    switch (category.toLowerCase()) {
+      case "productivity":
+        return (
+          <span title="Productivity">
+            <Zap className="size-3.5 text-muted-foreground" />
+          </span>
+        );
+      case "development":
+        return (
+          <span title="Development">
+            <Code className="size-3.5 text-muted-foreground" />
+          </span>
+        );
+      case "documentation":
+        return (
+          <span title="Documentation">
+            <FileText className="size-3.5 text-muted-foreground" />
+          </span>
+        );
+      case "testing":
+        return (
+          <span title="Testing">
+            <Beaker className="size-3.5 text-muted-foreground" />
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -186,44 +222,28 @@ export function SkillsGrid({
             return (
               <div
                 key={preset.id}
-                className={`flex items-center gap-4 rounded-xl border px-4 py-3 ${
-                  isInstalled
-                    ? "border-border/70 bg-card"
-                    : "border-border/40 bg-muted/20"
-                }`}
+                className={`flex items-center gap-4 rounded-xl border px-4 py-3 ${isInstalled
+                  ? "border-border/70 bg-card"
+                  : "border-border/40 bg-muted/20"
+                  }`}
               >
                 {/* Left: Info */}
                 <div className="flex-1 min-w-0">
-                  {/* Row 1: Name only */}
-                  <div className="font-medium">
-                    {preset.display_name || preset.name}
-                  </div>
-                  {/* Row 2: Badges */}
-                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium">
+                      {preset.display_name || preset.name}
+                    </span>
                     <Badge
                       variant="outline"
                       className="text-xs text-muted-foreground"
                     >
-                      {preset.source === "official" ? "官方" : "社区"}
+                      {preset.source === "official" ? "官方" : "个人"}
                     </Badge>
                     {preset.category && (
-                      <Badge
-                        variant="outline"
-                        className="text-xs text-muted-foreground"
-                      >
-                        {preset.category}
-                      </Badge>
-                    )}
-                    {preset.version && (
-                      <Badge
-                        variant="outline"
-                        className="text-xs text-muted-foreground"
-                      >
-                        v{preset.version}
-                      </Badge>
+                      <CategoryIcon category={preset.category} />
                     )}
                   </div>
-                  {/* Row 3: Description */}
+                  {/* Row 2: Description */}
                   {preset.description && (
                     <p className="text-xs text-muted-foreground mt-1 truncate">
                       {preset.description}
@@ -233,72 +253,48 @@ export function SkillsGrid({
 
                 {/* Right: Actions + Switch */}
                 <div className="flex items-center gap-4 flex-shrink-0">
-                  {isLoading ? (
-                    <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                  {isInstalled ? (
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8"
+                        onClick={() => onUpdate?.(install!.id)}
+                        title="更新"
+                      >
+                        <RefreshCw className="size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8"
+                        onClick={() => onUninstall?.(install!.id)}
+                        title="卸载"
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
                   ) : (
-                    <>
-                      {isInstalled ? (
-                        <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8"
-                            onClick={() => onUpdate?.(install!.id)}
-                            title="更新"
-                          >
-                            <RefreshCw className="size-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8"
-                            onClick={() => onUninstall?.(install!.id)}
-                            title="卸载"
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8"
-                          onClick={() => onInstall?.(preset.id)}
-                          title="安装"
-                        >
-                          <Download className="size-4" />
-                        </Button>
-                      )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8"
+                      onClick={() => onInstall?.(preset.id)}
+                      title="安装"
+                    >
+                      <Download className="size-4" />
+                    </Button>
+                  )}
 
-                      {/* Switch always on the far right for installed items */}
-                      {isInstalled && (
-                        <Switch
-                          checked={install?.enabled ?? false}
-                          onCheckedChange={() => {
-                            // Update install enabled status
-                            // Note: currently treating switch as enabled/disabled toggle for installed skills
-                            // If not installed, switch shouldn't be visible or should trigger install?
-                            // Based on previous code: if installed, toggle; else install.
-                            // But here we separate "Install" button from "Enable" switch.
-                            // Let's assume switch is only for enabling/disabling AFTER install.
-                            // So if not installed, we don't show switch.
-                          }}
-                          // Actually previous logic was: switch toggles install/uninstall.
-                          // But user asked for "Enable" switch.
-                          // Let's stick to the previous pattern:
-                          // If installed, Switch controls specific enabled state? Or install state?
-                          // The `UserSkillInstall` has an `enabled` field.
-                          // So Switch should control `install.enabled`.
-                          // But we need an `onToggleEnabled` prop.
-                          // The existing props are `onInstall`, `onUninstall`.
-                          // Let's assume for now we use a new prop or just onUpdate.
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // TODO: Implement toggle enabled
-                          }}
-                        />
-                      )}
-                    </>
+                  {/* Switch always on the far right for installed items */}
+                  {isInstalled && (
+                    <Switch
+                      checked={install?.enabled ?? false}
+                      onCheckedChange={(checked) => {
+                        if (install) onToggleEnabled?.(install.id, checked);
+                      }}
+                      disabled={isLoading}
+                    />
                   )}
                 </div>
               </div>
@@ -329,26 +325,18 @@ export function SkillsGrid({
                   className="flex items-center gap-4 rounded-xl border border-dashed border-border/60 bg-card px-4 py-3"
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium">
-                      {(config?.display_name as string) ||
-                        (config?.name as string) ||
-                        `自定义 #${install.id}`}
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium">
+                        {(config?.display_name as string) ||
+                          (config?.name as string) ||
+                          `自定义 #${install.id}`}
+                      </span>
                       <Badge
                         variant="outline"
                         className="text-xs text-muted-foreground"
                       >
-                        用户自定义
+                        个人
                       </Badge>
-                      {install.enabled && (
-                        <Badge
-                          variant="outline"
-                          className="text-xs text-muted-foreground"
-                        >
-                          已启用
-                        </Badge>
-                      )}
                     </div>
                     {typeof config?.description === "string" && (
                       <p className="text-xs text-muted-foreground mt-1 truncate">
@@ -358,35 +346,31 @@ export function SkillsGrid({
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    {isLoading ? (
-                      <Loader2 className="size-4 animate-spin text-muted-foreground" />
-                    ) : (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8"
-                          onClick={() => onUploadToPreset?.(install.id)}
-                          title="上传为预设"
-                        >
-                          <Upload className="size-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8"
-                          onClick={() => onUninstall?.(install.id)}
-                          title="删除"
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                        <Switch
-                          checked={install.enabled}
-                          // Mock functionality for custom install switch
-                          onCheckedChange={() => {}}
-                        />
-                      </>
-                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8"
+                      onClick={() => onUploadToPreset?.(install.id)}
+                      title="上传为预设"
+                    >
+                      <Upload className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="size-8"
+                      onClick={() => onUninstall?.(install.id)}
+                      title="删除"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                    <Switch
+                      checked={install.enabled}
+                      onCheckedChange={(checked) => {
+                        onToggleEnabled?.(install.id, checked);
+                      }}
+                      disabled={isLoading}
+                    />
                   </div>
                 </div>
               );

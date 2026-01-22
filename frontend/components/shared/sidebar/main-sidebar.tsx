@@ -439,7 +439,7 @@ export function MainSidebar({
                         className={cn(
                           "h-[36px] min-w-0 max-w-[calc(var(--sidebar-width)-16px)] w-full justify-start gap-3 rounded-[10px] px-3 py-[7.5px] text-muted-foreground transition-colors hover:bg-sidebar-accent group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)] group-data-[collapsible=icon]:max-w-[var(--sidebar-width-icon)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
                           isDisabled &&
-                            "opacity-50 cursor-not-allowed hover:bg-transparent",
+                          "opacity-50 cursor-not-allowed hover:bg-transparent",
                         )}
                         tooltip={
                           isDisabled ? `${t(labelKey)} (暂不可用)` : t(labelKey)
@@ -495,7 +495,7 @@ export function MainSidebar({
                   variant="ghost"
                   size="icon"
                   onClick={() => onOpenCreateProjectDialog?.()}
-                  className="relative z-10 size-5 text-muted-foreground hover:bg-sidebar-accent"
+                  className="relative z-10 size-5 flex items-center justify-center text-muted-foreground hover:bg-sidebar-accent"
                   title={t("sidebar.newProject")}
                 >
                   <Plus className="size-3" />

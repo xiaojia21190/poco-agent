@@ -111,10 +111,10 @@ function FileTreeItem({
     INDENT_CLASSES[Math.min(level, INDENT_CLASSES.length - 1)];
 
   return (
-    <div className="w-full min-w-0 max-w-full overflow-hidden">
+    <div className="w-full min-w-0">
       <div
         className={cn(
-          "flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors overflow-hidden min-w-0 w-full max-w-full group/item",
+          "flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors min-w-0 group/item",
           indentClass,
           selectedId === node.id
             ? "bg-sidebar-accent text-sidebar-accent-foreground"
@@ -140,14 +140,14 @@ function FileTreeItem({
           )}
         </span>
         <span
-          className="text-sm flex-1 min-w-0 max-w-full truncate"
+          className="text-sm flex-1 min-w-0 truncate"
           title={node.name}
         >
           {node.name}
         </span>
       </div>
       {node.type === "folder" && isExpanded && node.children && (
-        <div className="w-full min-w-0 max-w-full">
+        <div className="w-full min-w-0">
           {node.children.map((child) => (
             <FileTreeItem
               key={child.id}

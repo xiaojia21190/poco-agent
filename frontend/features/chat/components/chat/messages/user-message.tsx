@@ -46,7 +46,7 @@ export function UserMessage({
       )}
       {textContent && (
         <div className="max-w-[85%] bg-muted text-foreground rounded-lg px-4 py-2">
-          <p className="whitespace-pre-wrap break-words break-all">
+          <p className="text-base whitespace-pre-wrap break-words break-all">
             {textContent}
           </p>
         </div>
