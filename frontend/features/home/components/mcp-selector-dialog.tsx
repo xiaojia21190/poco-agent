@@ -19,7 +19,7 @@ import type { McpDisplayItem } from "@/features/mcp/hooks/use-mcp-catalog";
 interface McpSelectorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Current MCP toggle state: { server_name: boolean } */
+  /** Current MCP toggle state: { server_id: boolean } */
   mcpConfig: Record<string, boolean>;
   onMcpConfigChange: (config: Record<string, boolean>) => void;
 }
@@ -83,8 +83,8 @@ export function McpSelectorDialog({
           // Only show installed servers
           if (item.install) {
             // If not explicitly set, default to the install's enabled state
-            if (!(item.server.name in initialConfig)) {
-              initialConfig[item.server.name] = item.install.enabled;
+            if (!(item.server.id in initialConfig)) {
+              initialConfig[item.server.id] = item.install.enabled;
             }
           }
         }
@@ -99,8 +99,8 @@ export function McpSelectorDialog({
     loadServers();
   }, [open, mcpConfig]);
 
-  const handleToggle = (serverName: string, checked: boolean) => {
-    setLocalConfig((prev) => ({ ...prev, [serverName]: checked }));
+  const handleToggle = (serverId: number, checked: boolean) => {
+    setLocalConfig((prev) => ({ ...prev, [serverId]: checked }));
   };
 
   const handleSave = () => {
@@ -143,7 +143,7 @@ export function McpSelectorDialog({
             <div className="space-y-1 p-1">
               {installedItems.map(({ server, install }) => {
                 const isEnabled =
-                  localConfig[server.name] ?? install?.enabled ?? false;
+                  localConfig[server.id] ?? install?.enabled ?? false;
 
                 return (
                   <div
@@ -165,7 +165,7 @@ export function McpSelectorDialog({
                     <Switch
                       checked={isEnabled}
                       onCheckedChange={(checked) =>
-                        handleToggle(server.name, checked)
+                        handleToggle(server.id, checked)
                       }
                       aria-label={`Toggle ${server.name}`}
                     />

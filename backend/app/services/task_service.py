@@ -230,7 +230,7 @@ class TaskService:
         Args:
             db: Database session
             user_id: User ID
-            toggles: MCP server display name -> enabled flag (true=enabled, false=disabled)
+            toggles: MCP server id (as string) -> enabled flag (true=enabled, false=disabled)
                     Servers not in this dict use their default enabled state.
 
         Returns:
@@ -245,8 +245,8 @@ class TaskService:
             # Determine if this server should be enabled:
             # 1. If explicitly set in toggles, use that value
             # 2. Otherwise, use the install's default enabled state
-            if server.name in toggles:
-                if not toggles[server.name]:
+            if str(server.id) in toggles:
+                if not toggles[str(server.id)]:
                     continue  # Explicitly disabled
             elif not install.enabled:
                 continue  # Default disabled

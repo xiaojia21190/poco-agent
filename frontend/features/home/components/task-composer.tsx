@@ -178,7 +178,7 @@ export function TaskComposer({
 
   // Count enabled items
   const enabledMcpCount = mcps.filter(
-    (m) => m.install?.enabled && (mcpConfig[m.server.name] ?? true),
+    (m) => m.install?.enabled && (mcpConfig[m.server.id] ?? true),
   ).length;
   const enabledSkillCount = skills.filter((s) => s.install?.enabled).length;
 
