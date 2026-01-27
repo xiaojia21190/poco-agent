@@ -49,6 +49,7 @@ export const API_ENDPOINTS = {
   skill: (skillId: number) => `/skills/${skillId}`,
   skillImportDiscover: "/skills/import/discover",
   skillImportCommit: "/skills/import/commit",
+  skillImportJob: (jobId: string) => `/skills/import/jobs/${jobId}`,
 
   // Skill Installs (User)
   skillInstalls: "/skill-installs",
@@ -121,6 +122,7 @@ function normalizeBody(body: unknown): BodyInit | undefined {
 }
 
 export type ApiFetchOptions = RequestInit & {
+  timeoutMs?: number;
   next?: {
     revalidate?: number;
     tags?: string[];
@@ -131,6 +133,7 @@ export async function apiFetch<T>(
   endpoint: string,
   options: ApiFetchOptions = {},
 ): Promise<T> {
+  const { timeoutMs = 60_000, ...fetchOptions } = options;
   const baseUrl = getApiBaseUrl();
   const fullUrl = `${baseUrl}${API_PREFIX}${endpoint}`;
 
@@ -139,9 +142,12 @@ export async function apiFetch<T>(
     "color: #0ea5e9; font-weight: bold;",
   );
 
-  const headers = new Headers(options.headers);
+  const headers = new Headers(fetchOptions.headers);
 
-  if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
+  if (
+    !headers.has("Content-Type") &&
+    !(fetchOptions.body instanceof FormData)
+  ) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -150,50 +156,76 @@ export async function apiFetch<T>(
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(fullUrl, {
-    ...options,
-    headers,
-    body: normalizeBody(options.body),
-  });
+  const hasExternalSignal = Boolean(fetchOptions.signal);
+  const controller = hasExternalSignal ? null : new AbortController();
+  const timeoutId =
+    !hasExternalSignal && timeoutMs > 0
+      ? setTimeout(() => controller?.abort(), timeoutMs)
+      : null;
 
-  const contentType = response.headers.get("content-type") || "";
-  const isJson = contentType.includes("application/json");
-  const payload = isJson ? await response.json() : await response.text();
+  try {
+    const response = await fetch(fullUrl, {
+      ...fetchOptions,
+      headers,
+      signal: fetchOptions.signal ?? controller?.signal,
+      body: normalizeBody(fetchOptions.body),
+    });
 
-  if (!response.ok) {
-    const message =
-      typeof payload === "object" && payload && "message" in payload
-        ? String((payload as { message?: string }).message)
-        : response.statusText;
+    const contentType = response.headers.get("content-type") || "";
+    const isJson = contentType.includes("application/json");
+    const payload = isJson ? await response.json() : await response.text();
+
+    if (!response.ok) {
+      const message =
+        typeof payload === "object" && payload && "message" in payload
+          ? String((payload as { message?: string }).message)
+          : response.statusText;
+
+      console.log(
+        `%c[API] Error ${endpoint}`,
+        "color: #ef4444; font-weight: bold;",
+        { status: response.status, message, payload },
+      );
+
+      throw new ApiError(
+        message || "API request failed",
+        response.status,
+        payload,
+      );
+    }
 
     console.log(
-      `%c[API] Error ${endpoint}`,
-      "color: #ef4444; font-weight: bold;",
-      { status: response.status, message, payload },
-    );
-
-    throw new ApiError(
-      message || "API request failed",
-      response.status,
+      `%c[API] Success ${endpoint}`,
+      "color: #22c55e; font-weight: bold;",
       payload,
     );
-  }
 
-  console.log(
-    `%c[API] Success ${endpoint}`,
-    "color: #22c55e; font-weight: bold;",
-    payload,
-  );
-
-  if (typeof payload === "object" && payload && "data" in payload) {
-    const wrapped = payload as ApiResponse<T>;
-    if (wrapped.code !== 200 && wrapped.code !== 0) {
-      throw new ApiError(wrapped.message || "API request failed", wrapped.code);
+    if (typeof payload === "object" && payload && "data" in payload) {
+      const wrapped = payload as ApiResponse<T>;
+      if (wrapped.code !== 200 && wrapped.code !== 0) {
+        throw new ApiError(
+          wrapped.message || "API request failed",
+          wrapped.code,
+        );
+      }
+      return wrapped.data as T;
     }
-    return wrapped.data as T;
-  }
 
-  return payload as T;
+    return payload as T;
+  } catch (error) {
+    const errorName =
+      typeof error === "object" && error && "name" in error
+        ? String((error as { name?: unknown }).name)
+        : "";
+    if (errorName === "AbortError") {
+      throw new ApiError("Request timeout", 408);
+    }
+    throw error;
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  }
 }
 
 export const apiClient = {

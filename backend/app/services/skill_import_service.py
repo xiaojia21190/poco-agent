@@ -6,6 +6,7 @@ import urllib.parse
 import urllib.request
 import uuid
 import zipfile
+from collections.abc import Callable
 from pathlib import Path, PurePosixPath
 from typing import Any, IO, Iterable
 
@@ -190,7 +191,12 @@ class SkillImportService:
             )
 
     def commit(
-        self, db: Session, *, user_id: str, request: SkillImportCommitRequest
+        self,
+        db: Session,
+        *,
+        user_id: str,
+        request: SkillImportCommitRequest,
+        on_progress: Callable[[int, int], None] | None = None,
     ) -> SkillImportCommitResponse:
         archive_key = (request.archive_key or "").strip()
         if not archive_key:
@@ -205,6 +211,19 @@ class SkillImportService:
                 error_code=ErrorCode.BAD_REQUEST,
                 message="selections cannot be empty",
             )
+
+        # De-duplicate selections while keeping the caller ordering stable.
+        unique_selections: list[tuple[str, str | None]] = []
+        seen_paths: set[str] = set()
+        for selection in request.selections:
+            rel_raw = (selection.relative_path or "").strip() or "."
+            if rel_raw in seen_paths:
+                continue
+            seen_paths.add(rel_raw)
+            unique_selections.append((rel_raw, selection.name_override))
+
+        total = len(unique_selections)
+        processed = 0
 
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_root = Path(tmp_dir)
@@ -228,13 +247,8 @@ class SkillImportService:
                     _safe_relative_path(c["relative_path"]) for c in candidates
                 ]
 
-                seen: set[str] = set()
                 items: list[SkillImportResultItem] = []
-                for selection in request.selections:
-                    rel_raw = (selection.relative_path or "").strip() or "."
-                    if rel_raw in seen:
-                        continue
-                    seen.add(rel_raw)
+                for rel_raw, name_override in unique_selections:
                     try:
                         item = self._import_one(
                             db=db,
@@ -243,7 +257,7 @@ class SkillImportService:
                             candidate_by_path=candidate_by_path,
                             candidate_dirs=candidate_dirs,
                             relative_path=rel_raw,
-                            name_override=selection.name_override,
+                            name_override=name_override,
                             archive_key=archive_key,
                         )
                         items.append(item)
@@ -265,6 +279,14 @@ class SkillImportService:
                                 error=str(exc),
                             )
                         )
+
+                    processed += 1
+                    if on_progress is not None:
+                        try:
+                            on_progress(processed, total)
+                        except Exception:
+                            # Best-effort progress reporting: never fail the import job.
+                            pass
 
                 return SkillImportCommitResponse(items=items)
 

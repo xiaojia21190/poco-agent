@@ -34,7 +34,14 @@ class S3StorageService:
 
         self.bucket = settings.s3_bucket
 
-        config_kwargs: dict[str, Any] = {}
+        config_kwargs: dict[str, Any] = {
+            "connect_timeout": settings.s3_connect_timeout_seconds,
+            "read_timeout": settings.s3_read_timeout_seconds,
+            "retries": {
+                "max_attempts": settings.s3_max_attempts,
+                "mode": "standard",
+            },
+        }
         if settings.s3_force_path_style:
             config_kwargs["s3"] = {"addressing_style": "path"}
         config = Config(**config_kwargs) if config_kwargs else None

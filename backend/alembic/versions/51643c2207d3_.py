@@ -1,7 +1,7 @@
 """empty message
 
 Revision ID: 51643c2207d3
-Revises: b201306e5c2a
+Revises: None
 Create Date: 2026-01-27 11:40:35.754128
 
 """
@@ -14,7 +14,7 @@ from alembic import op  # type: ignore
 
 # revision identifiers, used by Alembic.
 revision: str = "51643c2207d3"
-down_revision: Union[str, Sequence[str], None] = "b201306e5c2a"
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

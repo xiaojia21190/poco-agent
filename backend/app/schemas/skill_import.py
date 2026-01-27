@@ -1,3 +1,6 @@
+import uuid
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -46,3 +49,24 @@ class SkillImportCommitResponse(BaseModel):
     """Response for skill import commit."""
 
     items: list[SkillImportResultItem] = Field(default_factory=list)
+
+
+class SkillImportCommitEnqueueResponse(BaseModel):
+    """Response for enqueueing a skill import commit job."""
+
+    job_id: uuid.UUID
+    status: str
+
+
+class SkillImportJobResponse(BaseModel):
+    """Status response for a skill import commit job."""
+
+    job_id: uuid.UUID
+    status: str
+    progress: int = 0
+    result: SkillImportCommitResponse | None = None
+    error: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    started_at: datetime | None = None
+    finished_at: datetime | None = None

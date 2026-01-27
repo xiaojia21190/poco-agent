@@ -72,3 +72,20 @@ export interface SkillImportResultItem {
 export interface SkillImportCommitResponse {
   items: SkillImportResultItem[];
 }
+
+export interface SkillImportCommitEnqueueResponse {
+  job_id: string;
+  status: string;
+}
+
+export interface SkillImportJobStatusResponse {
+  job_id: string;
+  status: string;
+  progress: number;
+  result: SkillImportCommitResponse | null;
+  error: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+}

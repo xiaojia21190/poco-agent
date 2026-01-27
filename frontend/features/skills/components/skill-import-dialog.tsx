@@ -59,8 +59,19 @@ export function SkillImportDialog({
 
   const [isDiscovering, setIsDiscovering] = useState(false);
   const [isCommitting, setIsCommitting] = useState(false);
+  const [commitJobId, setCommitJobId] = useState<string | null>(null);
+  const [commitProgress, setCommitProgress] = useState<number | null>(null);
+  const [commitError, setCommitError] = useState<string | null>(null);
   const [commitResult, setCommitResult] =
     useState<SkillImportCommitResponse | null>(null);
+
+  const isActiveRef = React.useRef(true);
+  React.useEffect(() => {
+    isActiveRef.current = true;
+    return () => {
+      isActiveRef.current = false;
+    };
+  }, []);
 
   const reset = React.useCallback(() => {
     setTab("zip");
@@ -72,6 +83,9 @@ export function SkillImportDialog({
     setSelections({});
     setIsDiscovering(false);
     setIsCommitting(false);
+    setCommitJobId(null);
+    setCommitProgress(null);
+    setCommitError(null);
     setCommitResult(null);
   }, []);
 
@@ -131,6 +145,7 @@ export function SkillImportDialog({
   const onDiscover = async () => {
     setIsDiscovering(true);
     setCommitResult(null);
+    setCommitError(null);
     try {
       const formData = new FormData();
       if (tab === "zip") {
@@ -190,6 +205,10 @@ export function SkillImportDialog({
     if (!canCommit) return;
 
     setIsCommitting(true);
+    setCommitError(null);
+    setCommitResult(null);
+    setCommitProgress(0);
+    setCommitJobId(null);
     try {
       const payload = {
         archive_key: archiveKey,
@@ -201,10 +220,63 @@ export function SkillImportDialog({
         })),
       };
 
-      const resp = await skillsService.importCommit(payload);
-      setCommitResult(resp);
+      const enqueue = await skillsService.importCommit(payload);
+      setCommitJobId(enqueue.job_id);
 
-      const failed = (resp.items || []).filter((i) => i.status !== "success");
+      const startedAt = Date.now();
+      let finalError: string | null = null;
+      let finalResult: SkillImportCommitResponse | null = null;
+      while (true) {
+        if (!isActiveRef.current) return;
+
+        const job = await skillsService.getImportJob(enqueue.job_id);
+        if (!isActiveRef.current) return;
+
+        setCommitProgress(typeof job.progress === "number" ? job.progress : 0);
+
+        if (job.status === "success") {
+          finalResult = job.result;
+          setCommitResult(job.result);
+          break;
+        }
+
+        if (job.status === "failed") {
+          finalError = job.error || "";
+          finalResult = job.result;
+          setCommitError(finalError);
+          setCommitResult(job.result);
+          break;
+        }
+
+        // Safety net: avoid polling forever if something goes wrong.
+        if (Date.now() - startedAt > 10 * 60 * 1000) {
+          finalError = t(
+            "library.skillsImport.toasts.commitTimeout",
+            "导入超时，请稍后刷新查看结果",
+          );
+          setCommitError(finalError);
+          break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+
+      if (!isActiveRef.current) return;
+
+      if (finalError) {
+        toast.error(
+          finalError ||
+            t(
+              "library.skillsImport.toasts.commitError",
+              "导入失败，请稍后重试",
+            ),
+        );
+        return;
+      }
+
+      const failed = (finalResult?.items || []).filter(
+        (i) => i.status !== "success",
+      );
       if (failed.length > 0) {
         toast.error(
           t(
@@ -556,6 +628,37 @@ export function SkillImportDialog({
                         </span>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {isCommitting && (
+                <div className="rounded-xl border border-border/50 bg-muted/5 px-4 py-3 space-y-2">
+                  <div className="text-sm font-medium">
+                    {t("library.skillsImport.progress.title", "正在导入")}
+                  </div>
+                  {typeof commitProgress === "number" && (
+                    <div className="text-xs text-muted-foreground">
+                      {t("library.skillsImport.progress.value", "进度")}:{" "}
+                      {commitProgress}%
+                    </div>
+                  )}
+                  {commitJobId && (
+                    <div className="text-xs text-muted-foreground font-mono">
+                      {t("library.skillsImport.progress.jobId", "任务")}:{" "}
+                      {commitJobId}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {commitError && !isCommitting && (
+                <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 space-y-1">
+                  <div className="text-sm font-medium">
+                    {t("library.skillsImport.result.failed", "导入失败")}
+                  </div>
+                  <div className="text-xs text-muted-foreground break-words">
+                    {commitError}
                   </div>
                 </div>
               )}

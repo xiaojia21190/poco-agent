@@ -115,6 +115,11 @@ class Settings(BaseSettings):
     s3_region: str = Field(default="us-east-1", alias="S3_REGION")
     s3_bucket: str | None = Field(default=None, alias="S3_BUCKET")
     s3_force_path_style: bool = Field(default=True, alias="S3_FORCE_PATH_STYLE")
+    s3_connect_timeout_seconds: int = Field(
+        default=5, alias="S3_CONNECT_TIMEOUT_SECONDS"
+    )
+    s3_read_timeout_seconds: int = Field(default=60, alias="S3_READ_TIMEOUT_SECONDS")
+    s3_max_attempts: int = Field(default=3, alias="S3_MAX_ATTEMPTS")
 
     model_config = SettingsConfigDict(
         env_file=".env",

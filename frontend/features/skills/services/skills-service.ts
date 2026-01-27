@@ -8,7 +8,8 @@ import type {
   UserSkillInstall,
   SkillImportDiscoverResponse,
   SkillImportCommitInput,
-  SkillImportCommitResponse,
+  SkillImportCommitEnqueueResponse,
+  SkillImportJobStatusResponse,
 } from "@/features/skills/types";
 
 export const skillsService = {
@@ -82,15 +83,25 @@ export const skillsService = {
     return apiClient.post<SkillImportDiscoverResponse>(
       API_ENDPOINTS.skillImportDiscover,
       formData,
+      { timeoutMs: 5 * 60_000 },
     );
   },
 
   importCommit: async (
     input: SkillImportCommitInput,
-  ): Promise<SkillImportCommitResponse> => {
-    return apiClient.post<SkillImportCommitResponse>(
+  ): Promise<SkillImportCommitEnqueueResponse> => {
+    return apiClient.post<SkillImportCommitEnqueueResponse>(
       API_ENDPOINTS.skillImportCommit,
       input,
+    );
+  },
+
+  getImportJob: async (
+    jobId: string,
+  ): Promise<SkillImportJobStatusResponse> => {
+    return apiClient.get<SkillImportJobStatusResponse>(
+      API_ENDPOINTS.skillImportJob(jobId),
+      { cache: "no-store" },
     );
   },
 

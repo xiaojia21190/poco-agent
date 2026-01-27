@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     s3_bucket: str | None = Field(default=None, alias="S3_BUCKET")
     s3_force_path_style: bool = Field(default=True, alias="S3_FORCE_PATH_STYLE")
     s3_presign_expires: int = Field(default=300, alias="S3_PRESIGN_EXPIRES")
+    s3_connect_timeout_seconds: int = Field(
+        default=5, alias="S3_CONNECT_TIMEOUT_SECONDS"
+    )
+    s3_read_timeout_seconds: int = Field(default=60, alias="S3_READ_TIMEOUT_SECONDS")
+    s3_max_attempts: int = Field(default=3, alias="S3_MAX_ATTEMPTS")
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     openai_base_url: str | None = Field(default=None, alias="OPENAI_BASE_URL")
     openai_default_model: str = Field(
