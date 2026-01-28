@@ -102,6 +102,7 @@ services:
     # Default to pulling from GHCR; override via EXECUTOR_MANAGER_IMAGE if needed.
     image: ${EXECUTOR_MANAGER_IMAGE:-ghcr.io/poco-ai/poco-executor-manager:latest}
     restart: unless-stopped
+    user: "${EXECUTOR_UID:-1000}:${EXECUTOR_GID:-1000}"
     depends_on:
       backend:
         condition: service_started
@@ -126,8 +127,7 @@ services:
       # Manager accesses executor containers through published host ports.
       EXECUTOR_PUBLISHED_HOST: ${EXECUTOR_PUBLISHED_HOST:-host.docker.internal}
 
-      # IMPORTANT: must be a host path (bind mount) accessible by the Docker daemon.
-      WORKSPACE_ROOT: /tmp_workspace
+      WORKSPACE_ROOT: ${PWD}/tmp_workspace
 
       MAX_CONCURRENT_TASKS: ${MAX_CONCURRENT_TASKS:-5}
       TASK_PULL_ENABLED: ${TASK_PULL_ENABLED:-true}
@@ -157,7 +157,7 @@ services:
       - "${DOCKER_GID:-0}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./tmp_workspace:/tmp_workspace
+      - ./tmp_workspace:${PWD}/tmp_workspace
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
