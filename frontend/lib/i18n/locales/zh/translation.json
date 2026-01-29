@@ -137,6 +137,9 @@
     "internalContextHide": "收起",
     "internalContextCopy": "复制",
     "thinkingTitle": "思考过程",
+    "toolExecution": "工具执行",
+    "input": "输入",
+    "output": "输出",
     "scrollToLatestMessage": "跳转到最新消息"
   },
   "status": {

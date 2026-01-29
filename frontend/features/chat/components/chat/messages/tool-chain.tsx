@@ -2,14 +2,16 @@
 
 import * as React from "react";
 import {
-  ChevronDown,
-  ChevronRight,
+  SquareTerminal,
   CheckCircle2,
   XCircle,
   Loader2,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ToolUseBlock, ToolResultBlock } from "@/features/chat/types";
+import { useT } from "@/lib/i18n/client";
 import {
   Collapsible,
   CollapsibleContent,
@@ -29,6 +31,7 @@ interface ToolStepProps {
 }
 
 function ToolStep({ toolUse, toolResult, isOpen, onToggle }: ToolStepProps) {
+  const { t } = useT("translation");
   const isCompleted = !!toolResult;
   const isError = toolResult?.is_error;
   const isLoading = !isCompleted;
@@ -76,7 +79,7 @@ function ToolStep({ toolUse, toolResult, isOpen, onToggle }: ToolStepProps) {
             {/* Input */}
             <div className="mt-2">
               <div className="text-[10px] uppercase text-muted-foreground mb-1 select-none">
-                Input
+                {t("chat.input", "Input")}
               </div>
               <div className="bg-muted/50 p-2 rounded overflow-x-auto text-foreground/90">
                 <pre className="whitespace-pre-wrap break-all">
@@ -89,7 +92,7 @@ function ToolStep({ toolUse, toolResult, isOpen, onToggle }: ToolStepProps) {
             {isCompleted && (
               <div>
                 <div className="text-[10px] uppercase text-muted-foreground mb-1 select-none flex items-center gap-1">
-                  Output
+                  {t("chat.output", "Output")}
                 </div>
                 <div
                   className={cn(
@@ -113,6 +116,7 @@ function ToolStep({ toolUse, toolResult, isOpen, onToggle }: ToolStepProps) {
 }
 
 export function ToolChain({ blocks }: ToolChainProps) {
+  const { t } = useT("translation");
   const [openStepId, setOpenStepId] = React.useState<string | null>(null);
 
   // Group blocks into steps (Use + Result pair)
@@ -166,30 +170,32 @@ export function ToolChain({ blocks }: ToolChainProps) {
   if (steps.length === 0) return null;
 
   return (
-    <div className="w-full my-2 border border-border/40 rounded-lg bg-background/50 overflow-hidden">
+    <div className="w-full my-2 rounded-md border border-border/60 bg-muted/20 px-3 py-2">
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-        <CollapsibleTrigger className="flex items-center gap-2 w-full p-2 hover:bg-muted/30 transition-colors cursor-pointer select-none">
-          {isExpanded ? (
-            <ChevronDown className="size-3 text-muted-foreground" />
-          ) : (
-            <ChevronRight className="size-3 text-muted-foreground" />
-          )}
-          <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1.5">
-            Tool Execution
+        <CollapsibleTrigger className="flex items-center gap-2 w-full cursor-pointer select-none text-xs font-medium text-muted-foreground hover:text-foreground transition-colors group">
+          <div className="flex items-center gap-1.5">
+            <SquareTerminal className="size-3.5" />
+            <span>{t("chat.toolExecution", "Tool Execution")}</span>
             {steps.length > 0 && (
               <span className="opacity-70">({steps.length})</span>
             )}
-          </span>
+          </div>
+
           {/* Show little badges if collapsed */}
           {!isExpanded && (
             <div className="flex items-center gap-1 ml-auto">
-              <CheckCircle2 className="size-3 text-success" />
+              {/* Just show one badge to indicate status if not expanded */}
+              {isRunning ? (
+                <Loader2 className="size-3 animate-spin text-primary" />
+              ) : (
+                <CheckCircle2 className="size-3 text-success" />
+              )}
             </div>
           )}
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <div className="space-y-1 p-2 pt-0">
+          <div className="space-y-1 mt-2 border-t border-border/50 pt-2">
             {steps.map((step) => (
               <ToolStep
                 key={step.use.id}

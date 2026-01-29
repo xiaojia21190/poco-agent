@@ -137,6 +137,9 @@
     "internalContextHide": "Hide",
     "internalContextCopy": "Copy",
     "thinkingTitle": "Thinking",
+    "toolExecution": "Tool Execution",
+    "input": "Input",
+    "output": "Output",
     "scrollToLatestMessage": "Jump to latest message"
   },
   "status": {

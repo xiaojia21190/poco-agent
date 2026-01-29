@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { MessageBlock } from "@/features/chat/types";
 import type { ToolUseBlock, ToolResultBlock } from "@/features/chat/types";
+import { Brain } from "lucide-react";
 import { ToolChain } from "./tool-chain";
 import remarkBreaks from "remark-breaks";
 import { MarkdownCode, MarkdownPre } from "@/components/shared/markdown-code";
@@ -178,8 +179,11 @@ export function MessageContent({
               key={index}
               className="rounded-md border border-border/60 bg-muted/20 px-3 py-2"
             >
-              <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">
-                {t("chat.thinkingTitle", "思考过程")}
+              <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-2 select-none">
+                <div className="flex items-center gap-1.5">
+                  <Brain className="size-3.5" />
+                  <span>{t("chat.thinkingTitle", "思考过程")}</span>
+                </div>
               </summary>
               <div className="mt-2 border-t border-border/50 pt-2 text-xs whitespace-pre-wrap break-words break-all font-mono text-foreground/90">
                 {thinking}
