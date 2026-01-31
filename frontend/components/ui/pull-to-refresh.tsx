@@ -28,7 +28,6 @@ export function PullToRefresh({
   });
 
   const contentRef = useRef<HTMLDivElement>(null);
-  const isGlobalLoading = externalLoading || isRefreshing;
 
   const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
     // Only allow pull to refresh if we're at the top of the container
@@ -109,25 +108,6 @@ export function PullToRefresh({
       onMouseDown={handleTouchStart}
       onTouchStart={handleTouchStart}
     >
-      {/* Global Loading Bar at the very top */}
-      <div className="absolute top-0 left-0 right-0 z-50 h-0.5 overflow-hidden">
-        {isGlobalLoading && (
-          <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: "100%" }}
-            transition={{
-              repeat: Infinity,
-              duration: 1.5,
-              ease: "linear",
-            }}
-            className="h-full w-1/2"
-            style={{
-              background:
-                "linear-gradient(90deg, transparent, currentColor, transparent)",
-            }}
-          />
-        )}
-      </div>
 
       <motion.div
         style={{
@@ -149,11 +129,10 @@ export function PullToRefresh({
                 ? { repeat: Infinity, duration: 1, ease: "linear" }
                 : { duration: 0.2 }
             }
-            className={`p-2 rounded-full border shadow-sm transition-colors ${
-              isThresholdMet
-                ? "bg-muted text-foreground border-muted-foreground/20"
-                : "bg-background text-muted-foreground border-border"
-            }`}
+            className={`p-2 rounded-full border shadow-sm transition-colors ${isThresholdMet
+              ? "bg-muted text-foreground border-muted-foreground/20"
+              : "bg-background text-muted-foreground border-border"
+              }`}
           >
             {isRefreshing ? (
               <RefreshCw className="size-5" />
@@ -163,9 +142,8 @@ export function PullToRefresh({
           </motion.div>
 
           <span
-            className={`text-xs font-medium transition-colors ${
-              isThresholdMet ? "text-foreground" : "text-muted-foreground"
-            }`}
+            className={`text-xs font-medium transition-colors ${isThresholdMet ? "text-foreground" : "text-muted-foreground"
+              }`}
           >
             {isRefreshing
               ? "正在刷新..."

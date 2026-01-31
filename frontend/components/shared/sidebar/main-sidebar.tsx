@@ -4,7 +4,6 @@ import * as React from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   Bot,
-  MoreHorizontal,
   PanelLeftClose,
   PanelLeftOpen,
   PenSquare,
@@ -126,10 +125,10 @@ function DroppableAllTasksGroup({
           <Button
             variant="ghost"
             size="icon"
-            className="relative z-10 size-5 flex items-center justify-center text-muted-foreground hover:bg-sidebar-accent"
+            className="relative z-10 size-5 flex items-center justify-center text-muted-foreground hover:bg-sidebar-accent mr-1"
             title={t("sidebar.filter") || "Filter"}
           >
-            <ListFilter className="size-3.5" />
+            <ListFilter className="size-4" />
           </Button>
         </div>
         <CollapsibleContent className="flex-1 min-h-0 data-[state=closed]:flex-none">
@@ -446,10 +445,10 @@ export function MainSidebar({
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={onNewTask}
-                    className="h-[36px] min-w-0 max-w-[calc(var(--sidebar-width)-16px)] w-full justify-start gap-3 rounded-[10px] px-3 py-[7.5px] text-muted-foreground transition-colors hover:bg-sidebar-accent group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)] group-data-[collapsible=icon]:max-w-[var(--sidebar-width-icon)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+                    className="h-[36px] min-w-0 max-w-[calc(var(--sidebar-width)-16px)] w-full justify-start gap-3 rounded-[10px] px-3 py-[7.5px] text-muted-foreground transition-colors hover:bg-sidebar-accent group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)] group-data-[collapsible=icon]:max-w-[var(--sidebar-width-icon)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group/new-task"
                     tooltip={t("sidebar.newTask")}
                   >
-                    <PenSquare className="size-4 shrink-0" />
+                    <PenSquare className="size-4 shrink-0 transition-transform duration-200 group-hover/new-task:rotate-12 group-hover/new-task:scale-110" />
                     <span className="text-sm truncate group-data-[collapsible=icon]:hidden">
                       {t("sidebar.newTask")}
                     </span>
@@ -459,12 +458,27 @@ export function MainSidebar({
 
               {TOP_NAV_ITEMS.map(({ id, labelKey, icon: Icon, href }) => {
                 const isDisabled = id === "search"; // Search temporarily disabled
+                // 根据不同的菜单项设置不同的动画效果
+                const getIconAnimation = () => {
+                  if (isDisabled) return ""; // 禁用状态下不显示动画
+                  switch (id) {
+                    case "search":
+                      return "transition-all duration-200 group-hover/menu-item:scale-110 group-hover/menu-item:rotate-[-8deg]";
+                    case "capabilities":
+                      return "transition-all duration-300 group-hover/menu-item:rotate-12 group-hover/menu-item:scale-110";
+                    case "scheduled-tasks":
+                      return "transition-transform duration-500 group-hover/menu-item:rotate-[360deg]";
+                    default:
+                      return "";
+                  }
+                };
+                
                 return (
                   <SidebarMenu
                     key={id}
                     className="group-data-[collapsible=icon]:px-0"
                   >
-                    <SidebarMenuItem>
+                    <SidebarMenuItem className="group/menu-item">
                       <SidebarMenuButton
                         onClick={() => {
                           if (isDisabled) return; // Disabled - do nothing
@@ -481,7 +495,7 @@ export function MainSidebar({
                           isDisabled ? `${t(labelKey)} (暂不可用)` : t(labelKey)
                         }
                       >
-                        <Icon className="size-4 shrink-0" />
+                        <Icon className={cn("size-4 shrink-0", getIconAnimation())} />
                         <span className="text-sm truncate group-data-[collapsible=icon]:hidden">
                           {t(labelKey)}
                         </span>
@@ -507,12 +521,12 @@ export function MainSidebar({
 
         <SidebarContent className="flex flex-col !overflow-hidden gap-0">
           {/* 项目列表 - 放在上面 */}
-          <div className="flex-shrink-0 max-h-[50%] flex flex-col min-h-0">
+          <div className="flex-shrink-0 flex flex-col">
             <Collapsible
               defaultOpen
-              className="group/collapsible-projects flex flex-col min-h-0 h-full"
+              className="group/collapsible-projects flex flex-col"
             >
-              <SidebarGroup className="p-0 flex flex-col min-h-0 h-full overflow-hidden group-data-[collapsible=icon]:hidden">
+              <SidebarGroup className="p-0 flex flex-col group-data-[collapsible=icon]:hidden">
                 <div className="group/projects-header relative flex items-center justify-between p-2 shrink-0">
                   <SidebarGroupLabel asChild>
                     <CollapsibleTrigger className="flex flex-1 items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer">
@@ -524,50 +538,48 @@ export function MainSidebar({
                     variant="ghost"
                     size="icon"
                     onClick={() => onOpenCreateProjectDialog?.()}
-                    className="relative z-10 size-5 flex items-center justify-center text-muted-foreground hover:bg-sidebar-accent"
+                    className="relative z-10 size-5 flex items-center justify-center text-muted-foreground hover:bg-sidebar-accent mr-1"
                     title={t("sidebar.newProject")}
                   >
-                    <Plus className="size-3.5" />
+                    <Plus className="size-4" />
                   </Button>
                 </div>
-                <CollapsibleContent className="flex-1 min-h-0 data-[state=closed]:flex-none">
-                  <ScrollArea className="h-full">
-                    <SidebarGroupContent className="mt-1 group-data-[collapsible=icon]:mt-0 p-2 pt-0">
-                      <SidebarMenu>
-                        {projects.map((project) => (
-                          <CollapsibleProjectItem
-                            key={project.id}
-                            project={project}
-                            tasks={tasksByProject.get(project.id) || []}
-                            isExpanded={expandedProjects.has(project.id)}
-                            onToggle={() => toggleProjectExpanded(project.id)}
-                            onProjectClick={() =>
-                              handleProjectClick(project.id)
-                            }
-                            onDeleteTask={onDeleteTask}
-                            onRenameTask={onRenameTask}
-                            onMoveTaskToProject={onMoveTaskToProject}
-                            allProjects={projects}
-                            onRenameProject={handleRenameProject}
-                            onDeleteProject={onDeleteProject}
-                            isSelectionMode={isSelectionMode}
-                            selectedTaskIds={selectedTaskIds}
-                            selectedProjectIds={selectedProjectIds}
-                            onToggleTaskSelection={handleToggleTaskSelection}
-                            onEnableSelectionMode={
-                              handleEnableTaskSelectionMode
-                            }
-                            onToggleProjectSelection={
-                              handleToggleProjectSelection
-                            }
-                            onEnableProjectSelectionMode={
-                              handleEnableProjectSelectionMode
-                            }
-                          />
-                        ))}
-                      </SidebarMenu>
-                    </SidebarGroupContent>
-                  </ScrollArea>
+                <CollapsibleContent className="data-[state=closed]:flex-none">
+                  <SidebarGroupContent className="mt-1 group-data-[collapsible=icon]:mt-0 p-2 pt-0">
+                    <SidebarMenu>
+                      {projects.map((project) => (
+                        <CollapsibleProjectItem
+                          key={project.id}
+                          project={project}
+                          tasks={tasksByProject.get(project.id) || []}
+                          isExpanded={expandedProjects.has(project.id)}
+                          onToggle={() => toggleProjectExpanded(project.id)}
+                          onProjectClick={() =>
+                            handleProjectClick(project.id)
+                          }
+                          onDeleteTask={onDeleteTask}
+                          onRenameTask={onRenameTask}
+                          onMoveTaskToProject={onMoveTaskToProject}
+                          allProjects={projects}
+                          onRenameProject={handleRenameProject}
+                          onDeleteProject={onDeleteProject}
+                          isSelectionMode={isSelectionMode}
+                          selectedTaskIds={selectedTaskIds}
+                          selectedProjectIds={selectedProjectIds}
+                          onToggleTaskSelection={handleToggleTaskSelection}
+                          onEnableSelectionMode={
+                            handleEnableTaskSelectionMode
+                          }
+                          onToggleProjectSelection={
+                            handleToggleProjectSelection
+                          }
+                          onEnableProjectSelectionMode={
+                            handleEnableProjectSelectionMode
+                          }
+                        />
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
                 </CollapsibleContent>
               </SidebarGroup>
             </Collapsible>
@@ -629,13 +641,6 @@ export function MainSidebar({
                 title={t("sidebar.settings")}
               >
                 <SlidersHorizontal className="size-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-auto size-8 text-muted-foreground hover:bg-sidebar-accent group-data-[collapsible=icon]:hidden"
-              >
-                <MoreHorizontal className="size-4" />
               </Button>
             </div>
           )}

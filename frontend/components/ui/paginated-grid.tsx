@@ -5,11 +5,8 @@ import {
   PaginationContent,
   PaginationItem,
   PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -114,39 +111,11 @@ export function PaginatedGrid({
       {/* Pagination Footer */}
       {(totalItems || totalPages > 1) && (
         <div className="flex flex-col items-center justify-between gap-4 py-2 sm:flex-row">
-          {/* Left: Page info */}
-          <div className="flex-1 text-sm text-muted-foreground text-center sm:text-left">
-            {totalItems && (
-              <>
-                {t("pagination.page", "Page {{page}}", { page: currentPage })}{" "}
-                {t("pagination.of", "/ {{total}}", { total: totalPages })}
-                <span className="mx-2">·</span>
-                {startItem}-{endItem} {t("pagination.items", "items")}
-              </>
-            )}
-          </div>
-
-          {/* Center: Pagination controls */}
+          {/* Pagination controls */}
           <div className="flex-none">
             {totalPages > 1 && (
               <Pagination className="mx-0 w-auto">
                 <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={onPreviousPage}
-                      className={
-                        !canGoPrevious
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
-                    >
-                      <ChevronLeftIcon />
-                      <span className="hidden sm:block">
-                        {t("pagination.previous", "Previous")}
-                      </span>
-                    </PaginationPrevious>
-                  </PaginationItem>
-
                   {pageNumbers.map((page, index) => {
                     if (page === "ellipsis") {
                       return (
@@ -168,22 +137,6 @@ export function PaginatedGrid({
                       </PaginationItem>
                     );
                   })}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={onNextPage}
-                      className={
-                        !canGoNext
-                          ? "pointer-events-none opacity-50"
-                          : "cursor-pointer"
-                      }
-                    >
-                      <span className="hidden sm:block">
-                        {t("pagination.next", "Next")}
-                      </span>
-                      <ChevronRightIcon />
-                    </PaginationNext>
-                  </PaginationItem>
                 </PaginationContent>
               </Pagination>
             )}

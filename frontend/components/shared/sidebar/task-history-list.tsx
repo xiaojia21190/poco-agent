@@ -131,7 +131,7 @@ function DraggableTask({
     >
       <SidebarMenuButton
         className={cn(
-          "h-[36px] min-w-0 max-w-[calc(var(--sidebar-width)-16px)] w-full justify-start gap-3 rounded-[10px] px-3 py-[7.5px] text-left transition-colors hover:bg-sidebar-accent group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)] group-data-[collapsible=icon]:max-w-[var(--sidebar-width-icon)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:pr-0",
+          "h-[36px] min-w-0 max-w-[calc(var(--sidebar-width)-32px)] w-full justify-start gap-3 rounded-[10px] px-3 py-[7.5px] text-left transition-colors hover:bg-sidebar-accent overflow-hidden group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)] group-data-[collapsible=icon]:max-w-[var(--sidebar-width-icon)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:pr-0",
           !isSelectionMode && "pr-8", // Padding only when not in selection mode (for 'more' button space)
         )}
         tooltip={task.title}
@@ -142,7 +142,7 @@ function DraggableTask({
         asChild={isSelectionMode}
       >
         {isSelectionMode ? (
-          <div>
+          <div className="flex items-center gap-3 min-w-0 w-full">
             <div className="shrink-0 flex items-center justify-center">
               <Checkbox
                 checked={isSelected}

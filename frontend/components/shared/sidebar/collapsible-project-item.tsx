@@ -270,7 +270,7 @@ export function CollapsibleProjectItem({
 
         {/* 任务列表（可折叠） */}
         {isExpanded && (
-          <div className="ml-4 mt-0.5">
+          <div className="ml-4 mt-0.5 min-w-0 max-w-[calc(var(--sidebar-width)-16px)] overflow-hidden">
             <TaskHistoryList
               tasks={tasks}
               onDeleteTask={onDeleteTask}

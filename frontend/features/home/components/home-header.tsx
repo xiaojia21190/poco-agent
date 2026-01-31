@@ -21,7 +21,7 @@ export function HomeHeader({ onOpenSettings }: HomeHeaderProps) {
   const { credits, isLoading } = useUserAccount();
 
   return (
-    <header className="flex h-12 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-sm">
+    <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-sm">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="md:hidden" />
         <Button
@@ -35,18 +35,15 @@ export function HomeHeader({ onOpenSettings }: HomeHeaderProps) {
         </Button>
       </div>
       <div className="flex items-center gap-1">
-        <RepoLinkButton size="sm" />
+        <RepoLinkButton size="sm" className="size-8 rounded-full p-0 flex items-center justify-center" />
         <CreditsPopover
           trigger={
             <Button
               variant="ghost"
               size="sm"
-              className="mx-1 h-8 gap-1.5 rounded-full border border-primary/10 bg-primary/5 px-3 text-sm font-medium text-primary hover:bg-primary/10 hover:text-primary"
+              className="mx-1 size-8 rounded-full border border-primary/10 bg-primary/5 p-0 text-sm font-medium text-primary hover:bg-primary/10 hover:text-primary flex items-center justify-center"
             >
               <Coins className="size-3.5" />
-              <span>
-                {isLoading ? "..." : credits?.total?.toLocaleString()}
-              </span>
             </Button>
           }
         />

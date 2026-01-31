@@ -316,7 +316,7 @@ export function TaskComposer({
             <DialogTitle>{t("hero.repo.dialogTitle")}</DialogTitle>
           </DialogHeader>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-[7fr_3fr]">
             <div className="space-y-2">
               <Label htmlFor="repo-url">{t("hero.repo.urlLabel")}</Label>
               <Input
@@ -498,28 +498,9 @@ export function TaskComposer({
         </div>
       ) : null}
 
-      {mode === "scheduled" ? (
-        <div className="px-4 pb-3">
+      <div className="px-4 pb-3 min-h-[32px] flex items-center">
+        {mode === "scheduled" ? (
           <div className="flex flex-wrap items-center gap-2">
-            <Badge
-              variant="secondary"
-              role="button"
-              tabIndex={0}
-              className="cursor-pointer select-none"
-              onClick={() => setScheduledSettingsOpen(true)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setScheduledSettingsOpen(true);
-                }
-              }}
-              aria-label={t("hero.modes.scheduled")}
-              title={t("hero.modes.scheduled")}
-            >
-              <Clock className="size-3" />
-              {scheduledSummary}
-            </Badge>
-
             {(scheduledName || "").trim().length > 0 ? (
               <Badge
                 variant="outline"
@@ -542,13 +523,13 @@ export function TaskComposer({
               </Badge>
             ) : null}
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
 
       {/* 底部工具栏 */}
       <div className="flex items-center justify-between px-3 pb-3">
         {/* 左侧：模式选择（Icon + Hover Label） */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-h-[32px]">
           <div className="flex items-center gap-1 rounded-2xl border border-border bg-muted/20 p-1">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -604,8 +585,6 @@ export function TaskComposer({
                   title={t("hero.modes.scheduled")}
                   onClick={() => {
                     onModeChange("scheduled");
-                    // Open the schedule dialog directly to avoid occupying the composer UI.
-                    requestAnimationFrame(() => setScheduledSettingsOpen(true));
                   }}
                 >
                   <Clock className="size-4" />
@@ -618,6 +597,29 @@ export function TaskComposer({
                 </div>
               </TooltipContent>
             </Tooltip>
+          </div>
+
+          <div className="h-8 flex items-center">
+            {mode === "scheduled" ? (
+              <Badge
+                variant="secondary"
+                role="button"
+                tabIndex={0}
+                className="h-8 rounded-xl cursor-pointer select-none px-3 py-0"
+                onClick={() => setScheduledSettingsOpen(true)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setScheduledSettingsOpen(true);
+                  }
+                }}
+                aria-label={t("hero.modes.scheduled")}
+                title={t("hero.modes.scheduled")}
+              >
+                <Clock className="size-3" />
+                {scheduledSummary}
+              </Badge>
+            ) : null}
           </div>
         </div>
 

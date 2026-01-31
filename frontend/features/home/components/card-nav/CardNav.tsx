@@ -29,6 +29,13 @@ import { playMcpInstallSound } from "@/lib/utils/sound";
 import { useT } from "@/lib/i18n/client";
 import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
+import { SkeletonText } from "@/components/ui/skeleton-shimmer";
+import { StaggeredEntrance } from "@/components/ui/staggered-entrance";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const MCP_LIMIT = 3;
 const SKILL_LIMIT = 5;
@@ -385,11 +392,12 @@ export function CardNav({
   ) => {
     const batchToggleFn = type === "mcp" ? batchToggleMcps : batchToggleSkills;
 
-    if (isLoading) {
+    if (isLoading && !hasFetched) {
       return (
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Loader2 className="size-3 animate-spin" />
-          <span>同步中...</span>
+        <div className="flex flex-col gap-1">
+          <SkeletonText className="h-3 w-20" />
+          <SkeletonText className="h-3 w-24" />
+          <SkeletonText className="h-3 w-16" />
         </div>
       );
     }
@@ -404,66 +412,41 @@ export function CardNav({
 
     const toggleFn = type === "mcp" ? toggleMcpEnabled : toggleSkillEnabled;
 
+    const enabledCount = items.filter((i) => i.enabled).length;
+    const hasEnabledItems = enabledCount > 0;
+
     return (
       <div className="flex flex-col gap-2">
-        {/* Batch controls */}
-        <div className="flex items-center justify-end gap-1.5 px-1">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              batchToggleFn(true);
-            }}
-            className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-primary hover:bg-primary/10 rounded transition-colors"
-            type="button"
-          >
-            <Power className="size-3" />
-            <span className="leading-none">启用全部</span>
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              batchToggleFn(false);
-            }}
-            className="flex items-center gap-1 px-1.5 py-0.5 text-[10px] text-muted-foreground hover:bg-muted rounded transition-colors"
-            type="button"
-          >
-            <PowerOff className="size-3" />
-            <span className="leading-none">禁用全部</span>
-          </button>
-        </div>
-
         {/* Item list */}
         <div className="flex flex-col gap-1 max-h-[180px] overflow-y-auto -mr-1 pr-2 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 transition-colors">
-          {items.map((item, index) => (
-            <button
-              key={item.id}
-              style={{
-                animationDelay: `${index * 30}ms`,
-                animationFillMode: "both",
-              }}
-              className={cn(
-                "group/item flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-all duration-200 text-left w-full cursor-pointer select-none animate-in fade-in slide-in-from-left-1",
-                "text-muted-foreground hover:text-foreground hover:bg-muted/60 active:bg-muted/80",
-              )}
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFn(item.installId, item.enabled);
-              }}
-              type="button"
-            >
-              <div
+          <StaggeredEntrance show={hasFetched} staggerDelay={30} duration={300}>
+            {items.map((item) => (
+              <button
+                key={item.id}
                 className={cn(
-                  "w-2 h-2 rounded-full transition-all duration-300 flex-shrink-0",
-                  item.enabled
-                    ? "bg-primary shadow-[0_0_6px_-1px_hsl(var(--primary)/0.6)] scale-100"
-                    : "bg-muted-foreground/30 scale-90 group-hover/item:bg-muted-foreground/50",
+                  "group/item flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-all duration-200 text-left w-full cursor-pointer select-none",
+                  "text-muted-foreground hover:text-foreground hover:bg-muted/60 active:bg-muted/80",
                 )}
-              />
-              <span className="flex-1 truncate tracking-tight opacity-90 group-hover/item:opacity-100">
-                {item.name}
-              </span>
-            </button>
-          ))}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFn(item.installId, item.enabled);
+                }}
+                type="button"
+              >
+                <div
+                  className={cn(
+                    "w-2 h-2 rounded-full transition-all duration-300 flex-shrink-0",
+                    item.enabled
+                      ? "bg-primary shadow-[0_0_6px_-1px_hsl(var(--primary)/0.6)] scale-100"
+                      : "bg-muted-foreground/30 scale-90 group-hover/item:bg-muted-foreground/50",
+                  )}
+                />
+                <span className="flex-1 truncate tracking-tight opacity-90 group-hover/item:opacity-100">
+                  {item.name}
+                </span>
+              </button>
+            ))}
+          </StaggeredEntrance>
         </div>
       </div>
     );
@@ -477,7 +460,7 @@ export function CardNav({
           "relative rounded-xl border border-border bg-card/50 overflow-hidden transition-all duration-[0.4s] ease-[cubic-bezier(0.23,1,0.32,1)] backdrop-blur-md",
           "hover:shadow-[0_12px_40px_-12px_rgba(var(--foreground),0.15)] hover:bg-card/80",
           isExpanded &&
-            "shadow-[0_12px_40px_-12px_rgba(var(--foreground),0.15)] bg-card/80",
+          "shadow-[0_12px_40px_-12px_rgba(var(--foreground),0.15)] bg-card/80",
         )}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -519,19 +502,40 @@ export function CardNav({
                     <ChevronRight className="size-3.5 text-muted-foreground transition-transform duration-200 hover:translate-x-0.5" />
                   </button>
                 </div>
-                {installedMcps.filter((i) => i.enabled).length > MCP_LIMIT && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleWarningClick("mcp");
-                    }}
-                    className="flex items-center justify-center size-6 rounded-full hover:bg-amber-500/20 transition-colors"
-                    type="button"
-                    title="点击查看详情"
-                  >
-                    <AlertTriangle className="size-4 text-amber-500" />
-                  </button>
-                )}
+                <div className="flex items-center gap-1">
+                  {installedMcps.filter((i) => i.enabled).length > 0 && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            batchToggleMcps(false);
+                          }}
+                          className="flex items-center justify-center size-6 rounded-md hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground"
+                          type="button"
+                        >
+                          <PowerOff className="size-3.5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" sideOffset={4}>
+                        <span>一键关闭</span>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  {installedMcps.filter((i) => i.enabled).length > MCP_LIMIT && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleWarningClick("mcp");
+                      }}
+                      className="flex items-center justify-center size-6 rounded-full hover:bg-amber-500/20 transition-colors"
+                      type="button"
+                      title="点击查看详情"
+                    >
+                      <AlertTriangle className="size-4 text-amber-500" />
+                    </button>
+                  )}
+                </div>
               </div>
               {renderItemBadges(installedMcps, "未安装 MCP", "mcp")}
             </div>
@@ -557,20 +561,41 @@ export function CardNav({
                     <ChevronRight className="size-3.5 text-muted-foreground transition-transform duration-200 hover:translate-x-0.5" />
                   </button>
                 </div>
-                {installedSkills.filter((i) => i.enabled).length >
-                  SKILL_LIMIT && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleWarningClick("skill");
-                    }}
-                    className="flex items-center justify-center size-6 rounded-full hover:bg-amber-500/20 transition-colors"
-                    type="button"
-                    title="点击查看详情"
-                  >
-                    <AlertTriangle className="size-4 text-amber-500" />
-                  </button>
-                )}
+                <div className="flex items-center gap-1">
+                  {installedSkills.filter((i) => i.enabled).length > 0 && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            batchToggleSkills(false);
+                          }}
+                          className="flex items-center justify-center size-6 rounded-md hover:bg-muted/60 transition-colors text-muted-foreground hover:text-foreground"
+                          type="button"
+                        >
+                          <PowerOff className="size-3.5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" sideOffset={4}>
+                        <span>一键关闭</span>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  {installedSkills.filter((i) => i.enabled).length >
+                    SKILL_LIMIT && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleWarningClick("skill");
+                        }}
+                        className="flex items-center justify-center size-6 rounded-full hover:bg-amber-500/20 transition-colors"
+                        type="button"
+                        title="点击查看详情"
+                      >
+                        <AlertTriangle className="size-4 text-amber-500" />
+                      </button>
+                    )}
+                </div>
               </div>
               {renderItemBadges(installedSkills, "未安装技能", "skill")}
             </div>

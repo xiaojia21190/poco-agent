@@ -129,10 +129,10 @@ export function HomePageClient() {
   );
 
   return (
-    <>
+    <div className="flex flex-1 flex-col min-h-0">
       <HomeHeader onOpenSettings={openSettings} />
 
-      <div className="flex flex-1 flex-col items-center justify-start px-6 pt-[20vh]">
+      <div className="flex flex-1 flex-col items-center justify-start px-6 pt-[20vh] min-h-0 overflow-auto">
         <div className="w-full max-w-2xl">
           {/* 欢迎语 */}
           <div className="mb-8 text-center">
@@ -154,10 +154,10 @@ export function HomePageClient() {
           />
 
           <ConnectorsBar
-            forceExpanded={shouldExpandConnectors && mode !== "scheduled"}
+            forceExpanded={shouldExpandConnectors}
           />
         </div>
       </div>
-    </>
+    </div>
   );
 }

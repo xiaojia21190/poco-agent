@@ -49,6 +49,7 @@ export function SlashCommandsPageClient() {
               <SlashCommandsList
                 commands={filteredCommands}
                 savingId={store.savingId}
+                isLoading={store.isLoading}
                 onToggleEnabled={(id, enabled) => store.setEnabled(id, enabled)}
                 onEdit={(cmd) => {
                   setDialogMode("edit");

@@ -96,6 +96,7 @@ export function McpPageClient() {
                   servers={pagination.paginatedData}
                   installs={installs}
                   loadingId={loadingId}
+                  isLoading={isLoading}
                   onToggleInstall={toggleInstall}
                   onUninstall={uninstallServer}
                   onEditServer={(server) => setSelectedServer(server)}
