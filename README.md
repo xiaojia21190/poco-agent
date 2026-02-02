@@ -71,22 +71,13 @@
 
 ## 快速开始
 
-1. 自动安装（推荐）
-   运行脚本，自动检查环境、拉取镜像并生成配置：
+运行一键启动脚本，按提示输入 API Key，自动生成配置文件并启动服务：
 
 ```bash
-./scripts/quickstart.sh
+./scripts/quickstart.sh -i
 ```
 
-注意：脚本运行完后，请在生成的 .env 文件中填入你的 ANTHROPIC_AUTH_TOKEN。
-
-2. 启动服务
-
-```bash
-docker compose up -d
-```
-
-3. 访问地址：http://localhost:3000
+启动完成后访问：http://localhost:3000
 
 (可选) 如需使用外部 S3/R2 存储，请使用 docker-compose.r2.yml 启动。
 

@@ -17,21 +17,44 @@ S3_ACCESS_KEY=""
 S3_ACCESS_KEY_SET=false
 S3_SECRET_KEY=""
 S3_SECRET_KEY_SET=false
+S3_PUBLIC_ENDPOINT=""
+S3_PUBLIC_ENDPOINT_SET=false
 CORS_ORIGINS=""
 CORS_ORIGINS_SET=false
 DOCKER_GID=""
-
 START_ALL=true
 ONLY_RUSTFS=false
 INIT_BUCKET=true
 PULL_EXECUTOR=true
 FORCE_ENV=false
+INTERACTIVE=false
+ANTHROPIC_KEY=""
+OPENAI_KEY=""
+ANTHROPIC_BASE_URL=""
+OPENAI_BASE_URL=""
+DEFAULT_MODEL=""
+OPENAI_DEFAULT_MODEL=""
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
 
 usage() {
   cat <<'USAGE'
 Usage: scripts/quickstart.sh [options]
 
 Options:
+  -i, --interactive         Interactive mode for API keys setup (recommended)
+  --no-start                Only prepare env and directories
+  --force-env               Overwrite existing keys in env file
+  --anthropic-key KEY       Anthropic API key (writes to env)
+  --openai-key KEY          OpenAI API key (writes to env, optional)
+  -h, --help                Show this help
+
+Advanced options:
   --data-dir PATH           Host path for RustFS data (default: ./oss_data)
   --workspace-dir PATH      Host path for workspaces (default: ./tmp_workspace)
   --rustfs-uid UID          RustFS uid for data dir ownership (default: 10001)
@@ -40,25 +63,58 @@ Options:
   --s3-bucket NAME          Bucket name (writes to env)
   --s3-access-key KEY       S3 access key (writes to env)
   --s3-secret-key KEY       S3 secret key (writes to env)
+  --s3-public-endpoint URL  S3 public endpoint for artifact access (writes to env)
   --cors-origins CSV|JSON   Allowed origins (writes to env)
   --docker-gid GID          Docker socket group id (auto-detect if omitted)
   --env-file PATH           Target env file (default: ./.env)
-  --no-start                Only prepare env and directories
   --only-rustfs             Start only rustfs (and rustfs-init)
   --no-init-bucket          Skip rustfs-init bucket creation
   --no-pull-executor        Skip pulling executor image
-  --force-env               Overwrite existing keys in env file
-  -h, --help                Show this help
+
+Examples:
+  # Interactive setup (recommended)
+  ./scripts/quickstart.sh -i
+
+  # Interactive setup without starting services
+  ./scripts/quickstart.sh -i --no-start
+
+  # Quick setup with API keys via CLI
+  ./scripts/quickstart.sh --anthropic-key sk-ant-xxx
 USAGE
 }
 
+print_header() {
+  local title="$1"
+  echo ""
+  echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo -e "${BLUE}  $title${NC}"
+  echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo ""
+}
+
+print_success() {
+  echo -e "${GREEN}[ok]${NC} $*"
+}
+
+print_warn() {
+  echo -e "${YELLOW}[warn]${NC} $*" >&2
+}
+
+print_error() {
+  echo -e "${RED}[error]${NC} $*" >&2
+}
+
+print_info() {
+  echo -e "${BLUE}[info]${NC} $*"
+}
+
 warn() {
-  echo "[warn] $*" >&2
+  print_warn "$@"
 }
 
 require_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
-    echo "[error] Missing command: $1" >&2
+    print_error "Missing command: $1"
     exit 1
   fi
 }
@@ -177,6 +233,265 @@ write_env_key() {
   mv "$tmp_file" "$ENV_FILE"
 }
 
+prompt_for_key() {
+  local key_name="$1"
+  local prompt_msg="$2"
+  local is_optional="${3:-false}"
+  local current_value="$4"
+  local input_value=""
+
+  while true; do
+    if [[ -n "$current_value" ]]; then
+      echo -e "${GREEN}Current value:${NC} ${current_value:0:8}...${current_value: -4}"
+      echo -n "Keep current? [Y/n/new]: "
+      read -r keep_current
+      if [[ "$keep_current" =~ ^[Yy]*$|^$ ]]; then
+        echo "$current_value"
+        return
+      elif [[ "$keep_current" == "new" ]]; then
+        current_value=""
+      else
+        break
+      fi
+    fi
+
+    echo -n "$prompt_msg: "
+    read -rs input_value
+    echo ""
+
+    if [[ -z "$input_value" ]]; then
+      if [[ "$is_optional" == "true" ]]; then
+        print_info "Skipping ${key_name} (optional)"
+        echo ""
+        return
+      else
+        print_warn "${key_name} is required"
+        continue
+      fi
+    fi
+
+    # Basic validation for API keys
+    if [[ "$key_name" == "Anthropic API Key" ]] && [[ ! "$input_value" =~ ^sk-ant-[a-zA-Z0-9_-]+$ ]]; then
+      print_warn "Invalid Anthropic API key format (should start with sk-ant-)"
+      continue
+    fi
+
+    if [[ "$key_name" == "OpenAI API Key" ]] && [[ ! "$input_value" =~ ^sk-[a-zA-Z0-9_-]+$ ]]; then
+      print_warn "Invalid OpenAI API key format (should start with sk-)"
+      continue
+    fi
+
+    echo "$input_value"
+    return
+  done
+}
+
+prompt_for_text() {
+  local prompt_msg="$1"
+  local default_value="$2"
+  local is_optional="${3:-true}"
+  local input_value=""
+
+  if [[ -n "$default_value" ]]; then
+    echo -n "$prompt_msg [$default_value]: "
+  else
+    echo -n "$prompt_msg: "
+  fi
+  read -r input_value
+
+  if [[ -z "$input_value" ]]; then
+    if [[ "$is_optional" == "true" ]]; then
+      echo "$default_value"
+    else
+      echo ""
+    fi
+  else
+    echo "$input_value"
+  fi
+}
+
+prompt_for_s3_public_endpoint() {
+  local current_value="$1"
+  local input_value=""
+
+  print_header "S3 Public Endpoint Configuration"
+  cat <<'EOF'
+
+The S3 Public Endpoint is used to access generated artifacts (images, HTML files, etc.)
+directly from your browser. This is the URL that your frontend will use to download
+artifacts stored in S3/R2.
+
+EOF
+  echo -e "${YELLOW}When do you need this?${NC}"
+  cat <<'EOF'
+  • Remote deployments (VPS, cloud servers) - Users access from different networks
+  • Cloudflare R2 or other cloud S3-compatible storage - Has a public domain
+  • Sharing artifacts with others - Need accessible URLs
+
+EOF
+  echo -e "${YELLOW}When can you skip this?${NC}"
+  cat <<'EOF'
+  • Local development only - You access everything from localhost
+  • Using built-in MinIO (default) - Local S3 at localhost:9000
+
+EOF
+
+  if [[ -n "$current_value" ]]; then
+    echo -e "${GREEN}Current value:${NC} $current_value"
+    echo -n "Keep current? [Y/n/new]: "
+    read -r keep_current
+    if [[ "$keep_current" =~ ^[Yy]*$|^$ ]]; then
+      echo "$current_value"
+      return
+    elif [[ "$keep_current" == "new" ]]; then
+      current_value=""
+    else
+      echo ""
+      return
+    fi
+  fi
+
+  echo -n "Enter S3 public endpoint (or press Enter to skip): "
+  read -r input_value
+  echo ""
+
+  if [[ -z "$input_value" ]]; then
+    print_info "Skipping S3 public endpoint (local development mode)"
+    echo ""
+    return
+  fi
+
+  echo "$input_value"
+}
+
+interactive_setup() {
+  print_header "Poco Interactive Setup"
+
+  cat <<'EOF'
+
+Welcome to Poco! This wizard will help you configure the essential settings.
+
+EOF
+
+  # Check for existing values in env
+  local existing_anthropic
+  local existing_anthropic_base_url
+  local existing_default_model
+  local existing_openai
+  local existing_openai_base_url
+  local existing_openai_model
+  local existing_s3_endpoint
+
+  existing_anthropic="$(read_env_key "ANTHROPIC_AUTH_TOKEN" || true)"
+  existing_anthropic_base_url="$(read_env_key "ANTHROPIC_BASE_URL" || true)"
+  existing_default_model="$(read_env_key "DEFAULT_MODEL" || true)"
+  existing_openai="$(read_env_key "OPENAI_API_KEY" || true)"
+  existing_openai_base_url="$(read_env_key "OPENAI_BASE_URL" || true)"
+  existing_openai_model="$(read_env_key "OPENAI_DEFAULT_MODEL" || true)"
+  existing_s3_endpoint="$(read_env_key "S3_PUBLIC_ENDPOINT" || true)"
+
+  # Prompt for Anthropic key (required)
+  print_header "Required Configuration"
+  ANTHROPIC_KEY="$(prompt_for_key "Anthropic API Key" \
+    "Enter your Anthropic API key (get one at https://console.anthropic.com/)" \
+    "false" \
+    "$existing_anthropic")"
+
+  # Prompt for Anthropic Base URL (optional)
+  cat <<'EOF'
+
+If you use a proxy or custom API endpoint for Anthropic, enter the base URL below.
+Otherwise, press Enter to use the default (https://api.anthropic.com).
+
+EOF
+  ANTHROPIC_BASE_URL="$(prompt_for_text "Anthropic Base URL" "${existing_anthropic_base_url:-https://api.anthropic.com}" "true")"
+
+  # Prompt for Default Model (optional)
+  cat <<'EOF'
+
+Enter the default Claude model to use. Press Enter to use the default.
+Common options: claude-sonnet-4-20250514, claude-opus-4-20250514
+
+EOF
+  DEFAULT_MODEL="$(prompt_for_text "Default Model" "${existing_default_model:-claude-sonnet-4-20250514}" "true")"
+
+  # Prompt for OpenAI key (optional)
+  print_header "Optional Configuration"
+  cat <<'EOF'
+
+OpenAI API Key is optional but recommended if you want to:
+  • Use GPT models alongside Claude
+  • Access OpenAI's tools and capabilities
+  • Compare results between different AI providers
+
+EOF
+  OPENAI_KEY="$(prompt_for_key "OpenAI API Key" \
+    "Enter your OpenAI API key (or press Enter to skip)" \
+    "true" \
+    "$existing_openai")"
+
+  if [[ -n "$OPENAI_KEY" ]]; then
+    # Prompt for OpenAI Base URL (only if key is set)
+    cat <<'EOF'
+
+If you use a proxy or custom API endpoint for OpenAI, enter the base URL below.
+Otherwise, press Enter to use the default (https://api.openai.com/v1).
+
+EOF
+    OPENAI_BASE_URL="$(prompt_for_text "OpenAI Base URL" "${existing_openai_base_url}" "true")"
+
+    # Prompt for OpenAI Default Model
+    cat <<'EOF'
+
+Enter the default GPT model to use. Press Enter to use the default.
+Common options: gpt-4o, gpt-4o-mini, gpt-4-turbo
+
+EOF
+    OPENAI_DEFAULT_MODEL="$(prompt_for_text "OpenAI Default Model" "${existing_openai_model:-gpt-4o-mini}" "true")"
+  fi
+
+  # Prompt for S3 public endpoint
+  S3_PUBLIC_ENDPOINT="$(prompt_for_s3_public_endpoint "$existing_s3_endpoint")"
+
+  # Write all collected keys
+  if [[ -n "$ANTHROPIC_KEY" ]]; then
+    write_env_key "ANTHROPIC_AUTH_TOKEN" "$ANTHROPIC_KEY"
+    print_success "Anthropic API key configured"
+  fi
+
+  if [[ -n "$ANTHROPIC_BASE_URL" ]]; then
+    write_env_key "ANTHROPIC_BASE_URL" "$ANTHROPIC_BASE_URL"
+    print_success "Anthropic base URL configured"
+  fi
+
+  if [[ -n "$DEFAULT_MODEL" ]]; then
+    write_env_key "DEFAULT_MODEL" "$DEFAULT_MODEL"
+    print_success "Default model configured"
+  fi
+
+  if [[ -n "$OPENAI_KEY" ]]; then
+    write_env_key "OPENAI_API_KEY" "$OPENAI_KEY"
+    print_success "OpenAI API key configured"
+  fi
+
+  if [[ -n "$OPENAI_BASE_URL" ]]; then
+    write_env_key "OPENAI_BASE_URL" "$OPENAI_BASE_URL"
+    print_success "OpenAI base URL configured"
+  fi
+
+  if [[ -n "$OPENAI_DEFAULT_MODEL" ]]; then
+    write_env_key "OPENAI_DEFAULT_MODEL" "$OPENAI_DEFAULT_MODEL"
+    print_success "OpenAI default model configured"
+  fi
+
+  if [[ -n "$S3_PUBLIC_ENDPOINT" ]]; then
+    write_env_key "S3_PUBLIC_ENDPOINT" "$S3_PUBLIC_ENDPOINT"
+    print_success "S3 public endpoint configured"
+  fi
+
+  echo ""
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --data-dir)
@@ -195,6 +510,8 @@ while [[ $# -gt 0 ]]; do
       S3_ACCESS_KEY="$2"; S3_ACCESS_KEY_SET=true; shift 2 ;;
     --s3-secret-key)
       S3_SECRET_KEY="$2"; S3_SECRET_KEY_SET=true; shift 2 ;;
+    --s3-public-endpoint)
+      S3_PUBLIC_ENDPOINT="$2"; S3_PUBLIC_ENDPOINT_SET=true; shift 2 ;;
     --cors-origins)
       CORS_ORIGINS="$2"; CORS_ORIGINS_SET=true; shift 2 ;;
     --docker-gid)
@@ -211,22 +528,47 @@ while [[ $# -gt 0 ]]; do
       PULL_EXECUTOR=false; shift ;;
     --force-env)
       FORCE_ENV=true; shift ;;
+    -i|--interactive)
+      INTERACTIVE=true; shift ;;
+    --anthropic-key)
+      ANTHROPIC_KEY="$2"; shift 2 ;;
+    --openai-key)
+      OPENAI_KEY="$2"; shift 2 ;;
     -h|--help)
       usage; exit 0 ;;
     *)
-      echo "[error] Unknown option: $1" >&2
+      print_error "Unknown option: $1"
       usage
       exit 1
       ;;
   esac
 done
 
+print_header "Poco Quickstart"
+
 if [[ ! -f "$ENV_FILE" ]]; then
   if [[ -f "${ROOT_DIR}/.env.example" ]]; then
     cp "${ROOT_DIR}/.env.example" "$ENV_FILE"
+    print_success "Created .env from .env.example"
   else
     touch "$ENV_FILE"
   fi
+fi
+
+# Run interactive setup if requested
+if [[ "$INTERACTIVE" = true ]]; then
+  interactive_setup
+fi
+
+# Handle API keys from CLI arguments
+if [[ -n "$ANTHROPIC_KEY" ]]; then
+  write_env_key "ANTHROPIC_AUTH_TOKEN" "$ANTHROPIC_KEY"
+  print_success "Anthropic API key configured"
+fi
+
+if [[ -n "$OPENAI_KEY" ]]; then
+  write_env_key "OPENAI_API_KEY" "$OPENAI_KEY"
+  print_success "OpenAI API key configured"
 fi
 
 DATA_DIR_ABS="$(resolve_path "$DATA_DIR")"
@@ -252,6 +594,10 @@ if [[ "$S3_SECRET_KEY_SET" = true ]]; then
 fi
 if [[ "$S3_BUCKET_SET" = true ]]; then
   write_env_key "S3_BUCKET" "$S3_BUCKET"
+fi
+if [[ "$S3_PUBLIC_ENDPOINT_SET" = true ]]; then
+  write_env_key "S3_PUBLIC_ENDPOINT" "$S3_PUBLIC_ENDPOINT"
+  print_success "S3 public endpoint configured"
 fi
 if [[ "$CORS_ORIGINS_SET" = true ]]; then
   write_env_key "CORS_ORIGINS" "$CORS_ORIGINS_JSON"
@@ -287,7 +633,7 @@ if [[ "$START_ALL" = true ]]; then
   elif command -v docker-compose >/dev/null 2>&1; then
     COMPOSE=(docker-compose)
   else
-    echo "[error] docker compose not found" >&2
+    print_error "docker compose not found"
     exit 1
   fi
 
@@ -299,7 +645,7 @@ if [[ "$START_ALL" = true ]]; then
     if [[ -z "$executor_image" ]]; then
       executor_image="ghcr.io/poco-ai/poco-executor:latest"
     fi
-    echo "[info] Pulling executor image: $executor_image"
+    print_info "Pulling executor image: $executor_image"
     docker pull "$executor_image"
   fi
 
@@ -315,4 +661,34 @@ if [[ "$START_ALL" = true ]]; then
   fi
 fi
 
-echo "[ok] Bootstrap completed."
+# Final status check
+print_header "Setup Complete"
+
+# Check if Anthropic key is set
+if ! read_env_key "ANTHROPIC_AUTH_TOKEN" >/dev/null 2>&1; then
+  print_warn "ANTHROPIC_AUTH_TOKEN is not set!"
+  cat <<'EOF'
+
+  Please set your Anthropic API key in .env or run:
+    ./scripts/quickstart.sh -i
+
+  Get your key at: https://console.anthropic.com/
+EOF
+else
+  print_success "Anthropic API key is configured"
+fi
+
+# Remind about optional keys
+if ! read_env_key "OPENAI_API_KEY" >/dev/null 2>&1; then
+  print_info "OpenAI API key not set (optional)"
+  echo "  Add it later in .env if you want to use GPT models"
+fi
+
+echo ""
+print_success "Bootstrap completed!"
+echo ""
+echo "Next steps:"
+echo "  1. Make sure ANTHROPIC_AUTH_TOKEN is set in .env"
+echo "  2. Start services: docker compose up -d"
+echo "  3. Open browser: http://localhost:3000"
+echo ""

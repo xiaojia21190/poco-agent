@@ -71,24 +71,13 @@ Supports reading and analyzing various project files.
 
 ## Quick Start
 
-1. Automatic Installation (Recommended)
-   Run the script to automatically check your environment, pull images, and generate configuration:
+Run the interactive setup script to automatically generate configuration and start services:
 
 ```bash
-./scripts/quickstart.sh
+./scripts/quickstart.sh -i
 ```
 
-Note: After the script completes, please add your ANTHROPIC_AUTH_TOKEN to the generated .env file.
-
-2. Start services
-
-```bash
-docker compose up -d
-```
-
-3. Visit: http://localhost:3000
-
-(Optional) If you need to use external S3/R2 storage, please use docker-compose.r2.yml to launch.
+Visit: http://localhost:3000 after startup completes.
 
 ## Community
 
