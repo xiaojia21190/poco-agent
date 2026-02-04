@@ -508,7 +508,7 @@ export function ComputerPanel({
               </span>
             </div>
             {isDone ? (
-              <div className="whitespace-pre-wrap break-words text-foreground/90 max-h-[50vh] overflow-auto rounded-md border bg-background p-3">
+              <div className="whitespace-pre-wrap break-words text-foreground/90 rounded-md border bg-background p-3">
                 {result.output || (
                   <span className="text-muted-foreground">
                     {t("computer.terminal.noOutput")}
