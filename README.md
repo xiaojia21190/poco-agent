@@ -90,3 +90,7 @@
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=poco-ai/poco-agent&type=date&legend=top-left)](https://www.star-history.com/#poco-ai/poco-agent&type=date&legend=top-left)
+
+## 致谢
+
+本项目灵感来源于[wegent](https://github.com/wecode-ai/Wegent)，并参考了其架构设计。感谢原作者的辛勤工作！

@@ -88,3 +88,7 @@ Scan to join our WeChat group:
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=poco-ai/poco-agent&type=date&legend=top-left)](https://www.star-history.com/#poco-ai/poco-agent&type=date&legend=top-left)
+
+## Acknowledgments
+
+Our project is inspired by [wegent](https://github.com/wecode-ai/Wegent) and refers to its architecture design. Thanks for the hard work of the original author!
