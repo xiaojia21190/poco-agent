@@ -54,6 +54,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,6 +75,7 @@ import {
   useBackendPreference,
   type BackendOption,
 } from "@/features/settings/hooks/use-backend-preference";
+import { useUserAccount } from "@/features/user/hooks/use-user-account";
 
 const TOP_NAV_ITEMS = [
   { id: "search", labelKey: "sidebar.search", icon: Search, href: null },
@@ -198,6 +200,11 @@ export function MainSidebar({
   const { theme, setTheme } = useTheme();
   const { currentLanguage, changeLanguage } = useSettingsLanguage();
   const { backend, setBackend } = useBackendPreference();
+  const { profile } = useUserAccount();
+  const mobileUserName = profile?.email
+    ? profile.email.split("@")[0] || profile.email
+    : t("sidebar.defaultUserName");
+  const mobileAvatarInitial = mobileUserName.charAt(0).toUpperCase() || "U";
 
   const lng = React.useMemo(() => {
     const value = params?.lng;
@@ -679,6 +686,37 @@ export function MainSidebar({
                 <Trash2 className="size-4" />
               </Button>
             </div>
+          ) : isMobile ? (
+            <button
+              type="button"
+              onClick={() => {
+                onOpenSettings?.();
+                closeMobileSidebar();
+              }}
+              className="flex w-full items-center justify-between gap-3 rounded-2xl border border-sidebar-border/60 bg-sidebar-accent/30 px-3 py-2 text-left text-sidebar-foreground transition hover:bg-sidebar-accent/50"
+            >
+              <div className="flex items-center gap-3">
+                <Avatar className="size-10 border border-sidebar-border/60">
+                  {profile?.avatar ? (
+                    <AvatarImage src={profile.avatar} alt={mobileUserName} />
+                  ) : null}
+                  <AvatarFallback className="bg-sidebar text-sidebar-foreground/80">
+                    {mobileAvatarInitial}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col text-left">
+                  <span className="text-sm font-semibold leading-tight truncate max-w-[120px]">
+                    {mobileUserName}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {t("sidebar.settings")}
+                  </span>
+                </div>
+              </div>
+              <span className="inline-flex size-8 items-center justify-center rounded-full bg-sidebar-accent/40">
+                <Settings2 className="size-4" />
+              </span>
+            </button>
           ) : (
             /* 底部工具栏 - 正常模式 */
             <div className="flex w-full items-center justify-between px-1 group-data-[collapsible=icon]:px-0">

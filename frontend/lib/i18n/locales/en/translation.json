@@ -23,6 +23,7 @@
     "shareTitle": "Share Poco with friends",
     "shareDesc": "Get 500 points each",
     "user": "User",
+    "defaultUserName": "Poco User",
     "removeFromProject": "Remove from project",
     "batchOperations": "Batch Operations",
     "moveToHere": "Move here",
