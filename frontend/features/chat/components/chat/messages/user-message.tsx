@@ -106,7 +106,7 @@ export function UserMessage({
               {textContent}
             </p>
           </div>
-          <div className="flex items-center justify-between w-full gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center justify-between w-full gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
             {shouldCollapse && (
               <button
                 onClick={() => setIsExpanded(!isExpanded)}

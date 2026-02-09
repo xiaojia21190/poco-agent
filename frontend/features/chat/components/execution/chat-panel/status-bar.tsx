@@ -17,6 +17,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { mcpService } from "@/features/capabilities/mcp/services/mcp-service";
 import { skillsService } from "@/features/capabilities/skills/services/skills-service";
 import { pluginsService } from "@/features/capabilities/plugins/services/plugins-service";
@@ -30,6 +35,7 @@ import type {
   BrowserState,
 } from "@/features/chat/types";
 import { useT } from "@/lib/i18n/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface StatusBarProps {
   // Runtime execution data (deprecated, now using configSnapshot)
@@ -50,6 +56,41 @@ export function StatusBar({
   const [mcpServers, setMcpServers] = React.useState<McpServer[]>([]);
   const [allSkills, setAllSkills] = React.useState<Skill[]>([]);
   const [allPresets, setAllPresets] = React.useState<Plugin[]>([]);
+  const isMobile = useIsMobile();
+
+  const renderInteractiveCard = React.useCallback(
+    (card: React.ReactNode, content: React.ReactNode) => {
+      if (isMobile) {
+        return (
+          <Popover>
+            <PopoverTrigger asChild>{card}</PopoverTrigger>
+            <PopoverContent
+              side="top"
+              align="start"
+              sideOffset={8}
+              className="w-64 p-2 bg-card border-border shadow-lg"
+            >
+              {content}
+            </PopoverContent>
+          </Popover>
+        );
+      }
+
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>{card}</TooltipTrigger>
+          <TooltipContent
+            side="top"
+            className="p-2 bg-card border-border shadow-lg"
+            sideOffset={8}
+          >
+            {content}
+          </TooltipContent>
+        </Tooltip>
+      );
+    },
+    [isMobile],
+  );
 
   // Load MCP servers and skills on mount
   React.useEffect(() => {
@@ -189,43 +230,34 @@ export function StatusBar({
         )}
 
         {/* Skills Card */}
-        {hasSkills && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="group flex min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
-                <Zap className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
-                <span className="min-w-0 truncate text-xs font-medium text-foreground">
-                  {configuredSkills.length > 0
-                    ? t("chat.statusBar.skillsConfigured")
-                    : t("chat.statusBar.skillsUsed")}
-                </span>
-                <Badge
-                  variant="secondary"
-                  className="text-xs h-5 px-1.5 bg-muted text-foreground"
+        {hasSkills &&
+          renderInteractiveCard(
+            <div className="group flex min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
+              <Zap className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
+              <span className="min-w-0 truncate text-xs font-medium text-foreground">
+                {configuredSkills.length > 0
+                  ? t("chat.statusBar.skillsConfigured")
+                  : t("chat.statusBar.skillsUsed")}
+              </span>
+              <Badge
+                variant="secondary"
+                className="text-xs h-5 px-1.5 bg-muted text-foreground"
+              >
+                {displaySkills.length}
+              </Badge>
+            </div>,
+            <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+              {displaySkills.map((skill) => (
+                <div
+                  key={skill.id}
+                  className="flex items-center gap-2 text-sm px-1"
                 >
-                  {displaySkills.length}
-                </Badge>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="p-2 bg-card border-border shadow-lg"
-              sideOffset={8}
-            >
-              <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
-                {displaySkills.map((skill) => (
-                  <div
-                    key={skill.id}
-                    className="flex items-center gap-2 text-sm px-1"
-                  >
-                    {getSkillStatusIcon(skill.status)}
-                    <span className="text-foreground">{skill.name}</span>
-                  </div>
-                ))}
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        )}
+                  {getSkillStatusIcon(skill.status)}
+                  <span className="text-foreground">{skill.name}</span>
+                </div>
+              ))}
+            </div>,
+          )}
 
         {/* Presets Card */}
         {hasPresets && (
@@ -265,45 +297,36 @@ export function StatusBar({
         )}
 
         {/* MCP Card */}
-        {hasMcp && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="group flex min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
-                <Server className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
-                <span className="min-w-0 truncate text-xs font-medium text-foreground">
-                  {configuredMcpServers.length > 0
-                    ? t("chat.statusBar.mcpConfigured")
-                    : t("chat.statusBar.mcp")}
-                </span>
-                <Badge
-                  variant="secondary"
-                  className="text-xs h-5 px-1.5 bg-muted text-foreground"
+        {hasMcp &&
+          renderInteractiveCard(
+            <div className="group flex min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
+              <Server className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
+              <span className="min-w-0 truncate text-xs font-medium text-foreground">
+                {configuredMcpServers.length > 0
+                  ? t("chat.statusBar.mcpConfigured")
+                  : t("chat.statusBar.mcp")}
+              </span>
+              <Badge
+                variant="secondary"
+                className="text-xs h-5 px-1.5 bg-muted text-foreground"
+              >
+                {displayMcpServers.length}
+              </Badge>
+            </div>,
+            <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+              {displayMcpServers.map((mcp, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 text-sm px-1"
                 >
-                  {displayMcpServers.length}
-                </Badge>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent
-              side="top"
-              className="p-2 bg-card border-border shadow-lg"
-              sideOffset={8}
-            >
-              <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
-                {displayMcpServers.map((mcp, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 text-sm px-1"
-                  >
-                    {getMcpStatusIcon(mcp.status)}
-                    <span className="text-foreground font-mono">
-                      {mcp.server_name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        )}
+                  {getMcpStatusIcon(mcp.status)}
+                  <span className="text-foreground font-mono">
+                    {mcp.server_name}
+                  </span>
+                </div>
+              ))}
+            </div>,
+          )}
       </TooltipProvider>
     </div>
   );

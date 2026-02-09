@@ -150,7 +150,7 @@ export function ArtifactsPanel({
           isSidebarCollapsed
             ? "grid-cols-1"
             : hideHeader
-              ? "grid-cols-[minmax(0,3fr)_minmax(0,1fr)]"
+              ? "grid-cols-[minmax(0,70%)_minmax(0,30%)]"
               : "md:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]",
         )}
       >
