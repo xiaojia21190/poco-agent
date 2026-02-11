@@ -80,7 +80,7 @@ def _parse_dingtalk_event(payload: dict[str, Any]) -> InboundMessage | None:
     text = _extract_text(payload)
     text = _clean_text(text)
     if not text:
-        return None
+        text = "/help"
 
     conversation_id = str(
         payload.get("openConversationId") or payload.get("conversationId") or ""

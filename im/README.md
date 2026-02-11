@@ -73,16 +73,18 @@ DINGTALK_WEBHOOK_URL=
 
 ### IM 命令
 
+- `/help`：查看完整命令列表
 - `/list [n]`：查看最近会话（默认 10 条）
 - `/connect <session_id|序号>`：连接会话（会自动订阅）
 - `/new <任务>`：创建新会话并自动连接
 - `/watch <session_id>`：订阅某个会话
-- `/unwatch <session_id>`：取消订阅
-- `/subscribe all`：订阅当前用户全部会话
-- `/unsubscribe all`：取消订阅全部会话
+- `/watches`：查看全部订阅
+- `/unwatch <session_id|序号>`：取消订阅
 - `/link`：查看当前连接会话
 - `/clear`：清除当前会话绑定
 - `/answer <request_id> {...}`：回答 AskQuestion
-- `/approve <request_id>` / `/reject <request_id>`：Plan Approval
+- `/answer <request_id> {"approved":"true|false"}`：回答 Plan Approval
 
 普通文本：如果当前已连接会话，会作为续聊消息发送。
+
+提示：在群聊里仅 `@机器人`（不带其他内容）会自动返回命令帮助（等价于 `/help`）。

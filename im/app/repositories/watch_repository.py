@@ -52,5 +52,9 @@ class WatchRepository:
 
     @staticmethod
     def list_by_channel(db: Session, *, channel_id: int) -> list[WatchedSession]:
-        stmt = select(WatchedSession).where(WatchedSession.channel_id == channel_id)
+        stmt = (
+            select(WatchedSession)
+            .where(WatchedSession.channel_id == channel_id)
+            .order_by(WatchedSession.created_at.desc(), WatchedSession.id.desc())
+        )
         return list(db.execute(stmt).scalars().all())

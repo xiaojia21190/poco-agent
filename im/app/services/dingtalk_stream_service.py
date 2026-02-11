@@ -72,7 +72,7 @@ class PocoDingTalkChatbotHandler(dingtalk_stream.ChatbotHandler):
             raw_text = incoming.text.content.strip()
         text = _clean_text(raw_text)
         if not text:
-            return dingtalk_stream.AckMessage.STATUS_OK, "OK"
+            text = "/help"
 
         conversation_id = str(incoming.conversation_id or "").strip()
         if not conversation_id:

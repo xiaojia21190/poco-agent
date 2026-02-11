@@ -87,9 +87,9 @@ class MessageFormatter:
                 lines.append("Plan:")
                 lines.append(plan)
             lines.append("")
-            lines.append("回复命令：")
-            lines.append(f"/approve {request_id}")
-            lines.append(f"/reject {request_id}")
+            lines.append("请使用 /answer 回复：")
+            lines.append(f'/answer {request_id} {{"approved":"true"}}')
+            lines.append(f'/answer {request_id} {{"approved":"false"}}')
             return "\n".join(lines)
 
         # AskUserQuestion

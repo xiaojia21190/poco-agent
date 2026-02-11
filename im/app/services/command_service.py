@@ -5,10 +5,8 @@ from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
-from app.core.settings import get_settings
 from app.models.channel import Channel
 from app.repositories.active_session_repository import ActiveSessionRepository
-from app.repositories.channel_repository import ChannelRepository
 from app.repositories.watch_repository import WatchRepository
 from app.services.backend_client import BackendClient, BackendClientError
 from app.services.message_formatter import MessageFormatter
@@ -27,8 +25,6 @@ class ParsedCommand:
 
 class CommandService:
     def __init__(self) -> None:
-        settings = get_settings()
-        self.backend_user_id = settings.backend_user_id
         self.backend = BackendClient()
         self.formatter = MessageFormatter()
         self._handlers: dict[str, CommandHandler] = {
@@ -38,15 +34,13 @@ class CommandService:
             "new": self._cmd_new,
             "connect": self._cmd_connect,
             "watch": self._cmd_watch,
+            "watches": self._cmd_watches,
+            "watchlist": self._cmd_watches,
             "unwatch": self._cmd_unwatch,
-            "subscribe": self._cmd_subscribe,
-            "unsubscribe": self._cmd_unsubscribe,
             "link": self._cmd_link,
             "current": self._cmd_link,
             "clear": self._cmd_clear,
             "disconnect": self._cmd_clear,
-            "approve": self._cmd_approve,
-            "reject": self._cmd_reject,
             "answer": self._cmd_answer,
         }
 
@@ -55,7 +49,7 @@ class CommandService:
     ) -> list[str]:
         clean = (text or "").strip()
         if not clean:
-            return []
+            return [self._help_text()]
 
         if clean.startswith("/"):
             parsed = _parse_command(clean)
@@ -205,33 +199,46 @@ class CommandService:
             f"🌐 前端查看: {self.formatter.session_url(session_id)}"
         ]
 
+    async def _cmd_watches(self, db: Session, channel: Channel, args: str) -> list[str]:
+        _ = args
+        watches = WatchRepository.list_by_channel(db, channel_id=channel.id)
+        if not watches:
+            return ["当前没有订阅会话。可用 /watch <session_id> 添加订阅。"]
+
+        active = ActiveSessionRepository.get_by_channel(db, channel_id=channel.id)
+        active_session_id = active.session_id if active else ""
+
+        lines = [f"当前订阅列表（共 {len(watches)} 条）："]
+        for idx, watch in enumerate(watches, start=1):
+            marker = " [👉 当前]" if watch.session_id == active_session_id else ""
+            lines.append(f"{idx}. {watch.session_id}{marker}")
+
+        lines.append("")
+        lines.append("使用 /unwatch <序号|session_id> 取消订阅")
+        return ["\n".join(lines)]
+
     async def _cmd_unwatch(self, db: Session, channel: Channel, args: str) -> list[str]:
-        session_id = args.strip()
-        if not session_id:
-            return ["用法：/unwatch <session_id>"]
+        ref = args.strip()
+        if not ref:
+            return ["用法：/unwatch <session_id|序号>"]
+
+        try:
+            session_id = self._resolve_watch_ref(
+                db,
+                channel_id=channel.id,
+                ref=ref,
+            )
+        except ValueError as exc:
+            return [str(exc)]
 
         removed = WatchRepository.remove_watch(
             db,
             channel_id=channel.id,
             session_id=session_id,
         )
-        return [f"已取消订阅：{session_id}（removed={removed}）"]
-
-    async def _cmd_subscribe(
-        self, db: Session, channel: Channel, args: str
-    ) -> list[str]:
-        if args.strip().lower() != "all":
-            return ["用法：/subscribe all"]
-        ChannelRepository.set_subscribe_all(db, channel_id=channel.id, enabled=True)
-        return [f"已开启：订阅用户 {self.backend_user_id} 的所有会话"]
-
-    async def _cmd_unsubscribe(
-        self, db: Session, channel: Channel, args: str
-    ) -> list[str]:
-        if args.strip().lower() != "all":
-            return ["用法：/unsubscribe all"]
-        ChannelRepository.set_subscribe_all(db, channel_id=channel.id, enabled=False)
-        return ["已关闭：订阅所有会话"]
+        if removed <= 0:
+            return [f"未找到订阅：{session_id}"]
+        return [f"✅ 已取消订阅：{session_id}"]
 
     async def _cmd_link(self, db: Session, channel: Channel, args: str) -> list[str]:
         _ = args
@@ -249,34 +256,6 @@ class CommandService:
         _ = args
         ActiveSessionRepository.clear(db, channel_id=channel.id)
         return ["已清除当前会话绑定"]
-
-    async def _cmd_approve(self, db: Session, channel: Channel, args: str) -> list[str]:
-        _ = db, channel
-        request_id = args.strip()
-        if not request_id:
-            return ["用法：/approve <request_id>"]
-        try:
-            await self.backend.answer_user_input_request(
-                request_id=request_id,
-                answers={"approved": "true"},
-            )
-        except BackendClientError as exc:
-            return [f"提交失败：{exc}"]
-        return ["已同意"]
-
-    async def _cmd_reject(self, db: Session, channel: Channel, args: str) -> list[str]:
-        _ = db, channel
-        request_id = args.strip()
-        if not request_id:
-            return ["用法：/reject <request_id>"]
-        try:
-            await self.backend.answer_user_input_request(
-                request_id=request_id,
-                answers={"approved": "false"},
-            )
-        except BackendClientError as exc:
-            return [f"提交失败：{exc}"]
-        return ["已拒绝"]
 
     async def _cmd_answer(self, db: Session, channel: Channel, args: str) -> list[str]:
         _ = db, channel
@@ -337,21 +316,38 @@ class CommandService:
 
         return raw
 
+    def _resolve_watch_ref(self, db: Session, *, channel_id: int, ref: str) -> str:
+        raw = ref.strip()
+        if not raw:
+            raise ValueError("订阅标识不能为空")
+
+        if raw.isdigit():
+            index = int(raw)
+            if index <= 0:
+                raise ValueError("订阅序号必须大于 0")
+            watches = WatchRepository.list_by_channel(db, channel_id=channel_id)
+            if not watches:
+                raise ValueError("当前没有订阅会话。可用 /watch <session_id> 添加。")
+            if index > len(watches):
+                raise ValueError(f"序号超出范围：当前仅有 {len(watches)} 条订阅")
+            return watches[index - 1].session_id
+
+        return raw
+
     def _help_text(self) -> str:
         return (
             "可用命令：\n"
+            "/help  查看命令帮助\n"
             "/list [n]  查看最近会话（默认 10）\n"
             "/connect <session_id|序号>  连接到会话\n"
             "/new <任务>  创建新会话并自动连接\n"
             "/watch <session_id>  订阅某个会话（前端会话也可）\n"
-            "/unwatch <session_id>  取消订阅\n"
-            "/subscribe all  订阅当前用户的所有会话\n"
-            "/unsubscribe all  取消订阅所有会话\n"
+            "/watches  查看全部订阅\n"
+            "/unwatch <session_id|序号>  取消订阅\n"
             "/link  查看当前连接会话\n"
             "/clear  清除当前会话绑定\n"
             '/answer <request_id> {"问题":"答案"}  回答 AskQuestion\n'
-            "/approve <request_id>  同意 plan\n"
-            "/reject <request_id>  拒绝 plan\n"
+            '/answer <request_id> {"approved":"true|false"}  回答 Plan Approval\n'
             "\n"
             "普通文本：如果已连接会话，会作为续聊消息发送。"
         )
