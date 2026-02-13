@@ -34,6 +34,7 @@ export function AppShell({
   const {
     taskHistory,
     addTask,
+    touchTask,
     removeTask,
     moveTask,
     renameTask,
@@ -108,7 +109,7 @@ export function AppShell({
   );
 
   return (
-    <TaskHistoryProvider value={{ refreshTasks }}>
+    <TaskHistoryProvider value={{ refreshTasks, touchTask }}>
       <AppShellProvider value={contextValue}>
         <SidebarProvider defaultOpen={true}>
           <div className="flex h-dvh w-full overflow-hidden bg-background">

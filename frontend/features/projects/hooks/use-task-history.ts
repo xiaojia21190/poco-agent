@@ -61,6 +61,46 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
     [],
   );
 
+  const touchTask = useCallback(
+    (
+      taskId: string,
+      updates: Partial<Omit<TaskHistoryItem, "id">> & { bumpToTop?: boolean },
+    ) => {
+      setTaskHistory((prev) => {
+        const idx = prev.findIndex((task) => task.id === taskId);
+        const { bumpToTop = true, ...taskUpdates } = updates;
+
+        if (idx === -1) {
+          const newTask: TaskHistoryItem = {
+            id: taskId,
+            title: taskUpdates.title ?? "",
+            timestamp: taskUpdates.timestamp ?? new Date().toISOString(),
+            status: taskUpdates.status ?? "pending",
+            projectId: taskUpdates.projectId,
+          };
+          return [newTask, ...prev];
+        }
+
+        const existing = prev[idx];
+        const updated: TaskHistoryItem = {
+          ...existing,
+          ...taskUpdates,
+        };
+
+        if (!bumpToTop) {
+          const next = [...prev];
+          next[idx] = updated;
+          return next;
+        }
+
+        const next = [...prev];
+        next.splice(idx, 1);
+        return [updated, ...next];
+      });
+    },
+    [],
+  );
+
   const removeTask = useCallback(
     async (taskId: string) => {
       // Optimistic update
@@ -131,6 +171,7 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
     taskHistory,
     isLoading,
     addTask,
+    touchTask,
     removeTask,
     moveTask,
     renameTask,

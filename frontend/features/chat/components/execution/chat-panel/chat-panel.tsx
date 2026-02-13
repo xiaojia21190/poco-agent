@@ -65,7 +65,7 @@ export function ChatPanel({
   hideHeader = false,
 }: ChatPanelProps) {
   const { t } = useT("translation");
-  const { refreshTasks } = useTaskHistoryContext();
+  const { refreshTasks, touchTask } = useTaskHistoryContext();
   const [isCancelling, setIsCancelling] = React.useState(false);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = React.useState(false);
   const inputRef = React.useRef<ChatInputRef>(null);
@@ -167,11 +167,20 @@ export function ChatPanel({
       // Session is running, add to pending queue
       addPendingMessage(content, attachments);
     } else {
+      // Optimistically update sidebar task status so it reflects the new turn immediately.
+      touchTask(session.session_id, {
+        status: "pending",
+        timestamp: new Date().toISOString(),
+        bumpToTop: true,
+      });
+
       // Session is idle, send immediately and mark as active
       if (session.status !== "running" && session.status !== "accepted") {
         updateSession({ status: "accepted" });
       }
       await sendMessage(content, attachments);
+      // Ensure sidebar converges to backend truth (status/updated_at/title).
+      await refreshTasks();
     }
   };
 
