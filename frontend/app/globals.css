@@ -20,6 +20,7 @@
   --font-serif:
     ui-serif, "Libre Baskerville", Georgia, Cambria, "Times New Roman", Times,
     serif;
+  --font-brand: "Libre Baskerville", serif;
 
   /* Sidebar */
   --color-sidebar-ring: var(--sidebar-ring);

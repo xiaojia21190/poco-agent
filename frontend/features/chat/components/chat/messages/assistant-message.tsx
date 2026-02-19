@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bot, Copy, ThumbsUp, Check } from "lucide-react";
+import { Copy, ThumbsUp, Check } from "lucide-react";
 import { MessageContent } from "./message-content";
 import { TypingIndicator } from "./typing-indicator";
 import type {
@@ -117,17 +117,17 @@ export function AssistantMessage({
 
   return (
     <div className="group w-full min-w-0 animate-in fade-in slide-in-from-left-4 duration-300">
-      <div className="flex min-w-0 items-center gap-2">
-        <div className="size-8 shrink-0 rounded-full border border-border bg-muted">
-          <div className="flex size-full items-center justify-center">
-            <Bot className="size-4 text-muted-foreground" />
-          </div>
-        </div>
-        <span className="shrink-0 text-xs font-bold uppercase tracking-wide text-foreground/50">
+      <div className="flex w-full min-w-0 items-center gap-2">
+        <img
+          src="/logo.jpg"
+          alt="Poco"
+          className="size-8 shrink-0 rounded-lg border border-border object-cover"
+        />
+        <span className="shrink-0 text-2xl font-bold text-card-foreground font-brand">
           Poco
         </span>
         {timestampLabel ? (
-          <span className="shrink-0 text-[10px] text-muted-foreground/40">
+          <span className="ml-auto shrink-0 text-sm text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100">
             {timestampLabel}
           </span>
         ) : null}

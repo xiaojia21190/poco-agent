@@ -95,7 +95,7 @@ export function SidebarHeaderSection({
           </button>
           <span
             onClick={() => router.push(lng ? `/${lng}/home` : "/")}
-            className="text-xl font-medium tracking-tight text-sidebar-foreground group-data-[collapsible=icon]:hidden cursor-pointer hover:opacity-80 transition-opacity font-[family-name:var(--font-space-grotesk)]"
+            className="text-3xl font-bold tracking-tight text-sidebar-foreground group-data-[collapsible=icon]:hidden cursor-pointer hover:opacity-80 transition-opacity font-brand"
           >
             Poco
           </span>
@@ -134,9 +134,7 @@ export function SidebarHeaderSection({
           {/* Navigation items */}
           {TOP_NAV_ITEMS.map(({ id, labelKey, icon: Icon, href }) => {
             const isDisabled = id === "search";
-            const iconAnimation = isDisabled
-              ? ""
-              : (ICON_ANIMATIONS[id] ?? "");
+            const iconAnimation = isDisabled ? "" : (ICON_ANIMATIONS[id] ?? "");
 
             return (
               <SidebarMenu
@@ -159,9 +157,7 @@ export function SidebarHeaderSection({
                     )}
                     tooltip={t(labelKey)}
                   >
-                    <Icon
-                      className={cn("size-4 shrink-0", iconAnimation)}
-                    />
+                    <Icon className={cn("size-4 shrink-0", iconAnimation)} />
                     <span className="text-sm truncate group-data-[collapsible=icon]:hidden">
                       {t(labelKey)}
                     </span>
