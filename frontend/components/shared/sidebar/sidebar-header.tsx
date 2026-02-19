@@ -80,37 +80,43 @@ export function SidebarHeaderSection({
   }, [isMobile, setOpenMobile]);
 
   return (
-    <SidebarHeader className="gap-2 pb-2">
-      {/* Logo and collapse toggle */}
-      <div className="mb-3 flex items-center justify-between pt-2 group-data-[collapsible=icon]:justify-start">
-        <div className="flex items-center gap-3 group-data-[collapsible=icon]:gap-0">
+    <SidebarHeader className="px-2 gap-2 pb-2">
+      {/* Logo and collapse toggle - logo in fixed 3rem zone so it doesn't move during collapse */}
+      <div className="mb-3 flex items-center pt-2 -mx-2">
+        <div className="flex w-[var(--sidebar-width-icon)] shrink-0 items-center justify-center">
           <button
             onClick={toggleSidebar}
-            className="group/logo relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-md transition-all hover:shadow-lg active:scale-95 active:shadow-sm"
+            className="group/logo relative flex size-6.5 shrink-0 items-center justify-center overflow-hidden transition-all active:scale-95"
             type="button"
+            style={{ border: "none", boxShadow: "none" }}
           >
-            <img
-              src="/logo.jpg"
-              alt="Poco"
-              className="size-full object-cover transition-opacity group-data-[collapsible=icon]:group-hover/logo:opacity-0"
-            />
+            <span className="flex items-center justify-center w-full h-full">
+              <img
+                src="/logo.png"
+                alt="Poco"
+                className="size-full object-cover transition-opacity group-data-[collapsible=icon]:group-hover/logo:opacity-0"
+                style={{ border: "none", boxShadow: "none" }}
+              />
+            </span>
             <PanelLeftOpen className="absolute hidden size-4 group-data-[collapsible=icon]:group-hover/logo:block" />
           </button>
+        </div>
+        <div className="flex min-w-0 flex-1 items-center justify-between gap-1 pl-0.1 pr-2 group-data-[collapsible=icon]:hidden">
           <span
             onClick={() => router.push(lng ? `/${lng}/home` : "/")}
-            className="text-3xl font-bold tracking-tight text-sidebar-foreground group-data-[collapsible=icon]:hidden cursor-pointer hover:opacity-80 transition-opacity font-brand"
+            className="text-2xl font-bold tracking-tight text-sidebar-foreground cursor-pointer transition-opacity font-brand"
           >
             Poco
           </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="size-8 shrink-0 text-sidebar-foreground hover:bg-sidebar-accent"
+          >
+            <PanelLeftClose className="size-4" />
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          className="size-8 text-sidebar-foreground hover:bg-sidebar-accent group-data-[collapsible=icon]:hidden"
-        >
-          <PanelLeftClose className="size-4" />
-        </Button>
       </div>
 
       {!isSelectionMode && (
