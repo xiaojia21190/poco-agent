@@ -397,7 +397,7 @@
       "fetchError": "ドキュメントコンテンツの取得に失敗しました",
       "retry": "再試行",
       "selectFile": "プレビューするファイルを右から選択してください",
-      "supportedFormats": "PDF、Officeドキュメント、一般的な画像形式をサポート",
+      "supportedFormats": "PDF、Officeドキュメント、一般的な画像形式と XMind ファイルをサポート",
       "processing": "ファイル処理",
       "notSupported": "この形式はプレビューをサポートしていません",
       "openInNewWindow": "新しいウィンドウで開く",

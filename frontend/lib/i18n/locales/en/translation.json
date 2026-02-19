@@ -399,7 +399,7 @@
       "fetchError": "Failed to fetch document content",
       "retry": "Retry",
       "selectFile": "Please select a file from the right to preview",
-      "supportedFormats": "Supports PDF, Office documents and common image formats",
+      "supportedFormats": "Supports PDF, Office documents, common image formats, and XMind files",
       "processing": "File processing",
       "notSupported": "Preview not supported for this format",
       "openInNewWindow": "Open in new window",

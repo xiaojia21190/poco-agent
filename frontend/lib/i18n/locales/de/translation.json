@@ -398,7 +398,7 @@
       "fetchError": "Dokumentinhalt konnte nicht abgerufen werden",
       "retry": "Wiederholen",
       "selectFile": "Bitte wähle eine Datei rechts zur Vorschau",
-      "supportedFormats": "Unterstützt PDF, Office-Dokumente und gängige Bildformate",
+      "supportedFormats": "Unterstützt PDF, Office-Dokumente, gängige Bildformate und XMind-Dateien",
       "processing": "Dateiverarbeitung",
       "notSupported": "Vorschau für dieses Format nicht unterstützt",
       "openInNewWindow": "In neuem Fenster öffnen",

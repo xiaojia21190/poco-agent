@@ -59,6 +59,35 @@ const DOC_VIEWER_TYPE_MAP: Record<string, string> = {
   xlsx: "xlsx",
 };
 
+type XMindEmbedViewerInstance = {
+  load: (file: ArrayBuffer) => void;
+  setStyles?: (styles: Record<string, string>) => void;
+  addEventListener?: (
+    event: string,
+    handler: (payload: unknown) => void,
+  ) => void;
+  removeEventListener?: (
+    event: string,
+    handler: (payload: unknown) => void,
+  ) => void;
+  setFitMap?: () => void;
+  setZoomScale?: (scale: number) => void;
+  switchSheet?: (sheetId: string) => void;
+};
+
+type XMindEmbedViewerConstructor = new (options: {
+  el: string | HTMLElement | HTMLIFrameElement;
+  region?: "cn" | "global";
+  styles?: Record<string, string>;
+  isPitchModeDisabled?: boolean;
+}) => XMindEmbedViewerInstance;
+
+declare global {
+  interface Window {
+    XMindEmbedViewer?: XMindEmbedViewerConstructor;
+  }
+}
+
 const TEXT_LANGUAGE_MAP: Record<string, string> = {
   txt: "text",
   log: "text",
@@ -139,6 +168,10 @@ const VIEW_CLASSNAME =
 
 const DEFAULT_TEXT_LANGUAGE = "text";
 const NO_SOURCE_ERROR = "NO_SOURCE";
+const XMIND_SCRIPT_SRC =
+  "https://unpkg.com/xmind-embed-viewer/dist/umd/xmind-embed-viewer.js";
+
+let xmindScriptPromise: Promise<void> | null = null;
 
 type FileContentState =
   | { status: "idle" | "loading" }
@@ -247,6 +280,48 @@ const ensureAbsoluteUrl = (url?: string | null) => {
   }
 };
 
+const ensureXMindScript = () => {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (window.XMindEmbedViewer) return Promise.resolve();
+
+  if (!xmindScriptPromise) {
+    xmindScriptPromise = new Promise((resolve, reject) => {
+      const existingScript = document.querySelector(
+        `script[src="${XMIND_SCRIPT_SRC}"]`,
+      ) as HTMLScriptElement | null;
+
+      if (existingScript) {
+        existingScript.addEventListener("load", () => resolve());
+        existingScript.addEventListener("error", () =>
+          reject(new Error("Failed to load XMind viewer script")),
+        );
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = XMIND_SCRIPT_SRC;
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () =>
+        reject(new Error("Failed to load XMind viewer script"));
+      document.head.appendChild(script);
+    });
+  }
+
+  return xmindScriptPromise;
+};
+
+const isSameOriginUrl = (url: string) => {
+  try {
+    return (
+      typeof window !== "undefined" &&
+      new URL(url, window.location.origin).origin === window.location.origin
+    );
+  } catch {
+    return false;
+  }
+};
+
 const extractExtension = (file?: FileNode) => {
   if (!file) return "";
   const sources = [file.name, file.path, file.url].filter(Boolean) as string[];
@@ -281,6 +356,9 @@ interface ViewerToolbarProps {
   copyState?: "idle" | "copied";
 }
 
+const TOOLBAR_ICON_BUTTON_CLASS =
+  "h-8 w-8 rounded-md bg-transparent transition-colors hover:bg-accent/60 active:bg-accent/80";
+
 const DocumentViewerToolbar = ({
   file,
   subtitle,
@@ -295,7 +373,7 @@ const DocumentViewerToolbar = ({
       <Button
         size="icon"
         variant="ghost"
-        className="h-8 w-8 shrink-0"
+        className={`${TOOLBAR_ICON_BUTTON_CLASS} shrink-0`}
         onClick={dispatchCloseViewer}
       >
         <ChevronLeft className="size-4" />
@@ -318,7 +396,7 @@ const DocumentViewerToolbar = ({
           <Button
             size="icon"
             variant="ghost"
-            className="h-8 w-8"
+            className={TOOLBAR_ICON_BUTTON_CLASS}
             onClick={onCopy}
             disabled={copyDisabled}
           >
@@ -333,7 +411,7 @@ const DocumentViewerToolbar = ({
           <Button
             size="icon"
             variant="ghost"
-            className="h-8 w-8"
+            className={TOOLBAR_ICON_BUTTON_CLASS}
             onClick={() => {
               if (onDownload) {
                 void onDownload();
@@ -692,6 +770,168 @@ const MarkdownDocumentViewer = ({
   );
 };
 
+const XMindDocumentViewer = ({
+  file,
+  resolvedUrl,
+  ensureFreshFile,
+}: {
+  file: FileNode;
+  resolvedUrl?: string;
+  ensureFreshFile?: (file: FileNode) => Promise<FileNode | undefined>;
+}) => {
+  const { t } = useT("translation");
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const viewerRef = React.useRef<XMindEmbedViewerInstance | null>(null);
+  const loadIdRef = React.useRef(0);
+  const [status, setStatus] = React.useState<"loading" | "ready" | "error">(
+    "loading",
+  );
+  const [errorMessage, setErrorMessage] = React.useState<string | undefined>();
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
+  const handleDownload = async () => {
+    const refreshed = ensureFreshFile ? await ensureFreshFile(file) : file;
+    const url = ensureAbsoluteUrl(refreshed?.url ?? resolvedUrl);
+    if (!url) return;
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = refreshed?.name || refreshed?.path || "document";
+    link.click();
+  };
+
+  React.useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+    const loadId = loadIdRef.current + 1;
+    loadIdRef.current = loadId;
+
+    const load = async () => {
+      console.info("[XMindViewer] init", {
+        name: file.name,
+        path: file.path,
+        url: file.url,
+      });
+      setStatus("loading");
+      setErrorMessage(undefined);
+      try {
+        await ensureXMindScript();
+        if (!isMounted || loadIdRef.current !== loadId) return;
+
+        const refreshed = ensureFreshFile ? await ensureFreshFile(file) : file;
+        const url = ensureAbsoluteUrl(refreshed?.url ?? resolvedUrl);
+        if (!url) throw new Error(NO_SOURCE_ERROR);
+
+        const response = await fetch(url, {
+          signal: controller.signal,
+          credentials: isSameOriginUrl(url) ? "include" : "omit",
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const buffer = await response.arrayBuffer();
+
+        if (!isMounted || controller.signal.aborted) return;
+        if (loadIdRef.current !== loadId) return;
+        if (!containerRef.current) return;
+
+        const ViewerCtor = window.XMindEmbedViewer;
+        if (!ViewerCtor) {
+          throw new Error("XMIND_NOT_READY");
+        }
+
+        if (!viewerRef.current) {
+          viewerRef.current = new ViewerCtor({
+            el: containerRef.current,
+            styles: { width: "100%", height: "100%" },
+          });
+        } else {
+          viewerRef.current.setStyles?.({ width: "100%", height: "100%" });
+        }
+
+        viewerRef.current.load(buffer);
+        viewerRef.current.setFitMap?.();
+        console.info("[XMindViewer] loaded");
+        setStatus("ready");
+      } catch (error) {
+        if (!isMounted || controller.signal.aborted) return;
+        setStatus("error");
+        setErrorMessage(error instanceof Error ? error.message : undefined);
+      }
+    };
+
+    void load();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [file, resolvedUrl, ensureFreshFile, refreshKey]);
+
+  React.useEffect(() => {
+    const container = containerRef.current;
+    return () => {
+      viewerRef.current = null;
+      container?.replaceChildren();
+    };
+  }, []);
+
+  if (status === "error") {
+    const isSourceError = errorMessage === NO_SOURCE_ERROR;
+    return (
+      <div className={VIEW_CLASSNAME}>
+        <StatusLayout
+          icon={File}
+          title={
+            isSourceError
+              ? t("artifacts.viewer.notSupported")
+              : t("artifacts.viewer.fetchError")
+          }
+          desc={isSourceError ? file.name : errorMessage}
+          action={
+            !isSourceError && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => {
+                  setRefreshKey((key) => key + 1);
+                }}
+              >
+                {t("artifacts.viewer.retry")}
+              </Button>
+            )
+          }
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        VIEW_CLASSNAME,
+        "flex min-w-0 flex-col rounded-xl border bg-card shadow-sm",
+      )}
+    >
+      <DocumentViewerToolbar
+        file={file}
+        subtitle="XMIND"
+        resolvedUrl={resolvedUrl}
+        onDownload={handleDownload}
+      />
+      <div className="relative flex-1 min-h-0 overflow-hidden">
+        <div ref={containerRef} className="h-full w-full bg-background" />
+        {status === "loading" && (
+          <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground bg-background/70">
+            <Loader2 className="mr-2 size-4 animate-spin" />
+            {t("artifacts.viewer.loadingDoc")}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 interface DocumentViewerProps {
   file?: FileNode;
   ensureFreshFile?: (file: FileNode) => Promise<FileNode | undefined>;
@@ -761,6 +1001,16 @@ const DocumentViewerComponent = ({
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
         />
       </div>
+    );
+  }
+
+  if (extension === "xmind") {
+    return (
+      <XMindDocumentViewer
+        file={file}
+        resolvedUrl={resolvedUrl}
+        ensureFreshFile={ensureFreshFile}
+      />
     );
   }
 
