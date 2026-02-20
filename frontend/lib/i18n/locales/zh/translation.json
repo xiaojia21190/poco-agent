@@ -993,6 +993,9 @@
         "githubUrl": "https://github.com/owner/repo",
         "name": "例如：my-preset"
       },
+      "hints": {
+        "github": "默认为 main/master 分支，仅支持公开 GitHub 仓库"
+      },
       "actions": {
         "back": "返回",
         "discover": "解析",

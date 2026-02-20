@@ -41,7 +41,7 @@ export function PluginImportDialog({
   onImported,
 }: PluginImportDialogProps) {
   const { t } = useT("translation");
-  const [tab, setTab] = useState<SourceTab>("zip");
+  const [tab, setTab] = useState<SourceTab>("github");
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [githubUrl, setGithubUrl] = useState("");
 
@@ -69,7 +69,7 @@ export function PluginImportDialog({
   }, []);
 
   const reset = React.useCallback(() => {
-    setTab("zip");
+    setTab("github");
     setZipFile(null);
     setGithubUrl("");
     setArchiveKey(null);
@@ -307,171 +307,238 @@ export function PluginImportDialog({
     }));
   };
 
-  const headerTitle = t("library.pluginsImport.title");
+  const hasPreview = candidates.length > 0 && !!archiveKey;
+  const selectionDisabled = isCommitting || isDiscovering;
+  const pageSelectionTitle = isPageFullySelected
+    ? t("library.pluginsImport.preview.selection.clearPage")
+    : t("library.pluginsImport.preview.selection.selectPage");
+  const allSelectionTitle = isAllSelected
+    ? t("library.pluginsImport.preview.selection.clearAll")
+    : t("library.pluginsImport.preview.selection.selectAll");
 
   return (
-    <Dialog open={open} onOpenChange={(v) => (v ? null : handleClose())}>
+    <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
       <CapabilityDialogContent
-        title={headerTitle}
+        title={t("library.pluginsImport.title")}
         description={t("library.pluginsImport.description")}
-      >
-        <div className="space-y-4">
-          <Tabs value={tab} onValueChange={(v) => setTab(v as SourceTab)}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="zip">
-                {t("library.pluginsImport.tabs.zip")}
-              </TabsTrigger>
-              <TabsTrigger value="github">
-                {t("library.pluginsImport.tabs.github")}
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="zip" className="space-y-2">
-              <Label htmlFor="plugin-zip">
-                {t("library.pluginsImport.fields.zip")}
-              </Label>
-              <Input
-                id="plugin-zip"
-                type="file"
-                accept=".zip"
-                onChange={(e) => setZipFile(e.target.files?.[0] || null)}
-              />
-            </TabsContent>
-
-            <TabsContent value="github" className="space-y-2">
-              <Label htmlFor="plugin-github">
-                {t("library.pluginsImport.fields.githubUrl")}
-              </Label>
-              <Input
-                id="plugin-github"
-                placeholder={t("library.pluginsImport.placeholders.githubUrl")}
-                value={githubUrl}
-                onChange={(e) => setGithubUrl(e.target.value)}
-              />
-            </TabsContent>
-          </Tabs>
-
-          <div className="flex items-center justify-between gap-2">
+        bodyClassName="space-y-6 bg-background px-6 pt-4 pb-6"
+        footer={
+          <DialogFooter className="grid grid-cols-2 gap-2">
             <Button
-              variant="secondary"
-              onClick={onDiscover}
-              disabled={isDiscovering || isCommitting}
+              variant="outline"
+              onClick={handleClose}
+              disabled={isCommitting}
+              className="w-full"
             >
-              {isDiscovering
-                ? t("library.pluginsImport.actions.discovering")
-                : t("library.pluginsImport.actions.discover")}
+              {t("common.cancel")}
             </Button>
-
-            {archiveKey && (
-              <div className="text-xs text-muted-foreground">
-                {t("library.pluginsImport.preview.found")} {candidates.length}{" "}
-                {t("library.pluginsImport.preview.items")}
-              </div>
+            {!hasPreview ? (
+              <Button
+                onClick={onDiscover}
+                disabled={isDiscovering}
+                className="w-full"
+              >
+                {isDiscovering
+                  ? t("library.pluginsImport.actions.discovering")
+                  : t("library.pluginsImport.actions.discover")}
+              </Button>
+            ) : (
+              <Button
+                onClick={onCommit}
+                disabled={!canCommit || isCommitting}
+                className="w-full"
+              >
+                {isCommitting
+                  ? t("library.pluginsImport.actions.committing")
+                  : t("library.pluginsImport.actions.commit")}
+              </Button>
             )}
-          </div>
+          </DialogFooter>
+        }
+      >
+        <div className="space-y-6">
+          {!hasPreview && (
+            <Tabs value={tab} onValueChange={(v) => setTab(v as SourceTab)}>
+              <TabsList>
+                <TabsTrigger value="github">
+                  {t("library.pluginsImport.tabs.github")}
+                </TabsTrigger>
+                <TabsTrigger value="zip">
+                  {t("library.pluginsImport.tabs.zip")}
+                </TabsTrigger>
+              </TabsList>
 
-          {archiveKey && candidates.length > 0 && (
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      checked={isAllSelected}
-                      onCheckedChange={(v) => toggleSelectAll(Boolean(v))}
-                      id="plugins-select-all"
-                    />
-                    <Label htmlFor="plugins-select-all" className="text-sm">
-                      {t("library.pluginsImport.preview.selection.selectAll")}
-                    </Label>
+              <TabsContent value="zip" className="space-y-3">
+                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {t("library.pluginsImport.fields.zip")}
+                </Label>
+                <Input
+                  type="file"
+                  accept=".zip"
+                  onChange={(e) => setZipFile(e.target.files?.[0] || null)}
+                />
+                {zipFile && (
+                  <div className="text-xs text-muted-foreground">
+                    {zipFile.name} ({Math.round(zipFile.size / 1024)} KB)
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      checked={isPageFullySelected}
-                      onCheckedChange={(v) => toggleSelectPage(Boolean(v))}
-                      id="plugins-select-page"
-                    />
-                    <Label htmlFor="plugins-select-page" className="text-sm">
-                      {t("library.pluginsImport.preview.selection.selectPage")}
-                    </Label>
-                  </div>
-                </div>
-
-                {overwriteCount > 0 && (
-                  <Badge variant="secondary">
-                    {t("library.pluginsImport.preview.overwrite")}{" "}
-                    {overwriteCount}{" "}
-                    {t("library.pluginsImport.preview.overwriteItems")}
-                  </Badge>
                 )}
+              </TabsContent>
+
+              <TabsContent value="github" className="space-y-3">
+                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  {t("library.pluginsImport.fields.githubUrl")}
+                </Label>
+                <Input
+                  value={githubUrl}
+                  onChange={(e) => setGithubUrl(e.target.value)}
+                  placeholder={t(
+                    "library.pluginsImport.placeholders.githubUrl",
+                  )}
+                />
+                <div className="text-xs text-muted-foreground">
+                  {t("library.pluginsImport.hints.github")}
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
+
+          {hasPreview && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="text-sm text-muted-foreground">
+                  {t("library.pluginsImport.preview.found")}{" "}
+                  <span className="text-foreground font-medium">
+                    {candidates.length}
+                  </span>{" "}
+                  {t("library.pluginsImport.preview.items")}
+                  {overwriteCount > 0 && (
+                    <span className="ml-2">
+                      · {t("library.pluginsImport.preview.overwrite")}{" "}
+                      <span className="text-foreground font-medium">
+                        {overwriteCount}
+                      </span>{" "}
+                      {t("library.pluginsImport.preview.overwriteItems")}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={selectionDisabled || pagedCandidates.length === 0}
+                    onClick={() => toggleSelectPage(!isPageFullySelected)}
+                    title={pageSelectionTitle}
+                    aria-label={pageSelectionTitle}
+                    className={
+                      isPageFullySelected
+                        ? "text-foreground"
+                        : "text-muted-foreground"
+                    }
+                  >
+                    <ListChecks className="size-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={selectionDisabled || candidates.length === 0}
+                    onClick={() => toggleSelectAll(!isAllSelected)}
+                    title={allSelectionTitle}
+                    aria-label={allSelectionTitle}
+                    className={
+                      isAllSelected
+                        ? "text-foreground"
+                        : "text-muted-foreground"
+                    }
+                  >
+                    <CheckCheck className="size-4" />
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-2">
                 {pagedCandidates.map((c) => {
-                  const state = selections[c.relative_path];
-                  const isSelected = Boolean(state?.selected);
-                  const requiresName = Boolean(c.requires_name);
+                  const state = selections[c.relative_path] || {
+                    selected: false,
+                    nameOverride: "",
+                  };
                   const displayName = c.plugin_name || c.relative_path;
                   return (
                     <div
                       key={c.relative_path}
-                      className="rounded-xl border border-border/60 bg-card p-3 space-y-2"
+                      role="button"
+                      tabIndex={0}
+                      className="flex items-start gap-3 rounded-xl border border-border/50 bg-muted/10 px-4 py-3 cursor-pointer transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2"
+                      onClick={(e) => {
+                        if (selectionDisabled) return;
+                        if ((e.target as HTMLElement).closest("input")) return;
+                        toggleCandidate(c.relative_path, !state.selected);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          if (!selectionDisabled)
+                            toggleCandidate(c.relative_path, !state.selected);
+                        }
+                      }}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-2">
-                          <Checkbox
-                            checked={isSelected}
-                            onCheckedChange={(v) =>
-                              toggleCandidate(c.relative_path, Boolean(v))
-                            }
-                            id={`plugin-cand-${c.relative_path}`}
-                          />
-                          <div className="min-w-0">
-                            <Label
-                              htmlFor={`plugin-cand-${c.relative_path}`}
-                              className="text-sm font-medium"
-                            >
-                              {displayName}
-                            </Label>
-                            <div className="mt-1 text-xs text-muted-foreground">
-                              {t("library.pluginsImport.relativePath")}:{" "}
-                              {c.relative_path}
-                            </div>
-                            {(c.version || c.description) && (
-                              <div className="mt-1 text-xs text-muted-foreground">
-                                {c.version ? `v${c.version}` : null}
-                                {c.version && c.description ? " · " : null}
-                                {c.description}
-                              </div>
+                      <span onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          className="self-center"
+                          checked={state.selected}
+                          disabled={selectionDisabled}
+                          onCheckedChange={(v) =>
+                            toggleCandidate(c.relative_path, Boolean(v))
+                          }
+                        />
+                      </span>
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="text-sm font-medium truncate">
+                            {displayName}
+                            {c.version && (
+                              <span className="ml-1.5 font-normal text-muted-foreground">
+                                v{c.version}
+                              </span>
                             )}
-                          </div>
+                          </span>
+                          {c.will_overwrite && (
+                            <Badge
+                              variant="outline"
+                              className="shrink-0 text-xs"
+                            >
+                              {t("library.pluginsImport.preview.willOverwrite")}
+                            </Badge>
+                          )}
                         </div>
-
-                        {c.will_overwrite && (
-                          <Badge variant="outline">
-                            {t("library.pluginsImport.preview.willOverwrite")}
-                          </Badge>
+                        {c.description && (
+                          <div className="text-xs text-muted-foreground line-clamp-2">
+                            {c.description}
+                          </div>
+                        )}
+                        {c.requires_name && state.selected && (
+                          <div
+                            className="space-y-1 pt-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Label className="text-xs">
+                              {t("library.pluginsImport.fields.nameOverride")}
+                            </Label>
+                            <Input
+                              className="h-8 text-xs"
+                              value={state.nameOverride}
+                              onChange={(e) =>
+                                updateNameOverride(
+                                  c.relative_path,
+                                  e.target.value,
+                                )
+                              }
+                              placeholder={t(
+                                "library.pluginsImport.placeholders.name",
+                              )}
+                            />
+                          </div>
                         )}
                       </div>
-
-                      {requiresName && isSelected && (
-                        <div className="space-y-1">
-                          <Label className="text-xs">
-                            {t("library.pluginsImport.fields.nameOverride")}
-                          </Label>
-                          <Input
-                            value={state?.nameOverride || ""}
-                            onChange={(e) =>
-                              updateNameOverride(
-                                c.relative_path,
-                                e.target.value,
-                              )
-                            }
-                            placeholder={t(
-                              "library.pluginsImport.placeholders.name",
-                            )}
-                          />
-                        </div>
-                      )}
                     </div>
                   );
                 })}
@@ -507,64 +574,64 @@ export function PluginImportDialog({
                   </Button>
                 </div>
               )}
-            </div>
-          )}
 
-          {commitJobId && (
-            <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-sm">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <ListChecks className="size-4 text-muted-foreground" />
-                  <span>{t("library.pluginsImport.progress.title")}</span>
+              {commitResult && (
+                <div className="rounded-xl border border-border/50 bg-muted/5 px-4 py-3 space-y-2">
+                  <div className="text-sm font-medium">
+                    {t("library.pluginsImport.result.title")}
+                  </div>
+                  <div className="space-y-1">
+                    {(commitResult.items || []).map((item) => (
+                      <div
+                        key={item.relative_path}
+                        className="text-xs text-muted-foreground flex items-center justify-between gap-2"
+                      >
+                        <span className="font-mono truncate">
+                          {item.plugin_name || item.relative_path}
+                        </span>
+                        <span className="shrink-0">
+                          {item.status === "success"
+                            ? t("library.pluginsImport.result.success")
+                            : t("library.pluginsImport.result.failed")}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {t("library.pluginsImport.progress.value")}:{" "}
-                  {commitProgress ?? 0}%
-                </span>
-              </div>
-              {commitError && (
-                <div className="mt-2 text-xs text-destructive">
-                  {commitError}
+              )}
+
+              {isCommitting && (
+                <div className="rounded-xl border border-border/50 bg-muted/5 px-4 py-3 space-y-2">
+                  <div className="text-sm font-medium">
+                    {t("library.pluginsImport.progress.title")}
+                  </div>
+                  {typeof commitProgress === "number" && (
+                    <div className="text-xs text-muted-foreground">
+                      {t("library.pluginsImport.progress.value")}:{" "}
+                      {commitProgress}%
+                    </div>
+                  )}
+                  {commitJobId && (
+                    <div className="text-xs text-muted-foreground font-mono">
+                      {t("library.pluginsImport.progress.jobId")}: {commitJobId}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {commitError && !isCommitting && (
+                <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 space-y-1">
+                  <div className="text-sm font-medium">
+                    {t("library.pluginsImport.result.failed")}
+                  </div>
+                  <div className="text-xs text-muted-foreground break-words">
+                    {commitError}
+                  </div>
                 </div>
               )}
             </div>
           )}
-
-          {commitResult && (
-            <div className="rounded-xl border border-border/60 bg-card p-3 text-sm">
-              <div className="flex items-center gap-2">
-                <CheckCheck className="size-4 text-muted-foreground" />
-                <span>{t("library.pluginsImport.result.title")}</span>
-              </div>
-              <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                {(commitResult.items || []).map((item) => (
-                  <div key={item.relative_path}>
-                    {item.plugin_name || item.relative_path}: {item.status}
-                    {item.error ? ` (${item.error})` : null}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
-
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isDiscovering || isCommitting}
-          >
-            {t("library.pluginsImport.actions.back")}
-          </Button>
-          <Button
-            onClick={onCommit}
-            disabled={!canCommit || isDiscovering || isCommitting}
-          >
-            {isCommitting
-              ? t("library.pluginsImport.actions.committing")
-              : t("library.pluginsImport.actions.commit")}
-          </Button>
-        </DialogFooter>
       </CapabilityDialogContent>
     </Dialog>
   );

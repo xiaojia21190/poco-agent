@@ -993,6 +993,9 @@
         "githubUrl": "https://github.com/owner/repo",
         "name": "e.g. my-preset"
       },
+      "hints": {
+        "github": "Defaults to main/master (public github.com repos only)"
+      },
       "actions": {
         "back": "Back",
         "discover": "Discover",

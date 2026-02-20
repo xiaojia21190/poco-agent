@@ -278,7 +278,7 @@ export function SkillImportDialog({
     <Dialog open={open} onOpenChange={(open) => !open && handleClose()}>
       <CapabilityDialogContent
         title={t("library.skillsImport.title")}
-        bodyClassName="space-y-6 bg-background px-6 py-6"
+        bodyClassName="space-y-6 bg-background px-6 pt-4 pb-6"
         footer={
           <DialogFooter className="grid grid-cols-2 gap-2">
             <Button
@@ -452,22 +452,50 @@ export function SkillImportDialog({
                   return (
                     <div
                       key={c.relative_path}
-                      className="flex items-start gap-3 rounded-xl border border-border/50 bg-muted/10 px-4 py-3"
+                      role="button"
+                      tabIndex={0}
+                      className="flex items-start gap-3 rounded-xl border border-border/50 bg-muted/10 px-4 py-3 cursor-pointer transition-colors hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2"
+                      onClick={(e) => {
+                        if (disabled) return;
+                        if ((e.target as HTMLElement).closest("input")) return;
+                        setSelections((prev) => ({
+                          ...prev,
+                          [c.relative_path]: {
+                            ...sel,
+                            selected: !sel.selected,
+                          },
+                        }));
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          if (!disabled)
+                            setSelections((prev) => ({
+                              ...prev,
+                              [c.relative_path]: {
+                                ...sel,
+                                selected: !sel.selected,
+                              },
+                            }));
+                        }
+                      }}
                     >
-                      <Checkbox
-                        className="self-center"
-                        checked={sel.selected}
-                        disabled={disabled}
-                        onCheckedChange={(checked) => {
-                          setSelections((prev) => ({
-                            ...prev,
-                            [c.relative_path]: {
-                              ...sel,
-                              selected: Boolean(checked),
-                            },
-                          }));
-                        }}
-                      />
+                      <span onClick={(e) => e.stopPropagation()}>
+                        <Checkbox
+                          className="self-center"
+                          checked={sel.selected}
+                          disabled={disabled}
+                          onCheckedChange={(checked) => {
+                            setSelections((prev) => ({
+                              ...prev,
+                              [c.relative_path]: {
+                                ...sel,
+                                selected: Boolean(checked),
+                              },
+                            }));
+                          }}
+                        />
+                      </span>
                       <div className="flex-1 min-w-0 space-y-2">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium truncate">
@@ -486,13 +514,11 @@ export function SkillImportDialog({
                           )}
                         </div>
 
-                        <div className="text-xs text-muted-foreground font-mono">
-                          {t("library.skillsImport.preview.path")}:{" "}
-                          {c.relative_path}
-                        </div>
-
                         {c.requires_name && sel.selected && (
-                          <div className="space-y-1">
+                          <div
+                            className="space-y-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                               {t("library.skillsImport.fields.nameOverride")}
                             </Label>
