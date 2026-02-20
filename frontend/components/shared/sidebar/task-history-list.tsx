@@ -62,6 +62,13 @@ interface DraggableTaskProps {
 /**
  * Individual draggable task item
  */
+
+// 颜色点状态：
+// 1. 转圈：pending、running
+// 2. 成功色 completed → bg-success（成功色点）
+// 3. 失败色 failed → bg-destructive（失败色点）
+// 4. 取消色 canceled → bg-muted-foreground/60（偏深灰点）
+
 function DraggableTask({
   task,
   lng,
@@ -152,7 +159,7 @@ function DraggableTask({
             {/* 状态指示器和拖拽手柄 - 同一位置，hover 时切换 */}
             <div className="size-4 shrink-0 flex items-center justify-center relative">
               {/* 默认显示：颜色点 - hover 时隐藏 */}
-              {task.status === "running" ? (
+              {task.status === "running" || task.status === "pending" ? (
                 <Loader2
                   className={cn(
                     "size-3 shrink-0 animate-spin text-info transition-opacity",

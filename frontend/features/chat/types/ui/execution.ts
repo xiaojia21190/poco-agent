@@ -5,7 +5,7 @@
 import type { ApiStatePatch } from "../api/callback";
 
 export type ExecutionStatus =
-  | "accepted"
+  | "pending"
   | "running"
   | "completed"
   | "failed"

@@ -136,7 +136,7 @@ export function useExecutionSession({
   // Poll only when session is active (or initial load)
   const isSessionActive =
     !!sessionId &&
-    (!session || ["accepted", "running"].includes(session.status));
+    (!session || ["pending", "running"].includes(session.status));
 
   // Log when polling stops and trigger callback
   const hasStoppedRef = useRef(false);
@@ -155,9 +155,7 @@ export function useExecutionSession({
   useEffect(() => {
     if (
       session &&
-      ["completed", "failed", "stopped", "canceled", "cancelled"].includes(
-        session.status,
-      )
+      ["completed", "failed", "canceled"].includes(session.status)
     ) {
       // Trigger callback only once when polling stops
       if (!hasStoppedRef.current && onPollingStop) {
@@ -172,14 +170,14 @@ export function useExecutionSession({
         if (
           session.status === "completed" &&
           prevStatusRef.current !== null &&
-          ["accepted", "running"].includes(prevStatusRef.current)
+          ["pending", "running"].includes(prevStatusRef.current)
         ) {
           playCompletionSound();
         }
 
         onPollingStop();
       }
-    } else if (session && ["accepted", "running"].includes(session.status)) {
+    } else if (session && ["pending", "running"].includes(session.status)) {
       // Reset ref when session becomes active again
       hasStoppedRef.current = false;
     }

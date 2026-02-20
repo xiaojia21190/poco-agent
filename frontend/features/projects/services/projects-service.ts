@@ -45,23 +45,11 @@ function resolveSessionTitle(session: SessionResponse): string {
 }
 
 function mapSessionToTask(session: SessionResponse): TaskHistoryItem {
-  let status: TaskHistoryItem["status"] = "completed";
-  const apiStatus = session.status?.toLowerCase();
-  if (apiStatus === "running" || apiStatus === "processing") {
-    status = "running";
-  } else if (apiStatus === "failed" || apiStatus === "error") {
-    status = "failed";
-  } else if (apiStatus === "canceled" || apiStatus === "cancelled") {
-    status = "canceled";
-  } else if (apiStatus === "pending" || apiStatus === "queued") {
-    status = "pending";
-  }
-
   return {
     id: session.session_id,
     title: resolveSessionTitle(session),
     timestamp: session.updated_at || session.created_at,
-    status,
+    status: session.status as TaskHistoryItem["status"],
     projectId: session.project_id || undefined,
   };
 }

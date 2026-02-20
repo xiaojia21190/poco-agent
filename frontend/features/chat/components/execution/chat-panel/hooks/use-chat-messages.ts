@@ -228,7 +228,7 @@ export function useChatMessages({
     // Setup polling
     let interval: NodeJS.Timeout;
 
-    const isTerminal = ["completed", "failed", "stopped", "canceled"].includes(
+    const isTerminal = ["completed", "failed", "canceled"].includes(
       session.status,
     );
 
@@ -267,7 +267,7 @@ export function useChatMessages({
 
   // Determine if session is running/active
   const isSessionActive =
-    session?.status === "running" || session?.status === "accepted";
+    session?.status === "running" || session?.status === "pending";
 
   // Reset typing state when session becomes inactive
   useEffect(() => {

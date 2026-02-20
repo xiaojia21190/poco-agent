@@ -115,7 +115,7 @@ export function ChatPanel({
 
   // Determine if session is running/active
   const isSessionActive =
-    session?.status === "running" || session?.status === "accepted";
+    session?.status === "running" || session?.status === "pending";
 
   const {
     requests: userInputRequests,
@@ -126,7 +126,7 @@ export function ChatPanel({
   const activeUserInput = userInputRequests[0];
 
   const isSessionCancelable =
-    session?.status === "running" || session?.status === "accepted";
+    session?.status === "running" || session?.status === "pending";
 
   const handleCancel = React.useCallback(async () => {
     if (!session?.session_id) return;
@@ -199,8 +199,8 @@ export function ChatPanel({
       });
 
       // Session is idle, send immediately and mark as active
-      if (session.status !== "running" && session.status !== "accepted") {
-        updateSession({ status: "accepted" });
+      if (session.status !== "running" && session.status !== "pending") {
+        updateSession({ status: "pending" });
       }
       await sendMessage(content, attachments);
       // Ensure sidebar converges to backend truth (status/updated_at/title).

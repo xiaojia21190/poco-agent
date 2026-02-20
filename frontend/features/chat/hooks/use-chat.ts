@@ -60,7 +60,7 @@ export function useChat(sessionId: string) {
   // Polling
   useEffect(() => {
     const shouldPoll =
-      session?.status === "running" || session?.status === "accepted";
+      session?.status === "running" || session?.status === "pending";
     if (!shouldPoll) return;
 
     const interval = setInterval(fetchSession, POLLING_INTERVAL);

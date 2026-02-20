@@ -39,13 +39,7 @@ const POCO_PLAYWRIGHT_MCP_PREFIX = "mcp____poco_playwright__";
 
 interface ComputerPanelProps {
   sessionId: string;
-  sessionStatus?:
-    | "running"
-    | "accepted"
-    | "completed"
-    | "failed"
-    | "canceled"
-    | "stopped";
+  sessionStatus?: "pending" | "running" | "completed" | "failed" | "canceled";
   browserEnabled?: boolean;
   headerAction?: React.ReactNode;
   hideHeader?: boolean;
@@ -136,7 +130,7 @@ export function ComputerPanel({
   hideHeader = false,
 }: ComputerPanelProps) {
   const { t } = useT("translation");
-  const isActive = sessionStatus === "running" || sessionStatus === "accepted";
+  const isActive = sessionStatus === "running" || sessionStatus === "pending";
 
   const { executions, isLoading, isLoadingMore, hasMore, loadMore } =
     useToolExecutions({

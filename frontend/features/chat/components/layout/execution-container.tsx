@@ -129,7 +129,7 @@ export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
   });
   const isMobile = useIsMobile();
   const isSessionActive =
-    session?.status === "running" || session?.status === "accepted";
+    session?.status === "running" || session?.status === "pending";
   const browserEnabled = Boolean(
     session?.config_snapshot?.browser_enabled ||
     session?.state_patch?.browser?.enabled,

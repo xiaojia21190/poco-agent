@@ -18,13 +18,7 @@ import { cn } from "@/lib/utils";
 
 interface FileChangeCardProps {
   change: FileChange;
-  sessionStatus?:
-    | "running"
-    | "accepted"
-    | "completed"
-    | "failed"
-    | "canceled"
-    | "stopped";
+  sessionStatus?: "pending" | "running" | "completed" | "failed" | "canceled";
   onFileClick?: () => void;
 }
 
@@ -84,7 +78,7 @@ export function FileChangeCard({
 
   // Determine if session is running (execution state)
   const isSessionRunning =
-    sessionStatus === "running" || sessionStatus === "accepted";
+    sessionStatus === "running" || sessionStatus === "pending";
 
   const handlePreviewClick = (e: React.MouseEvent) => {
     e.stopPropagation();

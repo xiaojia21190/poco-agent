@@ -51,18 +51,10 @@ function toExecutionSession(
   session: SessionResponse,
   progress = 0,
 ): ExecutionSession {
-  const statusMap: Record<string, ExecutionSession["status"]> = {
-    completed: "completed",
-    failed: "failed",
-    canceled: "canceled",
-    cancelled: "canceled",
-    running: "running",
-  };
-
   return {
     session_id: session.session_id,
     time: session.updated_at,
-    status: statusMap[session.status] ?? "accepted",
+    status: session.status as ExecutionSession["status"],
     progress,
     state_patch: session.state_patch ?? {},
     config_snapshot: parseConfigSnapshot(session.config_snapshot),
@@ -76,7 +68,7 @@ function createDefaultSession(sessionId: string): ExecutionSession {
   return {
     session_id: sessionId,
     time: new Date().toISOString(),
-    status: "accepted",
+    status: "pending",
     progress: 0,
     state_patch: {},
     task_name: undefined,

@@ -276,20 +276,13 @@ export function ToolChain({
   const [openStepId, setOpenStepId] = React.useState<string | null>(null);
 
   const normalizedSessionStatus = (sessionStatus || "").trim().toLowerCase();
-  const isTerminalSession = [
-    "completed",
-    "failed",
-    "canceled",
-    "cancelled",
-    "stopped",
-  ].includes(normalizedSessionStatus);
+  const isTerminalSession = ["completed", "failed", "canceled"].includes(
+    normalizedSessionStatus,
+  );
 
   const terminalToolResultText = React.useMemo(() => {
     if (normalizedSessionStatus === "failed") return t("status.failed");
-    if (
-      normalizedSessionStatus === "canceled" ||
-      normalizedSessionStatus === "cancelled"
-    ) {
+    if (normalizedSessionStatus === "canceled") {
       return t("status.canceled");
     }
     return t("status.completed");

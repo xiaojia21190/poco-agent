@@ -14,13 +14,7 @@ import { useT } from "@/lib/i18n/client";
 interface ArtifactsPanelProps {
   fileChanges?: FileChange[];
   sessionId?: string;
-  sessionStatus?:
-    | "running"
-    | "accepted"
-    | "completed"
-    | "failed"
-    | "canceled"
-    | "stopped";
+  sessionStatus?: "pending" | "running" | "completed" | "failed" | "canceled";
   headerAction?: React.ReactNode;
   hideHeader?: boolean;
 }
