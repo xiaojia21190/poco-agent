@@ -319,7 +319,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               type="button"
               onClick={handleSend}
               disabled={!hasDraft || disabled}
-              className="flex-shrink-0 flex items-center justify-center size-8 rounded-md bg-foreground text-background hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-shrink-0 flex items-center justify-center size-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               aria-label={t("hero.send")}
               title={t("hero.send")}
             >
