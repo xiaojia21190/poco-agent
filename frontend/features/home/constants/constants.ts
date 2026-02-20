@@ -47,7 +47,7 @@ export const TASK_STATUS_META: Record<
   completed: { dotClassName: "bg-primary", labelKey: "status.completed" },
   failed: { dotClassName: "bg-destructive", labelKey: "status.failed" },
   canceled: {
-    dotClassName: "bg-muted-foreground/60",
+    dotClassName: "bg-chart-4/60",
     labelKey: "status.canceled",
   },
 };

@@ -8,7 +8,6 @@ import {
   Pencil,
   Trash2,
   GripVertical,
-  Loader2,
 } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
 
@@ -64,10 +63,11 @@ interface DraggableTaskProps {
  */
 
 // 颜色点状态：
-// 1. 转圈：pending、running
-// 2. 主题色 completed → bg-primary（主题色点）
-// 3. 失败色 failed → bg-destructive（失败色点）
-// 4. 取消色 canceled → bg-muted-foreground/60（偏深灰点）
+// 1. 待处理 pending → bg-muted-foreground/40
+// 2. 进行中 running → bg-primary/70 (带脉冲动画)
+// 3. 已完成 completed → bg-primary
+// 4. 失败 failed → bg-destructive
+// 5. 已取消 canceled → bg-chart-4 (黄色点)
 
 function DraggableTask({
   task,
@@ -159,23 +159,15 @@ function DraggableTask({
             {/* 状态指示器和拖拽手柄 - 同一位置，hover 时切换 */}
             <div className="size-4 shrink-0 flex items-center justify-center relative">
               {/* 默认显示：颜色点 - hover 时隐藏 */}
-              {task.status === "running" || task.status === "pending" ? (
-                <Loader2
-                  className={cn(
-                    "size-3 shrink-0 animate-spin text-primary transition-opacity",
-                    "group-hover/task-card:opacity-0",
-                  )}
-                />
-              ) : (
-                <span
-                  className={cn(
-                    "size-2 shrink-0 rounded-full transition-opacity",
-                    statusMeta.dotClassName,
-                    "group-hover/task-card:opacity-0",
-                  )}
-                  aria-hidden="true"
-                />
-              )}
+              <span
+                className={cn(
+                  "size-2 shrink-0 rounded-full transition-opacity",
+                  statusMeta.dotClassName,
+                  task.status === "running" && "animate-pulse",
+                  "group-hover/task-card:opacity-0",
+                )}
+                aria-hidden="true"
+              />
               <span className="sr-only">{t(statusMeta.labelKey)}</span>
 
               {/* Hover 时显示：拖拽手柄 - 覆盖在颜色点上 */}
