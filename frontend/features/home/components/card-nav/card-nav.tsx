@@ -240,25 +240,62 @@ export function CardNav({
   // Toggle Plugin enabled state
   const togglePluginEnabled = useCallback(
     async (installId: number, currentEnabled: boolean) => {
+      const shouldEnable = !currentEnabled;
+      const otherEnabledInstalls = pluginInstalls.filter(
+        (install) => install.enabled && install.id !== installId,
+      );
+      const previousInstalls = pluginInstalls;
       try {
-        await pluginsService.updateInstall(installId, {
-          enabled: !currentEnabled,
+        if (shouldEnable && otherEnabledInstalls.length > 0) {
+          await pluginsService.bulkUpdateInstalls({
+            enabled: false,
+            install_ids: otherEnabledInstalls.map((install) => install.id),
+          });
+        }
+
+        const updated = await pluginsService.updateInstall(installId, {
+          enabled: shouldEnable,
         });
+
         setPluginInstalls((prev) =>
-          prev.map((install) =>
-            install.id === installId
-              ? { ...install, enabled: !currentEnabled }
-              : install,
-          ),
+          prev.map((install) => {
+            if (install.id === installId) {
+              return updated;
+            }
+            if (
+              shouldEnable &&
+              otherEnabledInstalls.some((other) => other.id === install.id)
+            ) {
+              return { ...install, enabled: false };
+            }
+            return install;
+          }),
         );
-        if (!currentEnabled) {
+        if (shouldEnable) {
           playInstallSound();
+          if (otherEnabledInstalls.length > 0) {
+            toast.warning(t("library.pluginsManager.toasts.exclusiveEnabled"));
+          }
         }
       } catch (error) {
         console.error("[CardNav] Failed to toggle Plugin:", error);
+        if (shouldEnable && otherEnabledInstalls.length > 0) {
+          try {
+            await pluginsService.bulkUpdateInstalls({
+              enabled: true,
+              install_ids: otherEnabledInstalls.map((install) => install.id),
+            });
+          } catch (restoreError) {
+            console.error(
+              "[CardNav] Failed to restore preset toggles:",
+              restoreError,
+            );
+          }
+        }
+        setPluginInstalls(previousInstalls);
       }
     },
-    [],
+    [pluginInstalls, t],
   );
 
   // Batch toggle all MCPs

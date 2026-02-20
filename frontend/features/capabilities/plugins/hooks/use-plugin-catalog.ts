@@ -47,22 +47,52 @@ export function usePluginCatalog() {
   const installPlugin = useCallback(
     async (pluginId: number) => {
       setLoadingId(pluginId);
+      const previouslyEnabled = installs.filter((install) => install.enabled);
       try {
+        if (previouslyEnabled.length > 0) {
+          await pluginsService.bulkUpdateInstalls({
+            enabled: false,
+            install_ids: previouslyEnabled.map((install) => install.id),
+          });
+        }
         const created = await pluginsService.createInstall({
           plugin_id: pluginId,
           enabled: true,
         });
-        setInstalls((prev) => [created, ...prev]);
+        setInstalls((prev) => [
+          created,
+          ...prev.map((install) =>
+            previouslyEnabled.some((enabled) => enabled.id === install.id)
+              ? { ...install, enabled: false }
+              : install,
+          ),
+        ]);
         toast.success(t("library.pluginsManager.toasts.installed"));
+        if (previouslyEnabled.length > 0) {
+          toast.warning(t("library.pluginsManager.toasts.exclusiveEnabled"));
+        }
         playInstallSound();
       } catch (error) {
         console.error("[Plugins] install failed:", error);
+        if (previouslyEnabled.length > 0) {
+          try {
+            await pluginsService.bulkUpdateInstalls({
+              enabled: true,
+              install_ids: previouslyEnabled.map((install) => install.id),
+            });
+          } catch (restoreError) {
+            console.error(
+              "[Plugins] restore enabled presets failed:",
+              restoreError,
+            );
+          }
+        }
         toast.error(t("library.pluginsManager.toasts.actionError"));
       } finally {
         setLoadingId(null);
       }
     },
-    [t],
+    [installs, t],
   );
 
   const deletePlugin = useCallback(
@@ -88,22 +118,45 @@ export function usePluginCatalog() {
   const setEnabled = useCallback(
     async (installId: number, enabled: boolean) => {
       setLoadingId(installId);
+      const previousInstalls = installs;
       const install = installs.find((i) => i.id === installId);
       const plugin = install
         ? plugins.find((p) => p.id === install.plugin_id)
         : null;
       const pluginName =
         plugin?.name || t("library.pluginsManager.unknownPlugin");
+      const otherEnabled = enabled
+        ? installs.filter((i) => i.enabled && i.id !== installId)
+        : [];
+      const shouldRestoreOthers = enabled && otherEnabled.length > 0;
 
       setInstalls((prev) =>
-        prev.map((i) => (i.id === installId ? { ...i, enabled } : i)),
+        prev.map((i) => {
+          if (i.id === installId) return { ...i, enabled };
+          if (enabled && otherEnabled.some((other) => other.id === i.id)) {
+            return { ...i, enabled: false };
+          }
+          return i;
+        }),
       );
       try {
+        if (shouldRestoreOthers) {
+          await pluginsService.bulkUpdateInstalls({
+            enabled: false,
+            install_ids: otherEnabled.map((installItem) => installItem.id),
+          });
+        }
         const updated = await pluginsService.updateInstall(installId, {
           enabled,
         });
         setInstalls((prev) =>
-          prev.map((i) => (i.id === installId ? updated : i)),
+          prev.map((i) => {
+            if (i.id === installId) return updated;
+            if (enabled && otherEnabled.some((other) => other.id === i.id)) {
+              return { ...i, enabled: false };
+            }
+            return i;
+          }),
         );
         toast.success(
           enabled
@@ -112,14 +165,26 @@ export function usePluginCatalog() {
         );
         if (enabled) {
           playInstallSound();
+          if (otherEnabled.length > 0) {
+            toast.warning(t("library.pluginsManager.toasts.exclusiveEnabled"));
+          }
         }
       } catch (error) {
         console.error("[Plugins] setEnabled failed:", error);
-        setInstalls((prev) =>
-          prev.map((i) =>
-            i.id === installId ? { ...i, enabled: !enabled } : i,
-          ),
-        );
+        if (shouldRestoreOthers) {
+          try {
+            await pluginsService.bulkUpdateInstalls({
+              enabled: true,
+              install_ids: otherEnabled.map((installItem) => installItem.id),
+            });
+          } catch (restoreError) {
+            console.error(
+              "[Plugins] restore enabled presets failed:",
+              restoreError,
+            );
+          }
+        }
+        setInstalls(previousInstalls);
         toast.error(t("library.pluginsManager.toasts.actionError"));
       } finally {
         setLoadingId(null);

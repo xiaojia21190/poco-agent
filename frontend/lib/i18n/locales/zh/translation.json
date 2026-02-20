@@ -971,7 +971,8 @@
         "uninstalled": "预设已卸载",
         "enabled": "预设已启用",
         "disabled": "预设已停用",
-        "actionFailed": "操作失败，请稍后再试"
+        "actionFailed": "操作失败，请稍后再试",
+        "exclusiveEnabled": "预设同一时间只能启用一个，已自动关闭其他预设。"
       },
       "empty": "暂无预设",
       "unknownPlugin": "未知预设"
