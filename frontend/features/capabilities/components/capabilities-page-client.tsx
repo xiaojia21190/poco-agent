@@ -215,7 +215,10 @@ export function CapabilitiesPageClient() {
           onSelect={handleSelectView}
         />
 
-        <main className="min-h-0 overflow-hidden">
+        <main
+          className="min-h-0 overflow-hidden"
+          data-onboarding="capabilities-detail"
+        >
           {isDesktop && !isListView
             ? renderActiveView("desktop", { isMobileDetail: false })
             : null}
@@ -225,7 +228,10 @@ export function CapabilitiesPageClient() {
       <div className="flex min-h-0 flex-1 md:hidden">
         {isMobileDetailVisible ? (
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <div className="min-h-0 flex-1 overflow-y-auto">
+            <div
+              className="min-h-0 flex-1 overflow-y-auto"
+              data-onboarding="capabilities-detail"
+            >
               {renderActiveView("mobile", {
                 isMobileDetail: true,
                 onMobileBack: handleMobileBack,

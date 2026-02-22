@@ -292,7 +292,10 @@ export function TaskComposer({
 
   // ---- Render ----
   return (
-    <div className="rounded-2xl border border-border bg-card shadow-sm">
+    <div
+      className="rounded-2xl border border-border bg-card shadow-sm"
+      data-onboarding="home-task-composer"
+    >
       {/* Hidden file input */}
       <input
         type="file"

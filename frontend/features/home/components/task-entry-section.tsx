@@ -41,7 +41,7 @@ export function TaskEntrySection({
           </h1>
         </div>
 
-        <div className="mb-5">
+        <div className="mb-5" data-onboarding="home-mode-toggle">
           <ModeToggle
             mode={mode}
             onModeChange={onModeChange}

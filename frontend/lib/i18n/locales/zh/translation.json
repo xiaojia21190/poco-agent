@@ -30,7 +30,8 @@
     "holdToSelect": "长按进入批量选择",
     "holdToExitSelect": "长按退出批量选择",
     "moveToHere": "移动到这里",
-    "plan": "专业版"
+    "plan": "专业版",
+    "onboarding": "新手教程"
   },
   "header": {
     "workspace": "Poco 1.0",
@@ -1510,5 +1511,56 @@
   },
   "filesidebar": {
     "title": "文件列表"
+  },
+  "onboarding": {
+    "close": "关闭教程",
+    "skip": "跳过",
+    "back": "上一步",
+    "next": "下一步",
+    "done": "完成",
+    "progress": "第 {{current}} / {{total}} 步",
+    "targetUnavailable": "当前区域可能已折叠或暂不可见，可继续下一步。",
+    "steps": {
+      "welcome": {
+        "title": "欢迎使用 Poco",
+        "description": "这个新手教程会快速介绍最常用的核心区域。你也可以随时在侧边栏快捷菜单中重新打开。"
+      },
+      "workspace": {
+        "title": "主工作区",
+        "description": "主要内容都会显示在这里，包括任务创建、执行会话和能力管理页面。"
+      },
+      "newTask": {
+        "title": "新建任务",
+        "description": "点击这里可以快速创建一个新任务并进入执行流程。"
+      },
+      "projects": {
+        "title": "项目区域",
+        "description": "在这里创建、重命名和管理项目，用于按项目组织你的工作。"
+      },
+      "capabilities": {
+        "title": "能力入口",
+        "description": "先从侧边栏进入能力中心入口，再进入技能页面查看详情。"
+      },
+      "modeToggle": {
+        "title": "选择执行模式",
+        "description": "发送前可在任务模式、分步模式和定时模式之间切换。"
+      },
+      "composer": {
+        "title": "任务编辑区",
+        "description": "在这里输入指令、添加附件、配置仓库并发起执行。"
+      },
+      "quickMenu": {
+        "title": "快捷设置菜单",
+        "description": "可在此调整语言/主题/后端偏好，并随时重新开始本教程。"
+      },
+      "taskList": {
+        "title": "任务清单",
+        "description": "这里会展示未归档到项目的任务，你可以快速回看并重新进入最近的执行会话。"
+      },
+      "skillsDetail": {
+        "title": "技能页面（Skills）",
+        "description": "这里是能力中心的 Skills 页面，用来浏览、启用和管理技能。"
+      }
+    }
   }
 }

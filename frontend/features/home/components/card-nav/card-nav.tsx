@@ -401,6 +401,29 @@ export function CardNav({
     }
   }, [pluginInstalls, t]);
 
+  // Batch toggle plugins: one-click enable picks one preset randomly, disable turns all off.
+  const batchTogglePlugins = useCallback(
+    async (enable: boolean) => {
+      if (!enable) {
+        await disableAllPlugins();
+        return;
+      }
+
+      const hasEnabledPlugin = pluginInstalls.some(
+        (install) => install.enabled,
+      );
+      if (hasEnabledPlugin) return;
+
+      if (pluginInstalls.length === 0) return;
+      const randomInstall =
+        pluginInstalls[Math.floor(Math.random() * pluginInstalls.length)];
+      if (!randomInstall) return;
+
+      await togglePluginEnabled(randomInstall.id, false);
+    },
+    [disableAllPlugins, pluginInstalls, togglePluginEnabled],
+  );
+
   // Handle warning icon click
   const handleWarningClick = useCallback(
     (type: "mcp" | "skill", count: number) => {
@@ -543,25 +566,6 @@ export function CardNav({
     return t(`cardNav.${isActive ? "turnOffAll" : "turnOnAll"}`);
   };
 
-  const getOffOnlyTooltip = (
-    type: "mcp" | "skill" | "plugin",
-    hasItems: boolean,
-  ) => {
-    if (!hasItems) {
-      return t(
-        `cardNav.${
-          type === "mcp"
-            ? "noMcpInstalled"
-            : type === "skill"
-              ? "noSkillsInstalled"
-              : "noPluginsInstalled"
-        }`,
-      );
-    }
-
-    return t("cardNav.turnOffAll");
-  };
-
   const renderAggregateToggle = (
     type: "mcp" | "skill" | "plugin",
     hasItems: boolean,
@@ -591,48 +595,7 @@ export function CardNav({
               !hasItems
                 ? "cursor-not-allowed border-border/40 bg-transparent text-muted-foreground/40"
                 : isHighlighted
-                  ? "border-border/60 bg-muted/70 text-foreground shadow-[0_6px_20px_-12px_rgba(var(--foreground),0.25)]"
-                  : "border-border/60 text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-            )}
-          >
-            <Power className="size-3.5" />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="top" sideOffset={4}>
-          <span>{tooltipLabel}</span>
-        </TooltipContent>
-      </Tooltip>
-    );
-  };
-
-  const renderOffOnlyToggle = (
-    type: "mcp" | "skill" | "plugin",
-    hasItems: boolean,
-    enabledCount: number,
-    toggleOffFn: () => Promise<void> | void,
-  ) => {
-    const tooltipLabel = getOffOnlyTooltip(type, hasItems);
-    const isHighlighted = enabledCount > 0;
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            aria-pressed={isHighlighted}
-            aria-label={tooltipLabel}
-            disabled={!hasItems}
-            onClick={async (event) => {
-              event.stopPropagation();
-              if (!hasItems) return;
-              await toggleOffFn();
-            }}
-            className={cn(
-              "relative flex h-10 w-10 items-center justify-center rounded-2xl border transition-all duration-200",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
-              !hasItems
-                ? "cursor-not-allowed border-border/40 bg-transparent text-muted-foreground/40"
-                : isHighlighted
-                  ? "border-border/60 bg-muted/70 text-foreground shadow-[0_6px_20px_-12px_rgba(var(--foreground),0.25)]"
+                  ? "border-primary/35 bg-primary/10 text-primary shadow-[0_6px_20px_-12px_hsl(var(--primary)/0.5)]"
                   : "border-border/60 text-muted-foreground hover:bg-muted/60 hover:text-foreground",
             )}
           >
@@ -852,11 +815,11 @@ export function CardNav({
                   </span>
                 </button>
                 <div className="flex shrink-0 items-center gap-1.5">
-                  {renderOffOnlyToggle(
+                  {renderAggregateToggle(
                     "plugin",
                     installedPlugins.length > 0,
                     pluginEnabledCount,
-                    disableAllPlugins,
+                    batchTogglePlugins,
                   )}
                 </div>
               </div>

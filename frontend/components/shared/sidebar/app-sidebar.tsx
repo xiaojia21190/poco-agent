@@ -20,6 +20,7 @@ interface AppSidebarProps {
   onRenameProject?: (projectId: string, newName: string) => void;
   onDeleteProject?: (projectId: string) => Promise<void> | void;
   onOpenSettings?: (tab?: SettingsTabId) => void;
+  onStartOnboarding?: () => void;
 }
 
 // 默认空函数
@@ -40,6 +41,7 @@ export function AppSidebar({
   onRenameProject,
   onDeleteProject,
   onOpenSettings,
+  onStartOnboarding,
 }: AppSidebarProps) {
   const router = useRouter();
   const params = useParams();
@@ -84,6 +86,7 @@ export function AppSidebar({
         onRenameProject={onRenameProject}
         onDeleteProject={onDeleteProject}
         onOpenSettings={onOpenSettings}
+        onStartOnboarding={onStartOnboarding}
         onOpenCreateProjectDialog={() => setIsCreateProjectDialogOpen(true)}
       />
 

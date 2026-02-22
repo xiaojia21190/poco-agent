@@ -30,7 +30,8 @@
     "holdToSelect": "Gedrückt halten zum Auswählen",
     "holdToExitSelect": "Gedrückt halten zum Beenden der Auswahl",
     "moveToHere": "Hierher verschieben",
-    "plan": "Pro-Plan"
+    "plan": "Pro-Plan",
+    "onboarding": "Guided tutorial"
   },
   "header": {
     "workspace": "Poco 1.0",
@@ -1402,5 +1403,56 @@
   },
   "filesidebar": {
     "title": "Dateiliste"
+  },
+  "onboarding": {
+    "close": "Close tutorial",
+    "skip": "Skip",
+    "back": "Back",
+    "next": "Next",
+    "done": "Finish",
+    "progress": "Step {{current}} / {{total}}",
+    "targetUnavailable": "This area is collapsed or unavailable right now. Continue to the next step.",
+    "steps": {
+      "welcome": {
+        "title": "Welcome to Poco",
+        "description": "This quick tutorial highlights the core areas you will use most often. You can reopen it anytime from the sidebar quick menu."
+      },
+      "workspace": {
+        "title": "Main workspace",
+        "description": "Your main content appears here, including task creation, chat execution, and capability management pages."
+      },
+      "newTask": {
+        "title": "Create a new task",
+        "description": "Use this button to quickly start a fresh task and jump into execution."
+      },
+      "projects": {
+        "title": "Projects section",
+        "description": "Create, rename, and manage projects here to organize work by project."
+      },
+      "capabilities": {
+        "title": "Capabilities entry",
+        "description": "Start from the sidebar entry, then open the Skills page for detailed management."
+      },
+      "modeToggle": {
+        "title": "Pick a run mode",
+        "description": "Switch between Task, Step-by-step, and Scheduled modes before sending your prompt."
+      },
+      "composer": {
+        "title": "Task composer",
+        "description": "Write instructions, attach files, set repository options, and launch execution from here."
+      },
+      "quickMenu": {
+        "title": "Quick settings menu",
+        "description": "Use this menu for language/theme/backend preferences, and restart this tutorial anytime."
+      },
+      "taskList": {
+        "title": "Task list",
+        "description": "This list lets you revisit all unassigned tasks and quickly reopen any recent execution session."
+      },
+      "skillsDetail": {
+        "title": "Skills page",
+        "description": "This is the Skills view inside Capabilities, where you browse and manage skills."
+      }
+    }
   }
 }

@@ -3,6 +3,7 @@
 import * as React from "react";
 import {
   Bot,
+  Sparkles,
   Trash2,
   X,
   Settings2,
@@ -25,6 +26,8 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -134,9 +137,13 @@ function MobileFooter({ onOpenSettings }: MobileFooterProps) {
 
 interface DesktopFooterProps {
   onOpenSettings: () => void;
+  onStartOnboarding?: () => void;
 }
 
-function DesktopFooter({ onOpenSettings }: DesktopFooterProps) {
+function DesktopFooter({
+  onOpenSettings,
+  onStartOnboarding,
+}: DesktopFooterProps) {
   const { t } = useT("translation");
   const { mode, setMode } = useThemeMode();
   const { currentLanguage, changeLanguage } = useSettingsLanguage();
@@ -176,11 +183,18 @@ function DesktopFooter({ onOpenSettings }: DesktopFooterProps) {
             size="icon"
             className="size-8 text-muted-foreground hover:bg-sidebar-accent"
             title={t("settings.dialogTitle")}
+            data-onboarding="sidebar-quick-menu"
           >
             <Settings2 className="size-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" side="top" className="w-48">
+          <DropdownMenuItem onClick={() => onStartOnboarding?.()}>
+            <Sparkles className="size-4" />
+            <span>{t("sidebar.onboarding")}</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+
           {/* Backend */}
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
@@ -272,6 +286,7 @@ interface SidebarFooterSectionProps {
   onCancelSelection: () => void;
   onDeleteSelected: () => void;
   onOpenSettings: (tab?: SettingsTabId) => void;
+  onStartOnboarding?: () => void;
 }
 
 export function SidebarFooterSection({
@@ -280,6 +295,7 @@ export function SidebarFooterSection({
   onCancelSelection,
   onDeleteSelected,
   onOpenSettings,
+  onStartOnboarding,
 }: SidebarFooterSectionProps) {
   const { isMobile, setOpenMobile } = useSidebar();
 
@@ -299,7 +315,10 @@ export function SidebarFooterSection({
       ) : isMobile ? (
         <MobileFooter onOpenSettings={handleOpenSettings} />
       ) : (
-        <DesktopFooter onOpenSettings={() => onOpenSettings()} />
+        <DesktopFooter
+          onOpenSettings={() => onOpenSettings()}
+          onStartOnboarding={onStartOnboarding}
+        />
       )}
     </SidebarFooter>
   );

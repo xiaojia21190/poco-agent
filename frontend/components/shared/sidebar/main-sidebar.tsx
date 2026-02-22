@@ -37,6 +37,7 @@ interface MainSidebarProps {
   onRenameProject?: (projectId: string, newName: string) => void;
   onDeleteProject?: (projectId: string) => Promise<void> | void;
   onOpenSettings?: (tab?: SettingsTabId) => void;
+  onStartOnboarding?: () => void;
   onOpenCreateProjectDialog?: () => void;
 }
 
@@ -66,6 +67,7 @@ export function MainSidebar({
   onRenameProject,
   onDeleteProject,
   onOpenSettings,
+  onStartOnboarding,
   onOpenCreateProjectDialog,
 }: MainSidebarProps) {
   // ---- Selection state ----
@@ -155,6 +157,7 @@ export function MainSidebar({
           onCancelSelection={selection.cancelSelectionMode}
           onDeleteSelected={selection.deleteSelectedItems}
           onOpenSettings={onOpenSettings ?? (() => {})}
+          onStartOnboarding={onStartOnboarding}
         />
 
         <SidebarRail />

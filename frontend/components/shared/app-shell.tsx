@@ -16,6 +16,8 @@ import { useProjectDeletion } from "@/features/projects/hooks/use-project-deleti
 
 import { TaskHistoryProvider } from "@/features/projects/contexts/task-history-context";
 import { AppShellProvider } from "@/components/shared/app-shell-context";
+import { OnboardingTour } from "@/features/onboarding/components/onboarding-tour";
+import { useOnboardingTour } from "@/features/onboarding/hooks/use-onboarding-tour";
 
 export function AppShell({
   lng,
@@ -46,6 +48,7 @@ export function AppShell({
     moveTask,
     removeProject,
   });
+  const onboarding = useOnboardingTour();
 
   const openSettings = React.useCallback((tab?: SettingsTabId) => {
     if (tab) {
@@ -137,7 +140,10 @@ export function AppShell({
     <TaskHistoryProvider value={{ refreshTasks, touchTask }}>
       <AppShellProvider value={contextValue}>
         <SidebarProvider defaultOpen={true}>
-          <div className="flex h-dvh w-full overflow-hidden bg-background">
+          <div
+            className="flex h-dvh w-full overflow-hidden bg-background"
+            data-onboarding="workspace-main"
+          >
             <AppSidebar
               projects={projects}
               taskHistory={taskHistory}
@@ -148,6 +154,7 @@ export function AppShell({
               onRenameProject={handleRenameProject}
               onDeleteProject={handleDeleteProject}
               onOpenSettings={openSettings}
+              onStartOnboarding={onboarding.startTour}
             />
 
             <SidebarInset className="flex flex-col bg-muted/30 min-h-0">
@@ -158,6 +165,13 @@ export function AppShell({
               open={isSettingsOpen}
               onOpenChange={handleSettingsOpenChange}
               tabRequest={settingsTabRequest ?? undefined}
+            />
+
+            <OnboardingTour
+              open={onboarding.isOpen}
+              runId={onboarding.runId}
+              lng={lng}
+              onClose={onboarding.closeTour}
             />
           </div>
         </SidebarProvider>

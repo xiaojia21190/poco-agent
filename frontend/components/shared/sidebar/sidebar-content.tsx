@@ -155,6 +155,7 @@ function DroppableAllTasksGroup({
     <Collapsible defaultOpen className="group/collapsible-tasks flex flex-col">
       <SidebarGroup
         ref={setNodeRef}
+        data-onboarding="sidebar-task-list"
         className={cn(
           "p-0 flex flex-col transition-colors rounded-lg overflow-hidden",
           isOver && "bg-primary/10",
@@ -349,7 +350,10 @@ export function SidebarContentSection({
           defaultOpen
           className="group/collapsible-projects flex flex-col"
         >
-          <SidebarGroup className="p-0 flex flex-col group-data-[collapsible=icon]:hidden">
+          <SidebarGroup
+            className="p-0 flex flex-col group-data-[collapsible=icon]:hidden"
+            data-onboarding="sidebar-projects"
+          >
             <div className="group/projects-header relative flex items-center justify-between p-2 shrink-0">
               <SidebarGroupLabel asChild>
                 <CollapsibleTrigger className="flex flex-1 items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer">
