@@ -13,8 +13,6 @@ import { mcpService } from "@/features/capabilities/mcp/services/mcp-service";
 import { useT } from "@/lib/i18n/client";
 import { CapabilityContentShell } from "@/features/capabilities/components/capability-content-shell";
 import { HeaderSearchInput } from "@/components/shared/header-search-input";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 const PAGE_SIZE = 10;
 
@@ -74,23 +72,12 @@ export function McpPageClient() {
   }, [items, selectedServer]);
 
   const toolbarSlot = (
-    <>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="gap-2"
-        onClick={() => setIsCreating(true)}
-      >
-        <Plus className="size-4" />
-        {t("library.mcpLibrary.header.add")}
-      </Button>
-      <HeaderSearchInput
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder={t("library.mcpLibrary.searchPlaceholder")}
-        className="w-full md:w-64"
-      />
-    </>
+    <HeaderSearchInput
+      value={searchQuery}
+      onChange={setSearchQuery}
+      placeholder={t("library.mcpLibrary.searchPlaceholder")}
+      className="w-full md:w-64"
+    />
   );
 
   return (
@@ -115,6 +102,8 @@ export function McpPageClient() {
                 onDeleteServer={deleteServer}
                 onEditServer={(server) => setSelectedServer(server)}
                 onBatchToggle={handleBatchToggle}
+                createCardLabel={t("library.mcpLibrary.addCard")}
+                onCreate={() => setIsCreating(true)}
                 toolbarSlot={toolbarSlot}
               />
             </PaginatedGrid>

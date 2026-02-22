@@ -12,8 +12,6 @@ import { useSlashCommandsStore } from "@/features/capabilities/slash-commands/ho
 import type { SlashCommand } from "@/features/capabilities/slash-commands/types";
 import { CapabilityContentShell } from "@/features/capabilities/components/capability-content-shell";
 import { HeaderSearchInput } from "@/components/shared/header-search-input";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { useT } from "@/lib/i18n/client";
 
 export function SlashCommandsPageClient() {
@@ -36,30 +34,12 @@ export function SlashCommandsPageClient() {
   });
 
   const toolbarSlot = (
-    <>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="gap-2"
-        onClick={() => {
-          setDialogMode("create");
-          setEditing(null);
-          setDialogOpen(true);
-        }}
-        aria-label={t("library.slashCommands.header.add")}
-      >
-        <Plus className="size-4" />
-        <span className="hidden sm:inline">
-          {t("library.slashCommands.header.add")}
-        </span>
-      </Button>
-      <HeaderSearchInput
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder={t("library.slashCommands.searchPlaceholder")}
-        className="w-full md:w-64"
-      />
-    </>
+    <HeaderSearchInput
+      value={searchQuery}
+      onChange={setSearchQuery}
+      placeholder={t("library.slashCommands.searchPlaceholder")}
+      className="w-full md:w-64"
+    />
   );
 
   return (
@@ -78,6 +58,12 @@ export function SlashCommandsPageClient() {
                 setDialogOpen(true);
               }}
               onDelete={(cmd) => store.deleteCommand(cmd.id)}
+              createCardLabel={t("library.slashCommands.addCard")}
+              onCreate={() => {
+                setDialogMode("create");
+                setEditing(null);
+                setDialogOpen(true);
+              }}
               toolbarSlot={toolbarSlot}
             />
           </CapabilityContentShell>

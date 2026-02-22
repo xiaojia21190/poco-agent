@@ -13,8 +13,6 @@ import { useSubAgentsStore } from "@/features/capabilities/sub-agents/hooks/use-
 import type { SubAgent } from "@/features/capabilities/sub-agents/types";
 import { CapabilityContentShell } from "@/features/capabilities/components/capability-content-shell";
 import { HeaderSearchInput } from "@/components/shared/header-search-input";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { useT } from "@/lib/i18n/client";
 
 export function SubAgentsPageClient() {
@@ -37,30 +35,12 @@ export function SubAgentsPageClient() {
   });
 
   const toolbarSlot = (
-    <>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="gap-2"
-        onClick={() => {
-          setDialogMode("create");
-          setEditing(null);
-          setDialogOpen(true);
-        }}
-        aria-label={t("library.subAgents.header.add")}
-      >
-        <Plus className="size-4" />
-        <span className="hidden sm:inline">
-          {t("library.subAgents.header.add")}
-        </span>
-      </Button>
-      <HeaderSearchInput
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder={t("library.subAgents.searchPlaceholder")}
-        className="w-full md:w-64"
-      />
-    </>
+    <HeaderSearchInput
+      value={searchQuery}
+      onChange={setSearchQuery}
+      placeholder={t("library.subAgents.searchPlaceholder")}
+      className="w-full md:w-64"
+    />
   );
 
   return (
@@ -79,6 +59,12 @@ export function SubAgentsPageClient() {
                 setDialogOpen(true);
               }}
               onDelete={(agent) => store.deleteSubAgent(agent.id)}
+              createCardLabel={t("library.subAgents.addCard")}
+              onCreate={() => {
+                setDialogMode("create");
+                setEditing(null);
+                setDialogOpen(true);
+              }}
               toolbarSlot={toolbarSlot}
             />
           </CapabilityContentShell>

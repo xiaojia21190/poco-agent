@@ -14,6 +14,7 @@ import type {
 } from "@/features/capabilities/plugins/types";
 import { formatSourceLabel } from "@/features/capabilities/utils/source";
 import { useT } from "@/lib/i18n/client";
+import { CapabilityCreateCard } from "@/features/capabilities/components/capability-create-card";
 
 interface PluginsGridProps {
   plugins: Plugin[];
@@ -24,6 +25,8 @@ interface PluginsGridProps {
   onDeletePlugin?: (pluginId: number) => void;
   onToggleEnabled?: (installId: number, enabled: boolean) => void;
   onBatchToggle?: (enabled: boolean) => void;
+  createCardLabel?: string;
+  onCreate?: () => void;
   toolbarSlot?: React.ReactNode;
 }
 
@@ -36,9 +39,13 @@ export function PluginsGrid({
   onDeletePlugin,
   onToggleEnabled,
   onBatchToggle,
+  createCardLabel,
+  onCreate,
   toolbarSlot,
 }: PluginsGridProps) {
   const { t } = useT("translation");
+  const actionIconClass =
+    "rounded-lg transition-opacity md:opacity-0 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto";
 
   const installByPluginId = React.useMemo(() => {
     const map = new Map<number, UserPluginInstall>();
@@ -73,6 +80,14 @@ export function PluginsGrid({
       </div>
 
       <div className="space-y-3">
+        {createCardLabel ? (
+          <CapabilityCreateCard
+            label={createCardLabel}
+            onClick={onCreate}
+            className="min-h-[72px]"
+          />
+        ) : null}
+
         {isLoading && plugins.length === 0 ? (
           <SkeletonShimmer count={5} itemClassName="min-h-[72px]" gap="md" />
         ) : !isLoading && plugins.length === 0 ? (
@@ -96,7 +111,7 @@ export function PluginsGrid({
 
               return (
                 <div
-                  className={`flex items-center gap-4 rounded-xl border px-4 py-3 min-h-[72px] ${
+                  className={`group flex items-center gap-4 rounded-xl border px-4 py-3 min-h-[72px] ${
                     isInstalled
                       ? "border-border/70 bg-card"
                       : "border-border/40 bg-muted/20"
@@ -137,6 +152,18 @@ export function PluginsGrid({
 
                   {isInstalled && install ? (
                     <div className="flex items-center gap-2">
+                      {plugin.scope === "user" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={isRowLoading}
+                          onClick={() => onDeletePlugin?.(plugin.id)}
+                          className={actionIconClass}
+                          title={t("common.delete")}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      )}
                       <Switch
                         checked={install.enabled}
                         disabled={isRowLoading}
@@ -144,18 +171,6 @@ export function PluginsGrid({
                           onToggleEnabled?.(install.id, enabled)
                         }
                       />
-                      {plugin.scope === "user" && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={isRowLoading}
-                          onClick={() => onDeletePlugin?.(plugin.id)}
-                          className="rounded-lg"
-                          title={t("common.delete")}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      )}
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
@@ -172,7 +187,7 @@ export function PluginsGrid({
                           size="icon"
                           disabled={isRowLoading}
                           onClick={() => onDeletePlugin?.(plugin.id)}
-                          className="rounded-lg"
+                          className={actionIconClass}
                           title={t("common.delete")}
                         >
                           <Trash2 className="size-4" />

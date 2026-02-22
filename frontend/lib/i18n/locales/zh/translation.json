@@ -589,6 +589,7 @@
         "add": "添加命令"
       },
       "searchPlaceholder": "搜索命令...",
+      "addCard": "新增一个 Slash Command",
       "summary": "可用命令",
       "enabled": "已启用",
       "mode": {
@@ -643,6 +644,7 @@
         "add": "添加子代理"
       },
       "searchPlaceholder": "搜索子代理...",
+      "addCard": "新增一个子代理",
       "summary": "子代理",
       "enabled": "已启用",
       "empty": "暂无子代理",
@@ -827,6 +829,7 @@
         "subtitle": "探索和管理 AI 能力"
       },
       "searchPlaceholder": "搜索技能...",
+      "addCard": "新增一个 Skill",
       "items": {
         "webSearch": {
           "name": "Web Search web搜索",
@@ -851,7 +854,8 @@
       }
     },
     "pluginsPage": {
-      "searchPlaceholder": "搜索预设..."
+      "searchPlaceholder": "搜索预设...",
+      "addCard": "新增一个 Plugin"
     },
     "skillsManager": {
       "stats": {
@@ -1061,6 +1065,7 @@
         "add": "添加MCP"
       },
       "searchPlaceholder": "搜索服务器...",
+      "addCard": "新增一个 MCP",
       "status": {
         "enabled": "已启用",
         "disabled": "未启用"

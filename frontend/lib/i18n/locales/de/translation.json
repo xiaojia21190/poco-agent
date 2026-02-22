@@ -584,6 +584,7 @@
         "add": "Befehl hinzufügen"
       },
       "searchPlaceholder": "Befehle durchsuchen...",
+      "addCard": "Slash-Befehl hinzufügen",
       "summary": "Befehle",
       "enabled": "Aktiviert",
       "mode": {
@@ -638,6 +639,7 @@
         "add": "Sub-Agenten hinzufügen"
       },
       "searchPlaceholder": "Sub-Agenten durchsuchen...",
+      "addCard": "Sub-Agent hinzufügen",
       "summary": "Sub-Agenten",
       "enabled": "Aktiviert",
       "empty": "Noch keine Sub-Agenten",
@@ -822,6 +824,7 @@
         "subtitle": "KI-Funktionen erkunden und verwalten"
       },
       "searchPlaceholder": "Skills durchsuchen...",
+      "addCard": "Skill hinzufügen",
       "items": {
         "webSearch": {
           "name": "Websuche",
@@ -947,6 +950,10 @@
         "jobId": "Job-ID"
       }
     },
+    "pluginsPage": {
+      "searchPlaceholder": "Vorlagen durchsuchen...",
+      "addCard": "Vorlage hinzufügen"
+    },
     "mcpLibrary": {
       "header": {
         "title": "MCP-Server",
@@ -955,6 +962,7 @@
         "add": "MCP hinzufügen"
       },
       "searchPlaceholder": "Server durchsuchen...",
+      "addCard": "MCP hinzufügen",
       "status": {
         "enabled": "Aktiviert",
         "disabled": "Deaktiviert"

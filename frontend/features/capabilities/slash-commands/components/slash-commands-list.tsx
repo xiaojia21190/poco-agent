@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SkeletonShimmer } from "@/components/ui/skeleton-shimmer";
 import { StaggeredList } from "@/components/ui/staggered-entrance";
+import { CapabilityCreateCard } from "@/features/capabilities/components/capability-create-card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,8 @@ interface SlashCommandsListProps {
   onToggleEnabled?: (commandId: number, enabled: boolean) => void;
   onEdit?: (command: SlashCommand) => void;
   onDelete?: (command: SlashCommand) => void;
+  createCardLabel?: string;
+  onCreate?: () => void;
   toolbarSlot?: React.ReactNode;
 }
 
@@ -39,9 +42,13 @@ export function SlashCommandsList({
   onToggleEnabled,
   onEdit,
   onDelete,
+  createCardLabel,
+  onCreate,
   toolbarSlot,
 }: SlashCommandsListProps) {
   const { t } = useT("translation");
+  const hoverActionsClass =
+    "flex items-center gap-2 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto";
   const enabledCount = commands.filter((c) => c.enabled).length;
 
   return (
@@ -58,6 +65,10 @@ export function SlashCommandsList({
       </div>
 
       <div className="space-y-3">
+        {createCardLabel ? (
+          <CapabilityCreateCard label={createCardLabel} onClick={onCreate} />
+        ) : null}
+
         {isLoading && commands.length === 0 ? (
           <SkeletonShimmer count={5} itemClassName="min-h-[64px]" gap="md" />
         ) : commands.length === 0 ? (
@@ -79,7 +90,7 @@ export function SlashCommandsList({
                   : t("library.slashCommands.mode.raw");
 
               return (
-                <div className="flex items-center gap-4 rounded-xl border border-border/70 bg-card px-4 py-3 min-h-[64px]">
+                <div className="group flex items-center gap-4 rounded-xl border border-border/70 bg-card px-4 py-3 min-h-[64px]">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium font-mono">/{cmd.name}</span>
@@ -103,49 +114,50 @@ export function SlashCommandsList({
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8"
-                      onClick={() => onEdit?.(cmd)}
-                      disabled={busy}
-                      title={t("common.edit")}
-                    >
-                      <Settings className="size-4" />
-                    </Button>
+                    <div className={hoverActionsClass}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8"
+                        onClick={() => onEdit?.(cmd)}
+                        disabled={busy}
+                        title={t("common.edit")}
+                      >
+                        <Settings className="size-4" />
+                      </Button>
 
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8"
-                          disabled={busy}
-                          title={t("common.delete")}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            {t("library.slashCommands.delete.title")}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t("library.slashCommands.delete.description")}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>
-                            {t("common.cancel")}
-                          </AlertDialogCancel>
-                          <AlertDialogAction onClick={() => onDelete?.(cmd)}>
-                            {t("common.delete")}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8"
+                            disabled={busy}
+                            title={t("common.delete")}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {t("library.slashCommands.delete.title")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t("library.slashCommands.delete.description")}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>
+                              {t("common.cancel")}
+                            </AlertDialogCancel>
+                            <AlertDialogAction onClick={() => onDelete?.(cmd)}>
+                              {t("common.delete")}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                     <Switch
                       checked={cmd.enabled}
                       onCheckedChange={(checked) =>

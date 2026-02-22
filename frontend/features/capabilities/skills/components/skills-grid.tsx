@@ -15,6 +15,7 @@ import type {
 } from "@/features/capabilities/skills/types";
 import { formatSourceLabel } from "@/features/capabilities/utils/source";
 import { useT } from "@/lib/i18n/client";
+import { CapabilityCreateCard } from "@/features/capabilities/components/capability-create-card";
 
 const SKILL_LIMIT = 5;
 
@@ -27,6 +28,8 @@ interface SkillsGridProps {
   onDeleteSkill?: (skillId: number) => void;
   onToggleEnabled?: (installId: number, enabled: boolean) => void;
   onBatchToggle?: (enabled: boolean) => void;
+  createCardLabel?: string;
+  onCreate?: () => void;
   toolbarSlot?: React.ReactNode;
 }
 
@@ -39,9 +42,13 @@ export function SkillsGrid({
   onDeleteSkill,
   onToggleEnabled,
   onBatchToggle,
+  createCardLabel,
+  onCreate,
   toolbarSlot,
 }: SkillsGridProps) {
   const { t } = useT("translation");
+  const actionIconClass =
+    "rounded-lg transition-opacity md:opacity-0 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto";
 
   const installBySkillId = React.useMemo(() => {
     const map = new Map<number, UserSkillInstall>();
@@ -87,6 +94,10 @@ export function SkillsGrid({
       </div>
 
       <div className="space-y-3">
+        {createCardLabel ? (
+          <CapabilityCreateCard label={createCardLabel} onClick={onCreate} />
+        ) : null}
+
         {isLoading && skills.length === 0 ? (
           <SkeletonShimmer count={5} itemClassName="min-h-[64px]" gap="md" />
         ) : !isLoading && skills.length === 0 ? (
@@ -110,7 +121,7 @@ export function SkillsGrid({
 
               return (
                 <div
-                  className={`flex items-center gap-4 rounded-xl border px-4 py-3 min-h-[64px] ${
+                  className={`group flex items-center gap-4 rounded-xl border px-4 py-3 min-h-[64px] ${
                     isInstalled
                       ? "border-border/70 bg-card"
                       : "border-border/40 bg-muted/20"
@@ -136,6 +147,18 @@ export function SkillsGrid({
 
                   {isInstalled && install ? (
                     <div className="flex items-center gap-2">
+                      {skill.scope === "user" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={isRowLoading}
+                          onClick={() => onDeleteSkill?.(skill.id)}
+                          className={actionIconClass}
+                          title={t("common.delete")}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      )}
                       <Switch
                         checked={install.enabled}
                         disabled={isRowLoading}
@@ -143,18 +166,6 @@ export function SkillsGrid({
                           onToggleEnabled?.(install.id, enabled)
                         }
                       />
-                      {skill.scope === "user" && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={isRowLoading}
-                          onClick={() => onDeleteSkill?.(skill.id)}
-                          className="rounded-lg"
-                          title={t("common.delete")}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      )}
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
@@ -171,7 +182,7 @@ export function SkillsGrid({
                           size="icon"
                           disabled={isRowLoading}
                           onClick={() => onDeleteSkill?.(skill.id)}
-                          className="rounded-lg"
+                          className={actionIconClass}
                           title={t("common.delete")}
                         >
                           <Trash2 className="size-4" />

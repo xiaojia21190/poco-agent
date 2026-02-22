@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SkeletonShimmer } from "@/components/ui/skeleton-shimmer";
 import { StaggeredList } from "@/components/ui/staggered-entrance";
+import { CapabilityCreateCard } from "@/features/capabilities/components/capability-create-card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,8 @@ interface SubAgentsListProps {
   onToggleEnabled?: (subAgentId: number, enabled: boolean) => void;
   onEdit?: (subAgent: SubAgent) => void;
   onDelete?: (subAgent: SubAgent) => void;
+  createCardLabel?: string;
+  onCreate?: () => void;
   toolbarSlot?: React.ReactNode;
 }
 
@@ -39,9 +42,13 @@ export function SubAgentsList({
   onToggleEnabled,
   onEdit,
   onDelete,
+  createCardLabel,
+  onCreate,
   toolbarSlot,
 }: SubAgentsListProps) {
   const { t } = useT("translation");
+  const hoverActionsClass =
+    "flex items-center gap-2 transition-opacity md:opacity-0 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto";
   const enabledCount = subAgents.filter((a) => a.enabled).length;
   return (
     <div className="space-y-6">
@@ -57,6 +64,10 @@ export function SubAgentsList({
       </div>
 
       <div className="space-y-3">
+        {createCardLabel ? (
+          <CapabilityCreateCard label={createCardLabel} onClick={onCreate} />
+        ) : null}
+
         {isLoading && subAgents.length === 0 ? (
           <SkeletonShimmer count={5} itemClassName="min-h-[64px]" gap="md" />
         ) : subAgents.length === 0 ? (
@@ -82,7 +93,7 @@ export function SubAgentsList({
                   : "";
 
               return (
-                <div className="flex items-center gap-4 rounded-xl border border-border/70 bg-card px-4 py-3 min-h-[64px]">
+                <div className="group flex items-center gap-4 rounded-xl border border-border/70 bg-card px-4 py-3 min-h-[64px]">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium font-mono">
@@ -108,49 +119,52 @@ export function SubAgentsList({
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8"
-                      onClick={() => onEdit?.(agent)}
-                      disabled={busy}
-                      title={t("common.edit")}
-                    >
-                      <Settings className="size-4" />
-                    </Button>
+                    <div className={hoverActionsClass}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8"
+                        onClick={() => onEdit?.(agent)}
+                        disabled={busy}
+                        title={t("common.edit")}
+                      >
+                        <Settings className="size-4" />
+                      </Button>
 
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8"
-                          disabled={busy}
-                          title={t("common.delete")}
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            {t("library.subAgents.delete.title")}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            {t("library.subAgents.delete.description")}
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>
-                            {t("common.cancel")}
-                          </AlertDialogCancel>
-                          <AlertDialogAction onClick={() => onDelete?.(agent)}>
-                            {t("common.delete")}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8"
+                            disabled={busy}
+                            title={t("common.delete")}
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {t("library.subAgents.delete.title")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t("library.subAgents.delete.description")}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>
+                              {t("common.cancel")}
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => onDelete?.(agent)}
+                            >
+                              {t("common.delete")}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                     <Switch
                       checked={agent.enabled}
                       onCheckedChange={(checked) =>

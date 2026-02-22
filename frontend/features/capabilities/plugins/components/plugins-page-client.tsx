@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { toast } from "sonner";
-import { Search } from "lucide-react";
 
 import { PluginsGrid } from "@/features/capabilities/plugins/components/plugins-grid";
 import { PluginImportDialog } from "@/features/capabilities/plugins/components/plugin-import-dialog";
@@ -14,7 +13,6 @@ import { pluginsService } from "@/features/capabilities/plugins/services/plugins
 import { useT } from "@/lib/i18n/client";
 import { CapabilityContentShell } from "@/features/capabilities/components/capability-content-shell";
 import { HeaderSearchInput } from "@/components/shared/header-search-input";
-import { Button } from "@/components/ui/button";
 
 const PAGE_SIZE = 10;
 
@@ -74,23 +72,12 @@ export function PluginsPageClient() {
   );
 
   const toolbarSlot = (
-    <>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="gap-2 md:w-auto"
-        onClick={() => setImportOpen(true)}
-      >
-        <Search className="size-4" />
-        {t("library.pluginsImport.title")}
-      </Button>
-      <HeaderSearchInput
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder={t("library.pluginsPage.searchPlaceholder")}
-        className="w-full md:w-64"
-      />
-    </>
+    <HeaderSearchInput
+      value={searchQuery}
+      onChange={setSearchQuery}
+      placeholder={t("library.pluginsPage.searchPlaceholder")}
+      className="w-full md:w-64"
+    />
   );
 
   return (
@@ -115,6 +102,8 @@ export function PluginsPageClient() {
                 onDeletePlugin={deletePlugin}
                 onToggleEnabled={setEnabled}
                 onBatchToggle={handleBatchToggle}
+                createCardLabel={t("library.pluginsPage.addCard")}
+                onCreate={() => setImportOpen(true)}
                 toolbarSlot={toolbarSlot}
               />
             </PaginatedGrid>

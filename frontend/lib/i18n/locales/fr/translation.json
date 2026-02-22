@@ -580,6 +580,7 @@
         "add": "Ajouter une commande"
       },
       "searchPlaceholder": "Rechercher des commandes...",
+      "addCard": "Ajouter une commande slash",
       "summary": "Commandes",
       "enabled": "Activé",
       "mode": {
@@ -634,6 +635,7 @@
         "add": "Ajouter un sub-agent"
       },
       "searchPlaceholder": "Rechercher des sub-agents...",
+      "addCard": "Ajouter un sub-agent",
       "summary": "Sub-agents",
       "enabled": "Activé",
       "empty": "Aucun sub-agent pour le moment",
@@ -818,6 +820,7 @@
         "subtitle": "Explorer et gérer les capacités IA"
       },
       "searchPlaceholder": "Rechercher des compétences...",
+      "addCard": "Ajouter une compétence",
       "items": {
         "webSearch": {
           "name": "Recherche Web",
@@ -943,6 +946,10 @@
         "jobId": "ID de tâche"
       }
     },
+    "pluginsPage": {
+      "searchPlaceholder": "Rechercher des préréglages...",
+      "addCard": "Ajouter un préréglage"
+    },
     "mcpLibrary": {
       "header": {
         "title": "Serveurs MCP",
@@ -951,6 +958,7 @@
         "add": "Ajouter MCP"
       },
       "searchPlaceholder": "Rechercher des serveurs...",
+      "addCard": "Ajouter un MCP",
       "status": {
         "enabled": "Activé",
         "disabled": "Désactivé"

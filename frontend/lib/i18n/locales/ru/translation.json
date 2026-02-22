@@ -580,6 +580,7 @@
         "add": "Добавить команду"
       },
       "searchPlaceholder": "Поиск команд...",
+      "addCard": "Добавить slash-команду",
       "summary": "Команды",
       "enabled": "Включено",
       "mode": {
@@ -634,6 +635,7 @@
         "add": "Добавить субагента"
       },
       "searchPlaceholder": "Поиск субагентов...",
+      "addCard": "Добавить субагента",
       "summary": "Субагенты",
       "enabled": "Включено",
       "empty": "Пока нет субагентов",
@@ -818,6 +820,7 @@
         "subtitle": "Исследуйте и управляйте возможностями ИИ"
       },
       "searchPlaceholder": "Поиск навыков...",
+      "addCard": "Добавить навык",
       "items": {
         "webSearch": {
           "name": "Веб-поиск",
@@ -943,6 +946,10 @@
         "jobId": "ID задания"
       }
     },
+    "pluginsPage": {
+      "searchPlaceholder": "Поиск пресетов...",
+      "addCard": "Добавить пресет"
+    },
     "mcpLibrary": {
       "header": {
         "title": "MCP серверы",
@@ -951,6 +958,7 @@
         "add": "Добавить MCP"
       },
       "searchPlaceholder": "Поиск серверов...",
+      "addCard": "Добавить MCP",
       "status": {
         "enabled": "Включено",
         "disabled": "Отключено"

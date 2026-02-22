@@ -589,6 +589,7 @@
         "add": "Add Command"
       },
       "searchPlaceholder": "Search commands...",
+      "addCard": "Add a slash command",
       "summary": "Commands",
       "enabled": "Enabled",
       "mode": {
@@ -643,6 +644,7 @@
         "add": "Add Sub Agent"
       },
       "searchPlaceholder": "Search sub agents...",
+      "addCard": "Add a sub agent",
       "summary": "Sub Agents",
       "enabled": "Enabled",
       "empty": "No sub agents yet",
@@ -827,6 +829,7 @@
         "subtitle": "Explore and manage AI capabilities"
       },
       "searchPlaceholder": "Search skills...",
+      "addCard": "Add a skill",
       "items": {
         "webSearch": {
           "name": "Web Search",
@@ -851,7 +854,8 @@
       }
     },
     "pluginsPage": {
-      "searchPlaceholder": "Search presets..."
+      "searchPlaceholder": "Search presets...",
+      "addCard": "Add a preset"
     },
     "skillsManager": {
       "stats": {
@@ -1061,6 +1065,7 @@
         "add": "Add MCP"
       },
       "searchPlaceholder": "Search servers...",
+      "addCard": "Add an MCP",
       "status": {
         "enabled": "Enabled",
         "disabled": "Disabled"

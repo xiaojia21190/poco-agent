@@ -14,6 +14,7 @@ import type {
   UserMcpInstall,
 } from "@/features/capabilities/mcp/types";
 import { useT } from "@/lib/i18n/client";
+import { CapabilityCreateCard } from "@/features/capabilities/components/capability-create-card";
 
 const MCP_LIMIT = 3;
 
@@ -26,6 +27,8 @@ interface McpGridProps {
   onDeleteServer?: (serverId: number) => void;
   onEditServer?: (server: McpServer) => void;
   onBatchToggle?: (enabled: boolean) => void;
+  createCardLabel?: string;
+  onCreate?: () => void;
   toolbarSlot?: React.ReactNode;
 }
 
@@ -38,9 +41,13 @@ export function McpGrid({
   onDeleteServer,
   onEditServer,
   onBatchToggle,
+  createCardLabel,
+  onCreate,
   toolbarSlot,
 }: McpGridProps) {
   const { t } = useT("translation");
+  const hoverActionsClass =
+    "flex items-center gap-2 transition-opacity md:opacity-0 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto";
   const installByServerId = React.useMemo(() => {
     const map = new Map<number, UserMcpInstall>();
     for (const install of installs) {
@@ -88,6 +95,10 @@ export function McpGrid({
       </div>
 
       <div className="space-y-3">
+        {createCardLabel ? (
+          <CapabilityCreateCard label={createCardLabel} onClick={onCreate} />
+        ) : null}
+
         {isLoading && servers.length === 0 ? (
           <SkeletonShimmer count={5} itemClassName="min-h-[64px]" gap="md" />
         ) : servers.length === 0 ? (
@@ -108,7 +119,7 @@ export function McpGrid({
 
               return (
                 <div
-                  className={`flex items-center gap-4 rounded-xl border px-4 py-3 min-h-[64px] ${
+                  className={`group flex items-center gap-4 rounded-xl border px-4 py-3 min-h-[64px] ${
                     install
                       ? "border-border/70 bg-card"
                       : "border-border/40 bg-muted/20"
@@ -129,32 +140,34 @@ export function McpGrid({
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className={hoverActionsClass}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8"
+                        onClick={() => onEditServer?.(server)}
+                        title={t("mcpGrid.settings")}
+                      >
+                        <Settings className="size-4" />
+                      </Button>
+                      {server.scope === "user" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-8"
+                          onClick={() => onDeleteServer?.(server.id)}
+                          disabled={isRowLoading}
+                          title={t("common.delete")}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      )}
+                    </div>
                     <Switch
                       checked={isEnabled}
                       onCheckedChange={() => onToggleInstall?.(server.id)}
                       disabled={isRowLoading}
                     />
-                    {server.scope === "user" && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8"
-                        onClick={() => onDeleteServer?.(server.id)}
-                        disabled={isRowLoading}
-                        title={t("common.delete")}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8"
-                      onClick={() => onEditServer?.(server)}
-                      title={t("mcpGrid.settings")}
-                    >
-                      <Settings className="size-4" />
-                    </Button>
                   </div>
                 </div>
               );

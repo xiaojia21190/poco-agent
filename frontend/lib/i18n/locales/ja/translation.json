@@ -580,6 +580,7 @@
         "add": "コマンドを追加"
       },
       "searchPlaceholder": "コマンドを検索...",
+      "addCard": "スラッシュコマンドを追加",
       "summary": "コマンド",
       "enabled": "有効",
       "mode": {
@@ -634,6 +635,7 @@
         "add": "サブエージェントを追加"
       },
       "searchPlaceholder": "サブエージェントを検索...",
+      "addCard": "サブエージェントを追加",
       "summary": "サブエージェント",
       "enabled": "有効",
       "empty": "まだサブエージェントはありません",
@@ -818,6 +820,7 @@
         "subtitle": "AI機能を探索・管理"
       },
       "searchPlaceholder": "スキルを検索...",
+      "addCard": "スキルを追加",
       "items": {
         "webSearch": {
           "name": "ウェブ検索",
@@ -943,6 +946,10 @@
         "jobId": "ジョブID"
       }
     },
+    "pluginsPage": {
+      "searchPlaceholder": "プリセットを検索...",
+      "addCard": "プリセットを追加"
+    },
     "mcpLibrary": {
       "header": {
         "title": "MCPサーバー",
@@ -951,6 +958,7 @@
         "add": "MCPを追加"
       },
       "searchPlaceholder": "サーバーを検索...",
+      "addCard": "MCPを追加",
       "status": {
         "enabled": "有効",
         "disabled": "無効"

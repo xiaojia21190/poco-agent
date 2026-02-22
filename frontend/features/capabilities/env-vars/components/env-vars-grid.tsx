@@ -5,8 +5,8 @@ import {
   CheckCircle2,
   CircleOff,
   Loader2,
-  Pencil,
   Plus,
+  Settings,
   Trash2,
   User,
   Wrench,
@@ -66,6 +66,8 @@ export function EnvVarsGrid({
   onAddClick,
 }: EnvVarsGridProps) {
   const { t } = useT("translation");
+  const hoverActionsClass =
+    "flex items-center gap-2 transition-opacity md:opacity-0 md:pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto";
   const vars = propEnvVars?.length ? propEnvVars : EMPTY_ENV_VARS;
 
   const systemVars = React.useMemo(
@@ -225,7 +227,7 @@ export function EnvVarsGrid({
               const overridesSystem = systemKeys.has(envVar.key);
               const isBusy = savingKey === envVar.key;
               return (
-                <div className="flex items-center gap-4 rounded-xl border border-border/70 bg-card px-4 py-3 min-h-[64px]">
+                <div className="group flex items-center gap-4 rounded-xl border border-border/70 bg-card px-4 py-3 min-h-[64px]">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono text-sm">{envVar.key}</span>
@@ -253,20 +255,20 @@ export function EnvVarsGrid({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className={hoverActionsClass}>
                     <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-2"
+                      variant="ghost"
+                      size="icon"
+                      className="size-8"
                       onClick={() => onEdit?.(envVar)}
                       disabled={isBusy}
+                      title={t("common.edit")}
                     >
                       {isBusy ? (
                         <Loader2 className="size-4 animate-spin" />
                       ) : (
-                        <Pencil className="size-4" />
+                        <Settings className="size-4" />
                       )}
-                      {t("library.envVars.actions.edit")}
                     </Button>
                     <Button
                       variant="ghost"
