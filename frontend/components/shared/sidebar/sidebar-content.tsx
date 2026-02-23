@@ -21,6 +21,7 @@ import {
   SidebarMenu,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 import type { ProjectItem, TaskHistoryItem } from "@/features/projects/types";
 import { TaskHistoryList } from "./task-history-list";
@@ -259,12 +260,25 @@ export function SidebarContentSection({
 
   // Track scroll state for border
   const [isContentScrolled, setIsContentScrolled] = React.useState(false);
-  const handleContentScroll = React.useCallback(
-    (event: React.UIEvent<HTMLDivElement>) => {
-      setIsContentScrolled(event.currentTarget.scrollTop > 0);
-    },
-    [],
-  );
+  const scrollAreaRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const viewport = scrollAreaRef.current?.querySelector<HTMLElement>(
+      "[data-slot='scroll-area-viewport']",
+    );
+    if (!viewport) return;
+
+    const handleViewportScroll = () => {
+      setIsContentScrolled(viewport.scrollTop > 0);
+    };
+
+    handleViewportScroll();
+    viewport.addEventListener("scroll", handleViewportScroll, {
+      passive: true,
+    });
+    return () => {
+      viewport.removeEventListener("scroll", handleViewportScroll);
+    };
+  }, []);
 
   // Project expand/collapse state
   const [expandedProjects, setExpandedProjects] = React.useState<Set<string>>(
@@ -338,108 +352,116 @@ export function SidebarContentSection({
 
   return (
     <SidebarContent
-      onScroll={handleContentScroll}
       className={cn(
-        "border-t flex flex-col overflow-y-auto gap-0 transition-colors",
+        "border-t flex flex-col overflow-hidden gap-0 transition-colors",
         isContentScrolled ? "border-border" : "border-transparent",
       )}
     >
-      {/* Projects section */}
-      <div className="flex flex-col">
-        <Collapsible
-          defaultOpen
-          className="group/collapsible-projects flex flex-col"
-        >
-          <SidebarGroup
-            className="p-0 flex flex-col group-data-[collapsible=icon]:hidden"
-            data-onboarding="sidebar-projects"
-          >
-            <div className="group/projects-header relative flex items-center justify-between p-2 shrink-0">
-              <SidebarGroupLabel asChild>
-                <CollapsibleTrigger className="flex flex-1 items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer">
-                  {t("sidebar.projects")}
-                  <ChevronRight className="size-4 transition-transform duration-200 group-data-[state=open]/collapsible-projects:rotate-90" />
-                </CollapsibleTrigger>
-              </SidebarGroupLabel>
-              <div className="flex items-center gap-1">
-                <LongPressActionButton
-                  icon={<CheckCheck className="size-4" />}
-                  label={
-                    isProjectSelectionMode
-                      ? t("sidebar.holdToExitSelect")
-                      : t("sidebar.holdToSelect")
-                  }
-                  disabled={isTaskSelectionMode}
-                  onComplete={
-                    isProjectSelectionMode
-                      ? onCancelSelection
-                      : onEnterProjectSelectionMode
-                  }
-                  className="opacity-0 group-hover/projects-header:opacity-100 transition-opacity"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onOpenCreateProjectDialog?.()}
-                  className="size-6 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent opacity-0 group-hover/projects-header:opacity-100 transition-opacity"
-                  title={t("sidebar.newProject")}
-                >
-                  <Plus className="size-4" />
-                </Button>
-              </div>
-            </div>
-            <CollapsibleContent className="data-[state=closed]:flex-none">
-              <SidebarGroupContent className="mt-1 group-data-[collapsible=icon]:mt-0 p-2 pt-0">
-                <SidebarMenu>
-                  {projects.map((project) => (
-                    <CollapsibleProjectItem
-                      key={project.id}
-                      project={project}
-                      tasks={tasksByProject.get(project.id) || []}
-                      isExpanded={expandedProjects.has(project.id)}
-                      onToggle={() => toggleProjectExpanded(project.id)}
-                      onProjectClick={() => handleProjectClick(project.id)}
-                      onDeleteTask={onDeleteTask}
-                      onRenameTask={onRenameTask}
-                      onMoveTaskToProject={onMoveTaskToProject}
-                      allProjects={projects}
-                      onRenameProject={handleRenameProject}
-                      onDeleteProject={onDeleteProject}
-                      isProjectSelectionMode={isProjectSelectionMode}
-                      isTaskSelectionMode={isTaskSelectionMode}
-                      selectedTaskIds={selectedTaskIds}
-                      selectedProjectIds={selectedProjectIds}
-                      onToggleTaskSelection={onToggleTaskSelection}
-                      onToggleProjectSelection={onToggleProjectSelection}
-                      onTaskNavigate={closeMobileSidebar}
+      <ScrollArea
+        ref={scrollAreaRef}
+        className="min-h-0 flex-1 [&_[data-slot=scroll-area-viewport]]:overflow-x-hidden"
+      >
+        <div className="flex flex-col">
+          {/* Projects section */}
+          <div className="flex flex-col">
+            <Collapsible
+              defaultOpen
+              className="group/collapsible-projects flex flex-col"
+            >
+              <SidebarGroup
+                className="p-0 flex flex-col group-data-[collapsible=icon]:hidden"
+                data-onboarding="sidebar-projects"
+              >
+                <div className="group/projects-header relative flex items-center justify-between p-2 shrink-0">
+                  <SidebarGroupLabel asChild>
+                    <CollapsibleTrigger className="flex flex-1 items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer">
+                      {t("sidebar.projects")}
+                      <ChevronRight className="size-4 transition-transform duration-200 group-data-[state=open]/collapsible-projects:rotate-90" />
+                    </CollapsibleTrigger>
+                  </SidebarGroupLabel>
+                  <div className="flex items-center gap-1">
+                    <LongPressActionButton
+                      icon={<CheckCheck className="size-4" />}
+                      label={
+                        isProjectSelectionMode
+                          ? t("sidebar.holdToExitSelect")
+                          : t("sidebar.holdToSelect")
+                      }
+                      disabled={isTaskSelectionMode}
+                      onComplete={
+                        isProjectSelectionMode
+                          ? onCancelSelection
+                          : onEnterProjectSelectionMode
+                      }
+                      className="opacity-0 group-hover/projects-header:opacity-100 transition-opacity"
                     />
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
-      </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onOpenCreateProjectDialog?.()}
+                      className="size-6 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent opacity-0 group-hover/projects-header:opacity-100 transition-opacity"
+                      title={t("sidebar.newProject")}
+                    >
+                      <Plus className="size-4" />
+                    </Button>
+                  </div>
+                </div>
+                <CollapsibleContent className="data-[state=closed]:flex-none">
+                  <SidebarGroupContent className="mt-1 group-data-[collapsible=icon]:mt-0 p-2 pt-0">
+                    <SidebarMenu>
+                      {projects.map((project) => (
+                        <CollapsibleProjectItem
+                          key={project.id}
+                          project={project}
+                          tasks={tasksByProject.get(project.id) || []}
+                          isExpanded={expandedProjects.has(project.id)}
+                          onToggle={() => toggleProjectExpanded(project.id)}
+                          onProjectClick={() => handleProjectClick(project.id)}
+                          onDeleteTask={onDeleteTask}
+                          onRenameTask={onRenameTask}
+                          onMoveTaskToProject={onMoveTaskToProject}
+                          allProjects={projects}
+                          onRenameProject={handleRenameProject}
+                          onDeleteProject={onDeleteProject}
+                          isProjectSelectionMode={isProjectSelectionMode}
+                          isTaskSelectionMode={isTaskSelectionMode}
+                          selectedTaskIds={selectedTaskIds}
+                          selectedProjectIds={selectedProjectIds}
+                          onToggleTaskSelection={onToggleTaskSelection}
+                          onToggleProjectSelection={onToggleProjectSelection}
+                          onTaskNavigate={closeMobileSidebar}
+                        />
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          </div>
 
-      {/* Unassigned tasks section */}
-      <div className="flex flex-col">
-        <DroppableAllTasksGroup
-          title={t("sidebar.allTasks")}
-          tasks={unassignedTasks}
-          onDeleteTask={onDeleteTask}
-          onRenameTask={onRenameTask}
-          onMoveTaskToProject={onMoveTaskToProject}
-          projects={projects}
-          isSelectionMode={isTaskSelectionMode}
-          isOtherSelectionMode={isProjectSelectionMode}
-          selectedTaskIds={selectedTaskIds}
-          onToggleTaskSelection={onToggleTaskSelection}
-          onEnterSelectionMode={
-            isTaskSelectionMode ? onCancelSelection : onEnterTaskSelectionMode
-          }
-          onTaskNavigate={closeMobileSidebar}
-        />
-      </div>
+          {/* Unassigned tasks section */}
+          <div className="flex flex-col">
+            <DroppableAllTasksGroup
+              title={t("sidebar.allTasks")}
+              tasks={unassignedTasks}
+              onDeleteTask={onDeleteTask}
+              onRenameTask={onRenameTask}
+              onMoveTaskToProject={onMoveTaskToProject}
+              projects={projects}
+              isSelectionMode={isTaskSelectionMode}
+              isOtherSelectionMode={isProjectSelectionMode}
+              selectedTaskIds={selectedTaskIds}
+              onToggleTaskSelection={onToggleTaskSelection}
+              onEnterSelectionMode={
+                isTaskSelectionMode
+                  ? onCancelSelection
+                  : onEnterTaskSelectionMode
+              }
+              onTaskNavigate={closeMobileSidebar}
+            />
+          </div>
+        </div>
+      </ScrollArea>
     </SidebarContent>
   );
 }
