@@ -1133,6 +1133,7 @@
     "getHelp": "Hilfe erhalten",
     "getHelpUrl": "https://github.com/poco-ai/poco-agent/issues",
     "theme": "Thema",
+    "systemMode": "System",
     "lightMode": "Hellmodus",
     "claude": "Claude",
     "french": "Französisch",

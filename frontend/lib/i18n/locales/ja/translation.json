@@ -1129,6 +1129,7 @@
     "getHelp": "ヘルプを表示",
     "getHelpUrl": "https://github.com/poco-ai/poco-agent/issues",
     "theme": "テーマ",
+    "systemMode": "システム",
     "lightMode": "ライトモード",
     "claude": "Claude",
     "french": "Français",

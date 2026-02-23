@@ -3,23 +3,37 @@
 import * as React from "react";
 import { useTheme } from "next-themes";
 
-export type ThemeMode = "light" | "dark";
+export type ThemeMode = "light" | "dark" | "system";
+export type ResolvedThemeMode = "light" | "dark";
 
-const resolveThemeMode = (
+const resolveThemeMode = (theme: string | undefined): ThemeMode => {
+  if (theme === "light" || theme === "dark" || theme === "system") {
+    return theme;
+  }
+
+  return "system";
+};
+
+const resolveActiveThemeMode = (
   theme: string | undefined,
   resolvedTheme: string | undefined,
-): ThemeMode => {
-  if (theme === "light" || theme === "dark") return theme;
-  if (resolvedTheme === "light" || resolvedTheme === "dark")
+): ResolvedThemeMode => {
+  if (resolvedTheme === "light" || resolvedTheme === "dark") {
     return resolvedTheme;
+  }
+  if (theme === "light" || theme === "dark") {
+    return theme;
+  }
+
   return "dark";
 };
 
 export function useThemeMode() {
   const { theme, resolvedTheme, setTheme } = useTheme();
 
-  const mode = React.useMemo(
-    () => resolveThemeMode(theme, resolvedTheme),
+  const mode = React.useMemo(() => resolveThemeMode(theme), [theme]);
+  const activeMode = React.useMemo(
+    () => resolveActiveThemeMode(theme, resolvedTheme),
     [theme, resolvedTheme],
   );
 
@@ -32,6 +46,7 @@ export function useThemeMode() {
     theme,
     resolvedTheme,
     mode,
+    activeMode,
     setMode,
   };
 }

@@ -42,7 +42,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/client";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useThemeMode } from "@/hooks/use-theme-mode";
+import { useThemeMode, type ThemeMode } from "@/hooks/use-theme-mode";
 import { SettingsSidebar } from "@/features/settings/components/settings-sidebar";
 import { AccountSettingsTab } from "@/features/settings/components/tabs/account-settings-tab";
 import { ModelsSettingsTab } from "@/features/settings/components/tabs/models-settings-tab";
@@ -247,6 +247,7 @@ export function SettingsDialog({
     () => [
       { value: "light", label: t("settings.lightMode") },
       { value: "dark", label: t("settings.darkMode") },
+      { value: "system", label: t("settings.systemMode") },
     ],
     [t],
   );
@@ -485,9 +486,9 @@ interface MobileSettingsOverviewProps {
   backendOptions: SettingOption[];
   onBackendChange: (value: BackendOption) => void;
   themeLabel: string;
-  themeValue: "light" | "dark";
+  themeValue: ThemeMode;
   themeOptions: SettingOption[];
-  onThemeChange: (value: "light" | "dark") => void;
+  onThemeChange: (value: ThemeMode) => void;
   languageLabel: string;
   languageValue: string;
   languageOptions: SettingOption[];
@@ -566,7 +567,7 @@ function MobileSettingsOverview({
           title={themeLabel}
           value={themeValue}
           options={themeOptions}
-          onChange={(value) => onThemeChange(value as "light" | "dark")}
+          onChange={(value) => onThemeChange(value as ThemeMode)}
         />
         <SettingSelectRow
           icon={Languages}

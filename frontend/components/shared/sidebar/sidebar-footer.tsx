@@ -17,7 +17,7 @@ import { useT } from "@/lib/i18n/client";
 import { Button } from "@/components/ui/button";
 import { SidebarFooter, useSidebar } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useThemeMode } from "@/hooks/use-theme-mode";
+import { useThemeMode, type ThemeMode } from "@/hooks/use-theme-mode";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -145,13 +145,19 @@ function DesktopFooter({
   onStartOnboarding,
 }: DesktopFooterProps) {
   const { t } = useT("translation");
-  const { mode, setMode } = useThemeMode();
+  const { mode, activeMode, setMode } = useThemeMode();
   const { currentLanguage, changeLanguage } = useSettingsLanguage();
   const { backend, setBackend } = useBackendPreference();
 
   const handleThemeSelect = React.useCallback(
     (nextTheme: string) => {
-      if (nextTheme === "light" || nextTheme === "dark") setMode(nextTheme);
+      if (
+        nextTheme === "light" ||
+        nextTheme === "dark" ||
+        nextTheme === "system"
+      ) {
+        setMode(nextTheme as ThemeMode);
+      }
     },
     [setMode],
   );
@@ -216,7 +222,7 @@ function DesktopFooter({
           {/* Theme */}
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              {mode === "dark" ? (
+              {activeMode === "dark" ? (
                 <Moon className="size-4" />
               ) : (
                 <Sun className="size-4" />
@@ -233,6 +239,9 @@ function DesktopFooter({
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="dark">
                   {t("settings.darkMode")}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="system">
+                  {t("settings.systemMode")}
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuSubContent>
