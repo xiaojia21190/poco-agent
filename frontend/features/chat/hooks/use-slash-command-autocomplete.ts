@@ -9,9 +9,9 @@ import {
 } from "react";
 
 import { slashCommandsService } from "@/features/capabilities/slash-commands/services/slash-commands-service";
-import type { SlashCommand } from "@/features/capabilities/slash-commands/types";
+import type { SlashCommandSuggestion as BackendSlashCommandSuggestion } from "@/features/capabilities/slash-commands/types";
 
-export type SlashCommandSuggestionSource = "builtin" | "custom";
+export type SlashCommandSuggestionSource = "builtin" | "custom" | "skill";
 
 export interface SlashCommandSuggestion {
   command: string;
@@ -60,7 +60,9 @@ export function useSlashCommandAutocomplete({
   onChange,
   textareaRef,
 }: UseSlashCommandAutocompleteParams) {
-  const [customCommands, setCustomCommands] = useState<SlashCommand[]>([]);
+  const [dynamicSuggestions, setDynamicSuggestions] = useState<
+    BackendSlashCommandSuggestion[]
+  >([]);
   const [dismissedToken, setDismissedToken] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -68,9 +70,11 @@ export function useSlashCommandAutocomplete({
     let cancelled = false;
     const load = async () => {
       try {
-        const list = await slashCommandsService.list({ revalidate: 0 });
+        const list = await slashCommandsService.listSuggestions({
+          revalidate: 0,
+        });
         if (cancelled) return;
-        setCustomCommands(list);
+        setDynamicSuggestions(list);
       } catch (error) {
         // Autocomplete should be best-effort and never break chat input showing/sending.
         console.warn("[SlashCommands] autocomplete list failed:", error);
@@ -85,17 +89,17 @@ export function useSlashCommandAutocomplete({
   const tokenInfo = useMemo(() => extractToken(value), [value]);
 
   const suggestions: SlashCommandSuggestion[] = useMemo(() => {
-    const enabledCustom: SlashCommandSuggestion[] = customCommands
-      .filter((c) => c.enabled)
-      .map((c) => ({
-        command: `/${c.name}`,
-        name: c.name,
-        description: c.description,
-        argument_hint: c.argument_hint,
-        source: "custom" as const,
-      }));
+    const mappedDynamic: SlashCommandSuggestion[] = dynamicSuggestions.map(
+      (item) => ({
+        command: `/${item.name}`,
+        name: item.name,
+        description: item.description,
+        argument_hint: item.argument_hint,
+        source: item.source,
+      }),
+    );
 
-    const merged = [...BUILTIN_COMMANDS, ...enabledCustom];
+    const merged = [...BUILTIN_COMMANDS, ...mappedDynamic];
     const unique = new Map<string, SlashCommandSuggestion>();
     for (const item of merged) {
       unique.set(item.command, item);
@@ -103,7 +107,7 @@ export function useSlashCommandAutocomplete({
     return Array.from(unique.values()).sort((a, b) =>
       a.command.localeCompare(b.command),
     );
-  }, [customCommands]);
+  }, [dynamicSuggestions]);
 
   const filtered = useMemo(() => {
     if (!tokenInfo) return [];

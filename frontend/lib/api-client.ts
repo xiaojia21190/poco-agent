@@ -93,6 +93,7 @@ export const API_ENDPOINTS = {
 
   // Slash Commands
   slashCommands: "/slash-commands",
+  slashCommandSuggestions: "/slash-commands/suggestions",
   slashCommand: (commandId: number) => `/slash-commands/${commandId}`,
 
   // Sub Agents
@@ -253,7 +254,10 @@ export async function apiFetch<T>(
 
   // Build headers
   const headers = new Headers(fetchOptions.headers);
-  if (!headers.has("Content-Type") && !(fetchOptions.body instanceof FormData)) {
+  if (
+    !headers.has("Content-Type") &&
+    !(fetchOptions.body instanceof FormData)
+  ) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -314,10 +318,7 @@ export async function apiFetch<T>(
 
     return payload as T;
   } catch (error) {
-    if (
-      error instanceof DOMException &&
-      error.name === "AbortError"
-    ) {
+    if (error instanceof DOMException && error.name === "AbortError") {
       throw new ApiError("Request timeout", 408);
     }
     throw error;

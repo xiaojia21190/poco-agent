@@ -2,6 +2,7 @@ import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
 import type {
   SlashCommand,
   SlashCommandCreateInput,
+  SlashCommandSuggestion,
   SlashCommandUpdateInput,
 } from "@/features/capabilities/slash-commands/types";
 
@@ -10,6 +11,17 @@ export const slashCommandsService = {
     return apiClient.get<SlashCommand[]>(API_ENDPOINTS.slashCommands, {
       next: { revalidate: options?.revalidate },
     });
+  },
+
+  listSuggestions: async (options?: {
+    revalidate?: number;
+  }): Promise<SlashCommandSuggestion[]> => {
+    return apiClient.get<SlashCommandSuggestion[]>(
+      API_ENDPOINTS.slashCommandSuggestions,
+      {
+        next: { revalidate: options?.revalidate },
+      },
+    );
   },
 
   get: async (
