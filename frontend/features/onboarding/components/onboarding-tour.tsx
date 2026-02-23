@@ -3,8 +3,10 @@
 import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useT } from "@/lib/i18n/client";
 
 interface OnboardingTourProps {
@@ -25,7 +27,7 @@ interface TourStep {
   padding?: number;
 }
 
-const TOUR_STEPS: TourStep[] = [
+const DESKTOP_TOUR_STEPS: TourStep[] = [
   {
     id: "welcome",
     titleKey: "onboarding.steps.welcome.title",
@@ -98,6 +100,42 @@ const TOUR_STEPS: TourStep[] = [
   },
 ];
 
+const MOBILE_TOUR_STEPS: TourStep[] = [
+  {
+    id: "welcome",
+    titleKey: "onboarding.steps.welcome.title",
+    descriptionKey: "onboarding.steps.welcome.description",
+  },
+  {
+    id: "workspace",
+    titleKey: "onboarding.steps.workspace.title",
+    descriptionKey: "onboarding.steps.workspace.description",
+    path: "/home",
+  },
+  {
+    id: "mode-toggle",
+    titleKey: "onboarding.steps.modeToggle.title",
+    descriptionKey: "onboarding.steps.modeToggle.description",
+    selector: '[data-onboarding="home-mode-toggle"]',
+    path: "/home",
+  },
+  {
+    id: "composer",
+    titleKey: "onboarding.steps.composer.title",
+    descriptionKey: "onboarding.steps.composer.description",
+    selector: '[data-onboarding="home-task-composer"]',
+    path: "/home",
+  },
+  {
+    id: "skills-detail",
+    titleKey: "onboarding.steps.skillsDetail.title",
+    descriptionKey: "onboarding.steps.skillsDetail.description",
+    selector: '[data-onboarding="capabilities-detail"]',
+    path: "/capabilities",
+    viewId: "skills",
+  },
+];
+
 const CARD_WIDTH = 360;
 const CARD_HEIGHT = 220;
 const VIEWPORT_MARGIN = 16;
@@ -120,6 +158,7 @@ export function OnboardingTour({
   onClose,
 }: OnboardingTourProps) {
   const { t } = useT("translation");
+  const isMobile = useIsMobile();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -131,13 +170,19 @@ export function OnboardingTour({
   );
   const [viewport, setViewport] = React.useState({ width: 0, height: 0 });
 
-  const step = TOUR_STEPS[stepIndex];
-  const isLastStep = stepIndex >= TOUR_STEPS.length - 1;
+  const tourSteps = React.useMemo(
+    () => (isMobile ? MOBILE_TOUR_STEPS : DESKTOP_TOUR_STEPS),
+    [isMobile],
+  );
+  const step = tourSteps[stepIndex];
+  const isLastStep = stepIndex >= tourSteps.length - 1;
+  const homePath = lng ? `/${lng}/home` : "/home";
 
-  const expectedPath = React.useMemo(() => {
-    if (!step?.path) return null;
-    return lng ? `/${lng}${step.path}` : step.path;
-  }, [lng, step?.path]);
+  const expectedPath = step?.path
+    ? lng
+      ? `/${lng}${step.path}`
+      : step.path
+    : null;
 
   const expectedHref = (() => {
     if (!expectedPath) return null;
@@ -152,6 +197,10 @@ export function OnboardingTour({
     setStepIndex(0);
   }, [open, runId]);
 
+  React.useEffect(() => {
+    setStepIndex((current) => Math.min(current, tourSteps.length - 1));
+  }, [tourSteps.length]);
+
   const goPrev = React.useCallback(() => {
     setStepIndex((current) => Math.max(0, current - 1));
   }, []);
@@ -159,11 +208,13 @@ export function OnboardingTour({
   const goNext = React.useCallback(() => {
     if (isLastStep) {
       onClose(true);
+      router.push(homePath);
+      toast.success(t("onboarding.letsStart"));
       return;
     }
 
-    setStepIndex((current) => Math.min(current + 1, TOUR_STEPS.length - 1));
-  }, [isLastStep, onClose]);
+    setStepIndex((current) => Math.min(current + 1, tourSteps.length - 1));
+  }, [homePath, isLastStep, onClose, router, t, tourSteps.length]);
 
   React.useEffect(() => {
     if (!open || !expectedPath || !expectedHref) return;
@@ -320,6 +371,15 @@ export function OnboardingTour({
       ? Math.min(CARD_WIDTH, viewport.width - VIEWPORT_MARGIN * 2)
       : CARD_WIDTH;
 
+    if (isMobile && viewport.width) {
+      return {
+        width: maxWidth,
+        left: (viewport.width - maxWidth) / 2,
+        top: "auto",
+        bottom: VIEWPORT_MARGIN,
+      };
+    }
+
     if (!targetRect || !viewport.width || !viewport.height) {
       return {
         width: maxWidth,
@@ -351,7 +411,7 @@ export function OnboardingTour({
       left,
       top,
     };
-  }, [targetRect, viewport.height, viewport.width]);
+  }, [isMobile, targetRect, viewport.height, viewport.width]);
 
   const maskedOverlayStyle = React.useMemo<
     React.CSSProperties | undefined
@@ -434,7 +494,7 @@ export function OnboardingTour({
           <h2 className="truncate text-sm font-semibold text-foreground">
             {t("onboarding.progress", {
               current: stepIndex + 1,
-              total: TOUR_STEPS.length,
+              total: tourSteps.length,
             })}{" "}
             · {t(step.titleKey)}
           </h2>

@@ -1415,6 +1415,7 @@
     "done": "Finish",
     "progress": "Step {{current}} / {{total}}",
     "targetUnavailable": "This area is collapsed or unavailable right now. Continue to the next step.",
+    "letsStart": "Let's get started.",
     "steps": {
       "welcome": {
         "title": "Welcome to Poco",

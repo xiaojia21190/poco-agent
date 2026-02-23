@@ -165,6 +165,7 @@ export function AppShell({
               open={isSettingsOpen}
               onOpenChange={handleSettingsOpenChange}
               tabRequest={settingsTabRequest ?? undefined}
+              onStartOnboarding={onboarding.startTour}
             />
 
             <OnboardingTour

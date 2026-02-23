@@ -1527,10 +1527,11 @@
     "done": "Finish",
     "progress": "Step {{current}} / {{total}}",
     "targetUnavailable": "This area is collapsed or unavailable right now. Continue to the next step.",
+    "letsStart": "Let's get started.",
     "steps": {
       "welcome": {
         "title": "Welcome to Poco",
-        "description": "This quick tutorial highlights the core areas you will use most often. You can reopen it anytime from the sidebar quick menu."
+        "description": "This quick tutorial highlights the core areas you will use most often. You can reopen it anytime from the desktop sidebar quick menu or the mobile Settings page."
       },
       "workspace": {
         "title": "Main workspace",

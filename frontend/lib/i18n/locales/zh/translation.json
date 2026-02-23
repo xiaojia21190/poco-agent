@@ -1527,10 +1527,11 @@
     "done": "完成",
     "progress": "第 {{current}} / {{total}} 步",
     "targetUnavailable": "当前区域可能已折叠或暂不可见，可继续下一步。",
+    "letsStart": "让我们开始吧",
     "steps": {
       "welcome": {
         "title": "欢迎使用 Poco",
-        "description": "这个新手教程会快速介绍最常用的核心区域。你也可以随时在侧边栏快捷菜单中重新打开。"
+        "description": "这个新手教程会快速介绍最常用的核心区域。你可以随时在桌面端侧边栏快捷菜单或移动端设置页中重新打开。"
       },
       "workspace": {
         "title": "主工作区",

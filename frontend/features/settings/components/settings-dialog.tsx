@@ -10,6 +10,7 @@ import {
   Languages,
   LogOut,
   Palette,
+  Sparkles,
   Server,
   SlidersHorizontal,
   User,
@@ -64,6 +65,7 @@ interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tabRequest?: SettingsTabRequest | null;
+  onStartOnboarding?: () => void;
 }
 
 type MobileView = "overview" | SettingsTabId;
@@ -94,6 +96,7 @@ export function SettingsDialog({
   open,
   onOpenChange,
   tabRequest,
+  onStartOnboarding,
 }: SettingsDialogProps) {
   const { t } = useT("translation");
   const isMobile = useIsMobile();
@@ -334,6 +337,13 @@ export function SettingsDialog({
     window.open(t("settings.getHelpUrl"), "_blank");
   }, [t]);
 
+  const handleStartOnboarding = React.useCallback(() => {
+    handleClose();
+    window.setTimeout(() => {
+      onStartOnboarding?.();
+    }, 180);
+  }, [handleClose, onStartOnboarding]);
+
   const renderContent = () => {
     if (activeTab === "account") {
       return (
@@ -449,8 +459,10 @@ export function SettingsDialog({
               languageOptions={languageOptions}
               onLanguageChange={changeLanguage}
               helpLabel={t("settings.getHelp")}
+              onboardingLabel={t("sidebar.onboarding")}
               logoutLabel={t("userMenu.logout")}
               onOpenHelp={handleHelp}
+              onStartOnboarding={handleStartOnboarding}
               onLogout={handleLogout}
             />
           ) : (
@@ -481,8 +493,10 @@ interface MobileSettingsOverviewProps {
   languageOptions: SettingOption[];
   onLanguageChange: (value: string) => void;
   helpLabel: string;
+  onboardingLabel: string;
   logoutLabel: string;
   onOpenHelp: () => void;
+  onStartOnboarding: () => void;
   onLogout: () => void;
 }
 
@@ -505,8 +519,10 @@ function MobileSettingsOverview({
   languageOptions,
   onLanguageChange,
   helpLabel,
+  onboardingLabel,
   logoutLabel,
   onOpenHelp,
+  onStartOnboarding,
   onLogout,
 }: MobileSettingsOverviewProps) {
   const accountItems = sidebarItems.filter(
@@ -566,6 +582,12 @@ function MobileSettingsOverview({
           icon={HelpCircle}
           title={helpLabel}
           onClick={onOpenHelp}
+        />
+        <SettingNavRow
+          icon={Sparkles}
+          title={onboardingLabel}
+          onClick={onStartOnboarding}
+          dataOnboarding="mobile-settings-onboarding"
         />
         <SettingNavRow
           icon={LogOut}
@@ -665,6 +687,7 @@ interface SettingNavRowProps {
   onClick?: () => void;
   showChevron?: boolean;
   destructive?: boolean;
+  dataOnboarding?: string;
 }
 
 function SettingNavRow({
@@ -674,6 +697,7 @@ function SettingNavRow({
   onClick,
   showChevron = true,
   destructive = false,
+  dataOnboarding,
 }: SettingNavRowProps) {
   const isInteractive = Boolean(onClick);
 
@@ -682,6 +706,7 @@ function SettingNavRow({
       type="button"
       onClick={onClick}
       disabled={!isInteractive}
+      data-onboarding={dataOnboarding}
       className={cn(
         "flex w-full items-center gap-3 px-4 py-4 text-left transition-colors",
         destructive
