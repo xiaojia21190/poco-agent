@@ -15,6 +15,12 @@ class SkillRepository:
         return session_db.query(Skill).filter(Skill.id == skill_id).first()
 
     @staticmethod
+    def list_by_ids(session_db: Session, skill_ids: list[int]) -> list[Skill]:
+        if not skill_ids:
+            return []
+        return session_db.query(Skill).filter(Skill.id.in_(skill_ids)).all()
+
+    @staticmethod
     def get_by_name(session_db: Session, name: str, user_id: str) -> Skill | None:
         """Get a user-owned skill by name."""
         return (
