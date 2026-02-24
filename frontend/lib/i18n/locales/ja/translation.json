@@ -247,6 +247,7 @@
     "copyMessage": "メッセージをコピー",
     "formulaCopied": "コピーしました",
     "editMessage": "メッセージを編集",
+    "quoteModify": "引用して返信",
     "statusBar": {
       "browser": "ブラウザ",
       "openDesktop": "デスクトップを開く",

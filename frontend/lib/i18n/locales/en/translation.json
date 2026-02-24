@@ -248,6 +248,7 @@
     "copyMessage": "Copy message",
     "formulaCopied": "Copied",
     "editMessage": "Edit message",
+    "quoteModify": "Quote Reply",
     "statusBar": {
       "browser": "Browser",
       "openDesktop": "Open desktop",

@@ -6,6 +6,7 @@ import {
   PanelRightClose,
   PanelRightOpen,
   Pencil,
+  Quote,
 } from "lucide-react";
 import { ChatMessageList } from "../../chat/chat-message-list";
 import { TodoList } from "./todo-list";
@@ -48,6 +49,20 @@ interface ChatPanelProps {
   onToggleRightPanel?: () => void;
   isRightPanelCollapsed?: boolean;
   hideHeader?: boolean;
+}
+
+interface QuoteSelectionState {
+  text: string;
+  left: number;
+  top: number;
+  placeAbove: boolean;
+}
+
+function formatAsMarkdownQuote(text: string): string {
+  return text
+    .split(/\r?\n/)
+    .map((line) => (line.length > 0 ? `> ${line}` : ">"))
+    .join("\n");
 }
 
 function ChatHistorySkeleton() {
@@ -105,6 +120,10 @@ export function ChatPanel({
   const [isCancelling, setIsCancelling] = React.useState(false);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = React.useState(false);
   const inputRef = React.useRef<ChatInputRef>(null);
+  const conversationRef = React.useRef<HTMLDivElement>(null);
+  const quoteButtonRef = React.useRef<HTMLButtonElement>(null);
+  const [quoteSelection, setQuoteSelection] =
+    React.useState<QuoteSelectionState | null>(null);
 
   // Message management hook
   const {
@@ -160,11 +179,97 @@ export function ChatPanel({
 
   React.useEffect(() => {
     setStickyUserInput(null);
+    setQuoteSelection(null);
     if (stickyTimerRef.current) {
       window.clearTimeout(stickyTimerRef.current);
       stickyTimerRef.current = null;
     }
   }, [session?.session_id]);
+
+  const updateQuoteSelection = React.useCallback(() => {
+    const container = conversationRef.current;
+    if (!container) {
+      setQuoteSelection(null);
+      return;
+    }
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+      setQuoteSelection(null);
+      return;
+    }
+
+    const selectedText = selection
+      .toString()
+      .replace(/\u200B/g, "")
+      .trim();
+    if (!selectedText) {
+      setQuoteSelection(null);
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    const commonAncestor = range.commonAncestorContainer;
+    const ancestorElement =
+      commonAncestor.nodeType === Node.ELEMENT_NODE
+        ? (commonAncestor as Element)
+        : commonAncestor.parentElement;
+
+    if (!ancestorElement || !container.contains(ancestorElement)) {
+      setQuoteSelection(null);
+      return;
+    }
+
+    const rect =
+      range.getBoundingClientRect().width > 0
+        ? range.getBoundingClientRect()
+        : range.getClientRects()[0];
+    if (!rect) {
+      setQuoteSelection(null);
+      return;
+    }
+
+    const minLeft = 80;
+    const maxLeft = Math.max(window.innerWidth - 80, minLeft);
+    const left = Math.min(
+      Math.max(rect.left + rect.width / 2, minLeft),
+      maxLeft,
+    );
+    const placeAbove = rect.top > 56;
+    setQuoteSelection({
+      text: selectedText,
+      left,
+      top: placeAbove ? rect.top - 6 : rect.bottom + 6,
+      placeAbove,
+    });
+  }, []);
+
+  const handleConversationMouseUp = React.useCallback(() => {
+    window.setTimeout(updateQuoteSelection, 0);
+  }, [updateQuoteSelection]);
+
+  React.useEffect(() => {
+    const handleMouseDown = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (quoteButtonRef.current?.contains(target)) return;
+      if (conversationRef.current?.contains(target)) return;
+      setQuoteSelection(null);
+    };
+    const handleViewportChange = () => {
+      setQuoteSelection(null);
+    };
+
+    document.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("resize", handleViewportChange);
+    window.addEventListener("scroll", handleViewportChange, true);
+
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("resize", handleViewportChange);
+      window.removeEventListener("scroll", handleViewportChange, true);
+    };
+  }, []);
 
   React.useEffect(() => {
     if (!session?.session_id) return;
@@ -280,6 +385,15 @@ export function ChatPanel({
     inputRef.current?.setValueAndFocus(content);
   }, []);
 
+  const handleInsertQuote = React.useCallback(() => {
+    if (!quoteSelection) return;
+    inputRef.current?.appendValueAndFocus(
+      formatAsMarkdownQuote(quoteSelection.text),
+    );
+    setQuoteSelection(null);
+    window.getSelection()?.removeAllRanges();
+  }, [quoteSelection]);
+
   // Handle send from input
   const handleSend = async (content: string, attachments?: InputFile[]) => {
     if (!session?.session_id) return;
@@ -389,7 +503,11 @@ export function ChatPanel({
       )}
 
       {/* Message list */}
-      <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
+      <div
+        ref={conversationRef}
+        className="flex-1 min-h-0 min-w-0 overflow-hidden"
+        onMouseUp={handleConversationMouseUp}
+      >
         {isLoadingHistory ? (
           <div className={cn("h-full", contentPaddingClass)}>
             <ChatHistorySkeleton />
@@ -410,6 +528,30 @@ export function ChatPanel({
           />
         )}
       </div>
+
+      {quoteSelection ? (
+        <button
+          ref={quoteButtonRef}
+          type="button"
+          onMouseDown={(event) => {
+            event.preventDefault();
+          }}
+          onClick={handleInsertQuote}
+          className="fixed z-40 inline-flex items-center gap-1 rounded-md border border-border bg-popover px-2.5 py-1.5 text-xs text-popover-foreground shadow-md transition-colors hover:bg-accent hover:text-accent-foreground"
+          aria-label={t("chat.quoteModify")}
+          title={t("chat.quoteModify")}
+          style={{
+            left: quoteSelection.left,
+            top: quoteSelection.top,
+            transform: quoteSelection.placeAbove
+              ? "translate(-50%, -100%)"
+              : "translate(-50%, 0)",
+          }}
+        >
+          <Quote className="size-3" />
+          {t("chat.quoteModify")}
+        </button>
+      ) : null}
 
       {activeUserInput || stickyUserInput ? (
         <div className={cn("pb-3", contentPaddingClass)}>
