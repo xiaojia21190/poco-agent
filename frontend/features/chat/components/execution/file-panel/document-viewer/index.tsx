@@ -27,7 +27,7 @@ import { SyntaxHighlighter, oneDark, oneLight } from "@/lib/markdown/prism";
 import { SkeletonItem } from "@/components/ui/skeleton-shimmer";
 import rehypeKatex from "rehype-katex";
 import type { ExcalidrawInitialDataState } from "@excalidraw/excalidraw/types";
-import type { ExcalidrawViewerClientProps } from "./excalidraw-viewer-client";
+import type { ExcalidrawViewerClientProps } from "../excalidraw-viewer-client";
 
 const dispatchCloseViewer = () => {
   if (typeof window === "undefined") return;
