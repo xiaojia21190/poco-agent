@@ -245,6 +245,7 @@
     "expand": "展開",
     "collapse": "折りたたみ",
     "copyMessage": "メッセージをコピー",
+    "formulaCopied": "コピーしました",
     "editMessage": "メッセージを編集",
     "statusBar": {
       "browser": "ブラウザ",

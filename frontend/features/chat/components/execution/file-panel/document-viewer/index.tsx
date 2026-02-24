@@ -23,6 +23,7 @@ import remarkMath from "remark-math";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { MarkdownCode, MarkdownPre } from "@/components/shared/markdown-code";
+import { AdaptiveMarkdown } from "@/components/shared/adaptive-markdown";
 import { SyntaxHighlighter, oneDark, oneLight } from "@/lib/markdown/prism";
 import { SkeletonItem } from "@/components/ui/skeleton-shimmer";
 import rehypeKatex from "rehype-katex";
@@ -555,7 +556,7 @@ const MarkdownDocumentViewer = ({
       />
       <div className="flex-1 overflow-auto bg-background min-h-0">
         <div className="mx-auto w-full max-w-4xl px-6 py-8">
-          <div className="prose prose-sm dark:prose-invert max-w-none break-words [&_*]:break-words">
+          <AdaptiveMarkdown className="prose prose-sm dark:prose-invert max-w-none break-words [&_*]:break-words">
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
               rehypePlugins={[rehypeKatex]}
@@ -619,7 +620,7 @@ const MarkdownDocumentViewer = ({
             >
               {state.content}
             </ReactMarkdown>
-          </div>
+          </AdaptiveMarkdown>
         </div>
       </div>
     </div>

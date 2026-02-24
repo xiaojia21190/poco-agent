@@ -245,6 +245,7 @@
     "expand": "Развернуть",
     "collapse": "Свернуть",
     "copyMessage": "Копировать сообщение",
+    "formulaCopied": "Скопировано",
     "editMessage": "Редактировать сообщение",
     "statusBar": {
       "browser": "Браузер",

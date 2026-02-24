@@ -246,6 +246,7 @@
     "expand": "Erweitern",
     "collapse": "Reduzieren",
     "copyMessage": "Nachricht kopieren",
+    "formulaCopied": "Kopiert",
     "editMessage": "Nachricht bearbeiten",
     "statusBar": {
       "browser": "Browser",

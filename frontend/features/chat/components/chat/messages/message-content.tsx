@@ -10,6 +10,7 @@ import { ToolChain } from "./tool-chain";
 import remarkBreaks from "remark-breaks";
 import rehypeKatex from "rehype-katex";
 import { MarkdownCode, MarkdownPre } from "@/components/shared/markdown-code";
+import { AdaptiveMarkdown } from "@/components/shared/adaptive-markdown";
 
 type LinkProps = {
   children?: React.ReactNode;
@@ -64,7 +65,7 @@ export function MessageContent({
   // If content is string, render as before
   if (typeof content === "string") {
     return (
-      <div className="prose prose-base dark:prose-invert w-full min-w-0 max-w-none overflow-hidden break-words break-all [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_p]:break-words [&_p]:break-all [&_*]:break-words [&_*]:break-all">
+      <AdaptiveMarkdown className="prose prose-base dark:prose-invert w-full min-w-0 max-w-none overflow-hidden break-words break-all [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_p]:break-words [&_p]:break-all [&_*]:break-words [&_*]:break-all">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
           rehypePlugins={[rehypeKatex]}
@@ -126,7 +127,7 @@ export function MessageContent({
         >
           {textContent}
         </ReactMarkdown>
-      </div>
+      </AdaptiveMarkdown>
     );
   }
 
@@ -206,7 +207,7 @@ export function MessageContent({
           if (!text.trim()) return null;
 
           return (
-            <div
+            <AdaptiveMarkdown
               key={index}
               className="prose prose-base dark:prose-invert w-full min-w-0 max-w-none overflow-hidden break-words break-all [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_p]:break-words [&_p]:break-all [&_*]:break-words [&_*]:break-all"
             >
@@ -271,7 +272,7 @@ export function MessageContent({
               >
                 {text}
               </ReactMarkdown>
-            </div>
+            </AdaptiveMarkdown>
           );
         }
       })}

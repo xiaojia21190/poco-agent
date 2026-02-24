@@ -246,6 +246,7 @@
     "expand": "Expand",
     "collapse": "Collapse",
     "copyMessage": "Copy message",
+    "formulaCopied": "Copied",
     "editMessage": "Edit message",
     "statusBar": {
       "browser": "Browser",
