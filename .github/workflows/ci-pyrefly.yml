@@ -36,4 +36,4 @@ jobs:
 
       - name: Run Pyrefly
         working-directory: ${{ matrix.service }}
-        run: uv run --frozen --with pyrefly pyrefly check
+        run: uv run --frozen --with pyrefly==0.47.0 pyrefly check
