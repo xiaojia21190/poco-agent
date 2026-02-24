@@ -242,6 +242,8 @@
     "input": "入力",
     "output": "出力",
     "scrollToLatestMessage": "最新メッセージにジャンプ",
+    "userPromptTimelineJump": "ユーザーメッセージ {{index}} に移動",
+    "userPromptTimelineEmpty": "（空のプロンプト）",
     "expand": "展開",
     "collapse": "折りたたみ",
     "copyMessage": "メッセージをコピー",
@@ -1294,6 +1296,10 @@
         "toggleOutputPanel": {
           "action": "Toggle output panel",
           "hint": "Collapse or expand computer/artifacts panel in chat."
+        },
+        "jumpUserPrompts": {
+          "action": "Jump user prompts",
+          "hint": "When output panel is collapsed, use J/K to jump between user messages."
         },
         "openSettings": {
           "action": "Open settings",

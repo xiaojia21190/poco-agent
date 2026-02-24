@@ -242,6 +242,8 @@
     "input": "Ввод",
     "output": "Вывод",
     "scrollToLatestMessage": "Перейти к последнему сообщению",
+    "userPromptTimelineJump": "Перейти к сообщению пользователя {{index}}",
+    "userPromptTimelineEmpty": "(Пустой запрос)",
     "expand": "Развернуть",
     "collapse": "Свернуть",
     "copyMessage": "Копировать сообщение",
@@ -1294,6 +1296,10 @@
         "toggleOutputPanel": {
           "action": "Toggle output panel",
           "hint": "Collapse or expand computer/artifacts panel in chat."
+        },
+        "jumpUserPrompts": {
+          "action": "Jump user prompts",
+          "hint": "When output panel is collapsed, use J/K to jump between user messages."
         },
         "openSettings": {
           "action": "Open settings",

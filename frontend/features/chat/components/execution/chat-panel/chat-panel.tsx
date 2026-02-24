@@ -521,6 +521,7 @@ export function ChatPanel({
             gitBranch={session?.config_snapshot?.git_branch ?? null}
             runUsageByUserMessageId={runUsageByUserMessageId}
             onEditMessage={handleEditMessage}
+            showUserPromptTimeline={isRightPanelCollapsed}
             contentPaddingClassName={messagePaddingClass}
             scrollButtonClassName={
               isRightPanelCollapsed ? "right-[20%]" : undefined

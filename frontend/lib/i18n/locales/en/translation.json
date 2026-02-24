@@ -243,6 +243,8 @@
     "input": "Input",
     "output": "Output",
     "scrollToLatestMessage": "Jump to latest message",
+    "userPromptTimelineJump": "Jump to user prompt {{index}}",
+    "userPromptTimelineEmpty": "(Empty prompt)",
     "expand": "Expand",
     "collapse": "Collapse",
     "copyMessage": "Copy message",
@@ -1397,6 +1399,10 @@
         "toggleOutputPanel": {
           "action": "Toggle output panel",
           "hint": "Collapse or expand computer/artifacts panel in chat."
+        },
+        "jumpUserPrompts": {
+          "action": "Jump user prompts",
+          "hint": "When output panel is collapsed, use J/K to jump between user messages."
         },
         "openSettings": {
           "action": "Open settings",

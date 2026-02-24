@@ -243,6 +243,8 @@
     "input": "输入",
     "output": "输出",
     "scrollToLatestMessage": "跳转到最新消息",
+    "userPromptTimelineJump": "跳转到第 {{index}} 条用户消息",
+    "userPromptTimelineEmpty": "（空输入）",
     "expand": "展开",
     "collapse": "收起",
     "copyMessage": "复制消息",
@@ -1397,6 +1399,10 @@
         "toggleOutputPanel": {
           "action": "收起/展开产物界面",
           "hint": "在聊天页收起或展开电脑/产物面板。"
+        },
+        "jumpUserPrompts": {
+          "action": "跳转用户消息",
+          "hint": "当产物面板收起时，使用 J/K 在用户消息之间快速跳转。"
         },
         "openSettings": {
           "action": "打开设置",
