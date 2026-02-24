@@ -1,4 +1,5 @@
 export type SlashCommandMode = "raw" | "structured";
+export type SlashCommandSuggestionSource = "custom" | "skill";
 
 export interface SlashCommand {
   id: number;
@@ -35,4 +36,11 @@ export interface SlashCommandUpdateInput {
   allowed_tools?: string | null;
   content?: string | null;
   raw_markdown?: string | null;
+}
+
+export interface SlashCommandSuggestion {
+  name: string;
+  description: string | null;
+  argument_hint: string | null;
+  source: SlashCommandSuggestionSource;
 }

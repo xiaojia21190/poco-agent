@@ -93,6 +93,7 @@ export const API_ENDPOINTS = {
 
   // Slash Commands
   slashCommands: "/slash-commands",
+  slashCommandSuggestions: "/slash-commands/suggestions",
   slashCommand: (commandId: number) => `/slash-commands/${commandId}`,
 
   // Sub Agents
