@@ -134,7 +134,7 @@ curl "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getWebhookInfo"
 
 优点：不依赖公网 webhook，适合稳定收消息/事件回调。
 
-#### 环境变量
+#### 环境变量（Stream）
 
 ```bash
 DINGTALK_ENABLED=true
@@ -165,7 +165,7 @@ DINGTALK_OPEN_BASE_URL=https://api.dingtalk.com
 
 当你不使用 Stream 时可启用 webhook 回调。
 
-#### 环境变量
+#### 环境变量（Webhook）
 
 ```bash
 DINGTALK_ENABLED=true

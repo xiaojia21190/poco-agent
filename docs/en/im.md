@@ -134,7 +134,7 @@ DingTalk supports two inbound modes:
 
 Pros: no public webhook required, stable for inbound message/event handling.
 
-#### Environment variables
+#### Environment variables (Stream)
 
 ```bash
 DINGTALK_ENABLED=true
@@ -165,7 +165,7 @@ DINGTALK_OPEN_BASE_URL=https://api.dingtalk.com
 
 Use webhook callbacks if you do not use Stream.
 
-#### Environment variables
+#### Environment variables (Webhook)
 
 ```bash
 DINGTALK_ENABLED=true

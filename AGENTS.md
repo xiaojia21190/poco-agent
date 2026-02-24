@@ -78,7 +78,7 @@ pre-commit run --all-files  # Run manually
 
 **Package Managers:** UV for Python, pnpm for Node.js
 
-**Python Package Index:** Tsinghua mirror (https://pypi.tuna.tsinghua.edu.cn/simple)
+**Python Package Index:** Tsinghua mirror (<https://pypi.tuna.tsinghua.edu.cn/simple>)
 
 ## Code Organization
 
