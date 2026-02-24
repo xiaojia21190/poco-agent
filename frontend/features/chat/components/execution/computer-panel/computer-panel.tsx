@@ -12,6 +12,12 @@ import {
   Layers,
   Globe,
   SquareTerminal,
+  Wrench,
+  Pencil,
+  FileEdit,
+  FileText,
+  Folder,
+  Search,
 } from "lucide-react";
 import { PanelHeader } from "@/components/shared/panel-header";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -31,9 +37,17 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { motion } from "motion/react";
 import { BrowserViewer } from "./browser-viewer";
+import { GenericToolViewer } from "./generic-tool-viewer";
 import { TerminalViewer } from "./terminal-viewer";
 
 const POCO_PLAYWRIGHT_MCP_PREFIX = "mcp____poco_playwright__";
+const COMPUTER_GENERIC_TOOL_NAMES = new Set([
+  "edit",
+  "read",
+  "write",
+  "glob",
+  "grep",
+]);
 
 interface ComputerPanelProps {
   sessionId: string;
@@ -43,8 +57,8 @@ interface ComputerPanelProps {
   hideHeader?: boolean;
 }
 
-type ReplayFilter = "all" | "browser" | "terminal";
-type ReplayKind = "browser" | "terminal";
+type ReplayFilter = "all" | "browser" | "terminal" | "tool";
+type ReplayKind = "browser" | "terminal" | "tool";
 
 interface ReplayFrame {
   kind: ReplayKind;
@@ -72,6 +86,42 @@ function pickFirstString(
       const trimmed = value.trim();
       if (trimmed) return trimmed;
     }
+  }
+  return null;
+}
+
+function normalizeToolName(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]/g, "");
+}
+
+function getGenericToolSummary(
+  execution: ToolExecutionResponse,
+): string | null {
+  const normalizedToolName = normalizeToolName(execution.tool_name || "");
+  const input = execution.tool_input || {};
+
+  if (normalizedToolName === "edit") {
+    return pickFirstString(input, [
+      "file_path",
+      "path",
+      "old_string",
+      "new_string",
+    ]);
+  }
+  if (normalizedToolName === "read") {
+    return pickFirstString(input, ["file_path", "path"]);
+  }
+  if (normalizedToolName === "write") {
+    return pickFirstString(input, ["file_path", "path"]);
+  }
+  if (normalizedToolName === "glob") {
+    return pickFirstString(input, ["pattern", "path"]);
+  }
+  if (normalizedToolName === "grep") {
+    return pickFirstString(input, ["pattern", "path", "glob", "type"]);
   }
   return null;
 }
@@ -122,8 +172,27 @@ function clampIndex(value: number, min: number, max: number): number {
 }
 
 function getFrameAdvanceDelayMs(frame: ReplayFrame): number {
-  const baseMs = frame.kind === "browser" ? 1200 : 1800;
+  const baseMs =
+    frame.kind === "browser" ? 1200 : frame.kind === "terminal" ? 1800 : 1500;
   return Math.max(80, baseMs);
+}
+
+function renderToolKindIcon(toolName: string): React.ReactNode {
+  const normalizedToolName = normalizeToolName(toolName);
+  switch (normalizedToolName) {
+    case "edit":
+      return <Pencil className="size-4 text-muted-foreground" />;
+    case "write":
+      return <FileEdit className="size-4 text-muted-foreground" />;
+    case "read":
+      return <FileText className="size-4 text-muted-foreground" />;
+    case "glob":
+      return <Folder className="size-4 text-muted-foreground" />;
+    case "grep":
+      return <Search className="size-4 text-muted-foreground" />;
+    default:
+      return <Wrench className="size-4 text-muted-foreground" />;
+  }
 }
 
 export function ComputerPanel({
@@ -198,7 +267,9 @@ export function ComputerPanel({
     const frames: ReplayFrame[] = [];
     for (const e of executions) {
       const toolName = e.tool_name || "";
-      if (toolName === "Bash") {
+      const normalizedToolName = normalizeToolName(toolName);
+
+      if (normalizedToolName === "bash") {
         const cmd =
           typeof e.tool_input?.["command"] === "string"
             ? (e.tool_input?.["command"] as string)
@@ -212,11 +283,24 @@ export function ComputerPanel({
         });
         continue;
       }
+
       if (toolName.startsWith(POCO_PLAYWRIGHT_MCP_PREFIX)) {
         frames.push({
           kind: "browser",
           execution: e,
           label: getBrowserStepLabel(e),
+        });
+        continue;
+      }
+
+      if (COMPUTER_GENERIC_TOOL_NAMES.has(normalizedToolName)) {
+        const summary = getGenericToolSummary(e);
+        frames.push({
+          kind: "tool",
+          execution: e,
+          label: summary
+            ? truncateMiddle(summary, 80)
+            : (toolName || t("chat.toolCards.tools.tool")).trim(),
         });
       }
     }
@@ -229,6 +313,10 @@ export function ComputerPanel({
   );
   const terminalCount = React.useMemo(
     () => replayFramesAll.filter((f) => f.kind === "terminal").length,
+    [replayFramesAll],
+  );
+  const toolCount = React.useMemo(
+    () => replayFramesAll.filter((f) => f.kind === "tool").length,
     [replayFramesAll],
   );
 
@@ -248,8 +336,26 @@ export function ComputerPanel({
     if (replayFilter === "terminal") {
       return replayFramesAll.filter((f) => f.kind === "terminal");
     }
+    if (replayFilter === "tool") {
+      return replayFramesAll.filter((f) => f.kind === "tool");
+    }
     return replayFramesAll;
   }, [replayFilter, replayFramesAll]);
+
+  const availableKinds = React.useMemo(() => {
+    const kinds: ReplayKind[] = [];
+    if (browserCount > 0) kinds.push("browser");
+    if (terminalCount > 0) kinds.push("terminal");
+    if (toolCount > 0) kinds.push("tool");
+    return kinds;
+  }, [browserCount, terminalCount, toolCount]);
+
+  React.useEffect(() => {
+    if (replayFilter === "all") return;
+    if (!availableKinds.includes(replayFilter)) {
+      setReplayFilter("all");
+    }
+  }, [availableKinds, replayFilter]);
 
   const selectedIndex = React.useMemo(() => {
     if (!selectedFrameId) return -1;
@@ -451,6 +557,9 @@ export function ComputerPanel({
         />
       );
     }
+    if (selectedFrame.kind === "tool") {
+      return <GenericToolViewer execution={selectedFrame.execution} />;
+    }
     return <TerminalViewer execution={selectedFrame.execution} />;
   })();
 
@@ -580,33 +689,48 @@ export function ComputerPanel({
     </div>
   );
 
-  const hasMultipleTypes = browserCount > 0 && terminalCount > 0;
+  const hasMultipleTypes = availableKinds.length > 1;
+
+  const filterOptions = React.useMemo(
+    () =>
+      [
+        {
+          value: "all" as const,
+          label: t("computer.replay.filter.all"),
+          Icon: Layers,
+        },
+        browserCount > 0
+          ? {
+              value: "browser" as const,
+              label: t("computer.replay.filter.browser"),
+              Icon: Globe,
+            }
+          : null,
+        terminalCount > 0
+          ? {
+              value: "terminal" as const,
+              label: t("computer.replay.filter.terminal"),
+              Icon: SquareTerminal,
+            }
+          : null,
+        toolCount > 0
+          ? {
+              value: "tool" as const,
+              label: t("chat.toolCards.tools.tool"),
+              Icon: Wrench,
+            }
+          : null,
+      ].filter(Boolean) as Array<{
+        value: ReplayFilter;
+        label: string;
+        Icon: React.ComponentType<{ className?: string }>;
+      }>,
+    [browserCount, terminalCount, t, toolCount],
+  );
 
   const filterToggleGroup = hasMultipleTypes ? (
     <div className="flex h-full flex-col items-center gap-1 p-1">
-      {(
-        [
-          {
-            value: "all" as const,
-            label: t("computer.replay.filter.all"),
-            Icon: Layers,
-          },
-          {
-            value: "browser" as const,
-            label: t("computer.replay.filter.browser"),
-            Icon: Globe,
-          },
-          {
-            value: "terminal" as const,
-            label: t("computer.replay.filter.terminal"),
-            Icon: SquareTerminal,
-          },
-        ] satisfies Array<{
-          value: ReplayFilter;
-          label: string;
-          Icon: React.ComponentType<{ className?: string }>;
-        }>
-      ).map(({ value, label, Icon }) => (
+      {filterOptions.map(({ value, label, Icon }) => (
         <Tooltip key={value}>
           <TooltipTrigger asChild>
             <button
@@ -708,6 +832,8 @@ export function ComputerPanel({
               const kindIcon =
                 frame.kind === "browser" ? (
                   <Globe className="size-4 text-muted-foreground" />
+                ) : frame.kind === "tool" ? (
+                  renderToolKindIcon(frame.execution.tool_name || "")
                 ) : (
                   <SquareTerminal className="size-4 text-muted-foreground" />
                 );
