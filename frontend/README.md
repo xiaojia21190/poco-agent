@@ -42,8 +42,6 @@ Useful variables:
 
 ## Architecture
 
-See `docs/frontend-architecture.md` for the full structure and conventions.
-
 Quick map:
 
 - `app/`: routes + layouts + global styles

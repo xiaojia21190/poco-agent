@@ -2,10 +2,9 @@
 
 import * as React from "react";
 
-import { ModeToggle } from "@/features/home/components/mode-toggle";
+import { ModeToggle } from "@/features/task-composer/components/mode-toggle";
 import { TaskComposer } from "@/features/task-composer/components/task-composer";
-import { ConnectorsBar } from "@/features/home/components/connectors-bar";
-import { KeyboardHints } from "@/features/home/components/keyboard-hints";
+import { KeyboardHints } from "@/features/task-composer/components/keyboard-hints";
 import type { ComposerMode } from "@/features/task-composer/types";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +13,7 @@ interface TaskEntrySectionProps {
   mode: ComposerMode;
   onModeChange: (mode: ComposerMode) => void;
   toggleDisabled?: boolean;
-  connectorsExpanded?: boolean;
+  footer?: React.ReactNode;
   composerProps: Omit<React.ComponentProps<typeof TaskComposer>, "mode">;
   className?: string;
 }
@@ -24,7 +23,7 @@ export function TaskEntrySection({
   mode,
   onModeChange,
   toggleDisabled = false,
-  connectorsExpanded = false,
+  footer,
   composerProps,
   className,
 }: TaskEntrySectionProps) {
@@ -53,7 +52,7 @@ export function TaskEntrySection({
 
         <TaskComposer {...composerProps} mode={mode} />
 
-        <ConnectorsBar forceExpanded={connectorsExpanded} />
+        {footer}
 
         {composerProps.value.length === 0 ? (
           <KeyboardHints className="mt-4" />

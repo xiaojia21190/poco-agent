@@ -17,6 +17,7 @@ import {
 import type { ProjectItem, TaskHistoryItem } from "@/features/projects/types";
 
 import { ProjectHeader } from "@/features/projects/components/project-header";
+import { ConnectorsBar } from "@/features/home/components/connectors-bar";
 import { useAppShell } from "@/components/shared/app-shell-context";
 import { toast } from "sonner";
 
@@ -171,7 +172,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
         mode={mode}
         onModeChange={setMode}
         toggleDisabled={isSubmitting}
-        connectorsExpanded={shouldExpandConnectors}
+        footer={<ConnectorsBar forceExpanded={shouldExpandConnectors} />}
         composerProps={{
           textareaRef,
           value: inputValue,

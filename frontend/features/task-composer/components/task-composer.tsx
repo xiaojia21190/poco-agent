@@ -11,19 +11,18 @@ import {
   RunScheduleDialog,
   type RunScheduleMode,
 } from "@/features/task-composer/components/run-schedule-dialog";
+import { ComposerAttachments } from "@/features/task-composer/components/composer-attachments";
+import { ComposerToolbar } from "@/features/task-composer/components/composer-toolbar";
+import { RepoDialog } from "@/features/task-composer/components/repo-dialog";
+import { SlashAutocompleteDropdown } from "@/features/task-composer/components/slash-autocomplete-dropdown";
 import { useSlashCommandAutocomplete } from "@/features/chat/hooks/use-slash-command-autocomplete";
 import { useAppShell } from "@/components/shared/app-shell-context";
-import { useFileUpload } from "@/features/home/hooks/use-file-upload";
+import { useFileUpload } from "@/features/task-composer/hooks/use-file-upload";
 import type {
   ComposerMode,
   RepoUsageMode,
   TaskSendOptions,
 } from "@/features/task-composer/types";
-
-import { ComposerAttachments } from "@/features/home/components/composer-attachments";
-import { ComposerToolbar } from "@/features/home/components/composer-toolbar";
-import { RepoDialog } from "@/features/home/components/repo-dialog";
-import { SlashAutocompleteDropdown } from "@/features/home/components/slash-autocomplete-dropdown";
 
 // ---------------------------------------------------------------------------
 // Props

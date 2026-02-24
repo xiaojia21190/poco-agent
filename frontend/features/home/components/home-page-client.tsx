@@ -17,6 +17,7 @@ import {
 import type { ModelConfigResponse } from "@/features/chat/types";
 
 import { HomeHeader } from "./home-header";
+import { ConnectorsBar } from "@/features/home/components/connectors-bar";
 
 import { useAppShell } from "@/components/shared/app-shell-context";
 import { toast } from "sonner";
@@ -230,7 +231,7 @@ export function HomePageClient() {
         mode={mode}
         onModeChange={setMode}
         toggleDisabled={isSubmitting}
-        connectorsExpanded={shouldExpandConnectors}
+        footer={<ConnectorsBar forceExpanded={shouldExpandConnectors} />}
         composerProps={{
           textareaRef,
           value: inputValue,
