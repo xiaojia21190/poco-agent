@@ -27,10 +27,7 @@ export type SessionStorageKey =
 // Generic helpers (private)
 // ---------------------------------------------------------------------------
 
-function getItem<T>(
-  storage: Storage | undefined,
-  key: string,
-): T | null {
+function getItem<T>(storage: Storage | undefined, key: string): T | null {
   if (!storage) return null;
   try {
     const raw = storage.getItem(`${PREFIX}${key}`);
@@ -40,11 +37,7 @@ function getItem<T>(
   }
 }
 
-function setItem<T>(
-  storage: Storage | undefined,
-  key: string,
-  value: T,
-): void {
+function setItem<T>(storage: Storage | undefined, key: string, value: T): void {
   if (!storage) return;
   try {
     storage.setItem(`${PREFIX}${key}`, JSON.stringify(value));

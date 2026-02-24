@@ -104,7 +104,13 @@ export function RepoDialog({
     if (!allowProjectize || repoUsage !== "create_project") return;
     if (projectName.trim() || !derivedName) return;
     onProjectNameChange(derivedName);
-  }, [allowProjectize, derivedName, onProjectNameChange, projectName, repoUsage]);
+  }, [
+    allowProjectize,
+    derivedName,
+    onProjectNameChange,
+    projectName,
+    repoUsage,
+  ]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

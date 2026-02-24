@@ -59,9 +59,7 @@ export function proxy(req: NextRequest) {
   if (!lng) lng = fallbackLng;
 
   // 4. Check if locale already exists in path
-  const lngInPath = languages.find((loc) =>
-    url.pathname.startsWith(`/${loc}`),
-  );
+  const lngInPath = languages.find((loc) => url.pathname.startsWith(`/${loc}`));
 
   const headers = new Headers(req.headers);
   headers.set(headerName, lngInPath || lng);
