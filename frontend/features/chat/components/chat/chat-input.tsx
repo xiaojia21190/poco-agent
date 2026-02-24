@@ -308,7 +308,9 @@ export function ChatInput({
                             <span>{connector.title}</span>
                           </div>
                           {/* TODO: Implement connection logic */}
-                          <span className="text-xs font-medium">连接</span>
+                          <span className="text-xs font-medium">
+                            {t("hero.connect")}
+                          </span>
                         </div>
                       </DropdownMenuItem>
                     ));
