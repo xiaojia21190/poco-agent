@@ -133,7 +133,10 @@ export function ChatPanel({
     requests: userInputRequests,
     isLoading: isSubmittingUserInput,
     submitAnswer: submitUserInputAnswer,
-  } = useUserInputRequests(session?.session_id, Boolean(session?.session_id));
+  } = useUserInputRequests(
+    session?.session_id,
+    Boolean(session?.session_id) && isSessionActive,
+  );
 
   const activeUserInput = userInputRequests[0];
   const [stickyUserInput, setStickyUserInput] =
