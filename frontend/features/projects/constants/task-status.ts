@@ -8,7 +8,10 @@ export const TASK_STATUS_META: Record<
     dotClassName: "bg-muted-foreground/40",
     labelKey: "status.pending",
   },
-  running: { dotClassName: "bg-primary/70", labelKey: "status.running" },
+  running: {
+    dotClassName: "bg-primary ring-1 ring-primary/45",
+    labelKey: "status.running",
+  },
   completed: { dotClassName: "bg-primary", labelKey: "status.completed" },
   failed: { dotClassName: "bg-destructive", labelKey: "status.failed" },
   canceled: {

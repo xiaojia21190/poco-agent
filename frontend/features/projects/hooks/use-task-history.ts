@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import {
   listTaskHistoryAction,
   moveTaskToProjectAction,
@@ -28,6 +28,7 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
   const { initialTasks = [] } = options;
   const seededTasks = hasPreloadedTasks ? (preloadTasks ?? []) : initialTasks;
   const { t } = useT("translation");
+  const hasConsumedStartupPreloadRef = useRef(hasPreloadedTasks);
   const [taskHistory, setTaskHistory] =
     useState<TaskHistoryItem[]>(seededTasks);
   const [isLoading, setIsLoading] = useState(
@@ -37,17 +38,23 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
   const fetchTasks = useCallback(async () => {
     try {
       setIsLoading(true);
-      if (hasStartupPreloadValue("taskHistory")) {
-        setTaskHistory(getStartupPreloadValue("taskHistory") ?? []);
-        return;
-      }
+      // Startup preload is a static snapshot. Use it only once to avoid
+      // clobbering runtime updates when refreshTasks() is called later.
+      if (!hasConsumedStartupPreloadRef.current) {
+        hasConsumedStartupPreloadRef.current = true;
 
-      const preloadPromise = getStartupPreloadPromise();
-      if (preloadPromise) {
-        await preloadPromise;
         if (hasStartupPreloadValue("taskHistory")) {
           setTaskHistory(getStartupPreloadValue("taskHistory") ?? []);
           return;
+        }
+
+        const preloadPromise = getStartupPreloadPromise();
+        if (preloadPromise) {
+          await preloadPromise;
+          if (hasStartupPreloadValue("taskHistory")) {
+            setTaskHistory(getStartupPreloadValue("taskHistory") ?? []);
+            return;
+          }
         }
       }
 

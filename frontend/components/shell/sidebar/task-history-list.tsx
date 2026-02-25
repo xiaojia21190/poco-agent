@@ -67,7 +67,7 @@ interface DraggableTaskProps {
 
 // Task status dot colors:
 // - pending   → bg-muted-foreground/40
-// - running   → bg-primary/70 (with pulse animation)
+// - running   → bg-primary (with blink animation)
 // - completed → bg-primary
 // - failed    → bg-destructive
 // - canceled  → bg-chart-4/60
@@ -97,6 +97,7 @@ function DraggableTask({
   });
 
   const statusMeta = TASK_STATUS_META[task.status];
+  const isRunningTask = task.status === "running";
 
   const handleClick = (e: React.MouseEvent) => {
     if (isSelectionMode) {
@@ -166,7 +167,8 @@ function DraggableTask({
                 className={cn(
                   "size-2 shrink-0 rounded-full transition-opacity",
                   statusMeta.dotClassName,
-                  task.status === "running" && "animate-pulse",
+                  isRunningTask &&
+                    "motion-safe:animate-[running-status-dot-blink_1.05s_ease-in-out_infinite] motion-reduce:animate-none",
                   "group-hover/task-card:opacity-0",
                 )}
                 aria-hidden="true"
