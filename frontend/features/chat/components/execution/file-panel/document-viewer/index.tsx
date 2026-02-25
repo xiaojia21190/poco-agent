@@ -307,6 +307,7 @@ interface TextDocumentViewerProps {
   ensureFreshFile?: (file: FileNode) => Promise<FileNode | undefined>;
   onClose?: () => void;
   onOpenPreviewWindow?: () => void;
+  showCardWhileLoading?: boolean;
 }
 
 const TextDocumentViewer = ({
@@ -316,6 +317,7 @@ const TextDocumentViewer = ({
   ensureFreshFile,
   onClose,
   onOpenPreviewWindow,
+  showCardWhileLoading = false,
 }: TextDocumentViewerProps) => {
   const { t } = useT("translation");
   const { resolvedTheme } = useTheme();
@@ -324,6 +326,7 @@ const TextDocumentViewer = ({
     fallbackUrl: resolvedUrl,
   });
   const [copyState, setCopyState] = React.useState<"idle" | "copied">("idle");
+  const isLoading = state.status === "idle" || state.status === "loading";
   const syntaxLanguage =
     language && language !== DEFAULT_TEXT_LANGUAGE ? language : undefined;
   const subtitle = (language || DEFAULT_TEXT_LANGUAGE).toUpperCase();
@@ -348,7 +351,7 @@ const TextDocumentViewer = ({
     }
   }, [state]);
 
-  if (state.status === "idle" || state.status === "loading") {
+  if (isLoading && !showCardWhileLoading) {
     return <DocumentViewerSkeleton label={t("artifacts.viewer.loadingDoc")} />;
   }
 
@@ -387,7 +390,7 @@ const TextDocumentViewer = ({
     );
   }
 
-  if (state.status !== "success") {
+  if (state.status !== "success" && !isLoading) {
     return null;
   }
 
@@ -405,51 +408,58 @@ const TextDocumentViewer = ({
         onClose={onClose}
         onDownload={handleDownload}
         onCopy={handleCopy}
-        copyDisabled={false}
+        copyDisabled={state.status !== "success"}
         copyState={copyState}
         onOpenPreviewWindow={onOpenPreviewWindow}
       />
-      <div className="flex-1 overflow-auto min-h-0 p-4">
-        <SyntaxHighlighter
-          language={syntaxLanguage}
-          style={syntaxTheme}
-          wrapLines={false}
-          showLineNumbers
-          lineNumberStyle={{
-            userSelect: "none",
-            WebkitUserSelect: "none",
-            minWidth: "2.5em",
-            paddingRight: "1em",
-            textAlign: "right",
-            opacity: 0.5,
-          }}
-          customStyle={{
-            background: "transparent",
-            margin: 0,
-            padding: 0,
-            fontSize: "0.85rem",
-            overflow: "visible",
-          }}
-          codeTagProps={{
-            style: {
+      <div className="relative flex-1 min-h-0 overflow-auto p-4">
+        {state.status === "success" && (
+          <SyntaxHighlighter
+            language={syntaxLanguage}
+            style={syntaxTheme}
+            wrapLines={false}
+            showLineNumbers
+            lineNumberStyle={{
+              userSelect: "none",
+              WebkitUserSelect: "none",
+              minWidth: "2.5em",
+              paddingRight: "1em",
+              textAlign: "right",
+              opacity: 0.5,
+            }}
+            customStyle={{
               background: "transparent",
-            },
-          }}
-          PreTag={({ children, ...props }) => (
-            <pre
-              {...props}
-              style={{
+              margin: 0,
+              padding: 0,
+              fontSize: "0.85rem",
+              overflow: "visible",
+            }}
+            codeTagProps={{
+              style: {
                 background: "transparent",
-                margin: 0,
-                overflow: "visible",
-              }}
-            >
-              {children}
-            </pre>
-          )}
-        >
-          {state.content}
-        </SyntaxHighlighter>
+              },
+            }}
+            PreTag={({ children, ...props }) => (
+              <pre
+                {...props}
+                style={{
+                  background: "transparent",
+                  margin: 0,
+                  overflow: "visible",
+                }}
+              >
+                {children}
+              </pre>
+            )}
+          >
+            {state.content}
+          </SyntaxHighlighter>
+        )}
+        {isLoading && showCardWhileLoading && (
+          <DocumentViewerOverlaySkeleton
+            label={t("artifacts.viewer.loadingDoc")}
+          />
+        )}
       </div>
     </div>
   );
@@ -461,12 +471,14 @@ const MarkdownDocumentViewer = ({
   ensureFreshFile,
   onClose,
   onOpenPreviewWindow,
+  showCardWhileLoading = false,
 }: {
   file: FileNode;
   resolvedUrl?: string;
   ensureFreshFile?: (file: FileNode) => Promise<FileNode | undefined>;
   onClose?: () => void;
   onOpenPreviewWindow?: () => void;
+  showCardWhileLoading?: boolean;
 }) => {
   const { t } = useT("translation");
   const { state, refetch } = useFileTextContent({
@@ -474,6 +486,7 @@ const MarkdownDocumentViewer = ({
     fallbackUrl: resolvedUrl,
   });
   const [copyState, setCopyState] = React.useState<"idle" | "copied">("idle");
+  const isLoading = state.status === "idle" || state.status === "loading";
 
   const handleDownload = async () => {
     const refreshed = ensureFreshFile ? await ensureFreshFile(file) : file;
@@ -494,7 +507,7 @@ const MarkdownDocumentViewer = ({
     }
   }, [state]);
 
-  if (state.status === "idle" || state.status === "loading") {
+  if (isLoading && !showCardWhileLoading) {
     return <DocumentViewerSkeleton label={t("artifacts.viewer.loadingDoc")} />;
   }
 
@@ -533,7 +546,7 @@ const MarkdownDocumentViewer = ({
     );
   }
 
-  if (state.status !== "success") {
+  if (state.status !== "success" && !isLoading) {
     return null;
   }
 
@@ -551,78 +564,85 @@ const MarkdownDocumentViewer = ({
         onClose={onClose}
         onDownload={handleDownload}
         onCopy={handleCopy}
-        copyDisabled={false}
+        copyDisabled={state.status !== "success"}
         copyState={copyState}
         onOpenPreviewWindow={onOpenPreviewWindow}
       />
-      <div className="flex-1 overflow-auto bg-background min-h-0">
-        <div className="mx-auto w-full max-w-4xl px-6 py-8">
-          <AdaptiveMarkdown className="prose prose-sm dark:prose-invert max-w-none break-words [&_*]:break-words">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
-              rehypePlugins={[rehypeKatex]}
-              components={{
-                pre: MarkdownPre,
-                code: MarkdownCode,
-                a: ({ children, href, ...props }) => (
-                  <a
-                    className="text-primary underline underline-offset-4 decoration-primary/30 hover:decoration-primary"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    href={href}
-                    {...props}
-                  >
-                    {children}
-                  </a>
-                ),
-                h1: ({ children }) => (
-                  <h1 className="text-3xl font-bold mb-6 pb-2 border-b border-border">
-                    {children}
-                  </h1>
-                ),
-                h2: ({ children }) => (
-                  <h2 className="text-2xl font-semibold mb-4 mt-8">
-                    {children}
-                  </h2>
-                ),
-                h3: ({ children }) => (
-                  <h3 className="text-xl font-semibold mb-3 mt-6">
-                    {children}
-                  </h3>
-                ),
-                table: ({ children }) => (
-                  <div className="overflow-x-auto my-6 rounded-lg border border-border">
-                    <table className="w-full border-collapse text-sm">
+      <div className="relative flex-1 min-h-0 overflow-auto bg-background">
+        {state.status === "success" && (
+          <div className="mx-auto w-full max-w-4xl px-6 py-8">
+            <AdaptiveMarkdown className="prose prose-sm dark:prose-invert max-w-none break-words [&_*]:break-words">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
+                rehypePlugins={[rehypeKatex]}
+                components={{
+                  pre: MarkdownPre,
+                  code: MarkdownCode,
+                  a: ({ children, href, ...props }) => (
+                    <a
+                      className="text-primary underline underline-offset-4 decoration-primary/30 hover:decoration-primary"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={href}
+                      {...props}
+                    >
                       {children}
-                    </table>
-                  </div>
-                ),
-                thead: ({ children }) => (
-                  <thead className="bg-muted/50">{children}</thead>
-                ),
-                tbody: ({ children }) => (
-                  <tbody className="divide-y divide-border">{children}</tbody>
-                ),
-                th: ({ children }) => (
-                  <th className="border-b-2 border-border px-4 py-3 text-left font-semibold text-foreground">
-                    {children}
-                  </th>
-                ),
-                td: ({ children }) => (
-                  <td className="px-4 py-3 text-foreground">{children}</td>
-                ),
-                blockquote: ({ children }) => (
-                  <blockquote className="border-l-4 border-primary/20 bg-primary/5 pl-4 py-1 italic my-6 rounded-r-sm">
-                    {children}
-                  </blockquote>
-                ),
-                hr: () => <hr className="my-8 border-t border-border/60" />,
-              }}
-            >
-              {state.content}
-            </ReactMarkdown>
-          </AdaptiveMarkdown>
-        </div>
+                    </a>
+                  ),
+                  h1: ({ children }) => (
+                    <h1 className="text-3xl font-bold mb-6 pb-2 border-b border-border">
+                      {children}
+                    </h1>
+                  ),
+                  h2: ({ children }) => (
+                    <h2 className="text-2xl font-semibold mb-4 mt-8">
+                      {children}
+                    </h2>
+                  ),
+                  h3: ({ children }) => (
+                    <h3 className="text-xl font-semibold mb-3 mt-6">
+                      {children}
+                    </h3>
+                  ),
+                  table: ({ children }) => (
+                    <div className="overflow-x-auto my-6 rounded-lg border border-border">
+                      <table className="w-full border-collapse text-sm">
+                        {children}
+                      </table>
+                    </div>
+                  ),
+                  thead: ({ children }) => (
+                    <thead className="bg-muted/50">{children}</thead>
+                  ),
+                  tbody: ({ children }) => (
+                    <tbody className="divide-y divide-border">{children}</tbody>
+                  ),
+                  th: ({ children }) => (
+                    <th className="border-b-2 border-border px-4 py-3 text-left font-semibold text-foreground">
+                      {children}
+                    </th>
+                  ),
+                  td: ({ children }) => (
+                    <td className="px-4 py-3 text-foreground">{children}</td>
+                  ),
+                  blockquote: ({ children }) => (
+                    <blockquote className="border-l-4 border-primary/20 bg-primary/5 pl-4 py-1 italic my-6 rounded-r-sm">
+                      {children}
+                    </blockquote>
+                  ),
+                  hr: () => <hr className="my-8 border-t border-border/60" />,
+                }}
+              >
+                {state.content}
+              </ReactMarkdown>
+            </AdaptiveMarkdown>
+          </div>
+        )}
+        {isLoading && showCardWhileLoading && (
+          <DocumentViewerOverlaySkeleton
+            label={t("artifacts.viewer.loadingDoc")}
+          />
+        )}
       </div>
     </div>
   );
@@ -634,12 +654,14 @@ const ExcalidrawDocumentViewer = ({
   ensureFreshFile,
   onClose,
   onOpenPreviewWindow,
+  showCardWhileLoading = false,
 }: {
   file: FileNode;
   resolvedUrl?: string;
   ensureFreshFile?: (file: FileNode) => Promise<FileNode | undefined>;
   onClose?: () => void;
   onOpenPreviewWindow?: () => void;
+  showCardWhileLoading?: boolean;
 }) => {
   const { t } = useT("translation");
   const { resolvedTheme } = useTheme();
@@ -647,6 +669,7 @@ const ExcalidrawDocumentViewer = ({
     file,
     fallbackUrl: resolvedUrl,
   });
+  const isLoading = state.status === "idle" || state.status === "loading";
 
   const parsedSceneState = React.useMemo(() => {
     if (state.status !== "success") {
@@ -674,7 +697,7 @@ const ExcalidrawDocumentViewer = ({
     });
   };
 
-  if (state.status === "idle" || state.status === "loading") {
+  if (isLoading && !showCardWhileLoading) {
     return <DocumentViewerSkeleton label={t("artifacts.viewer.loadingDoc")} />;
   }
 
@@ -743,7 +766,7 @@ const ExcalidrawDocumentViewer = ({
     );
   }
 
-  if (parsedSceneState.status !== "success") {
+  if (parsedSceneState.status !== "success" && !isLoading) {
     return null;
   }
 
@@ -762,11 +785,18 @@ const ExcalidrawDocumentViewer = ({
         onDownload={handleDownload}
         onOpenPreviewWindow={onOpenPreviewWindow}
       />
-      <div className="flex-1 min-h-0 overflow-hidden bg-background">
-        <ExcalidrawViewer
-          initialData={parsedSceneState.scene}
-          theme={resolvedTheme === "dark" ? "dark" : "light"}
-        />
+      <div className="relative flex-1 min-h-0 overflow-hidden bg-background">
+        {parsedSceneState.status === "success" && (
+          <ExcalidrawViewer
+            initialData={parsedSceneState.scene}
+            theme={resolvedTheme === "dark" ? "dark" : "light"}
+          />
+        )}
+        {isLoading && showCardWhileLoading && (
+          <DocumentViewerOverlaySkeleton
+            label={t("artifacts.viewer.loadingDoc")}
+          />
+        )}
       </div>
     </div>
   );
@@ -778,18 +808,21 @@ const DrawioDocumentViewer = ({
   ensureFreshFile,
   onClose,
   onOpenPreviewWindow,
+  showCardWhileLoading = false,
 }: {
   file: FileNode;
   resolvedUrl?: string;
   ensureFreshFile?: (file: FileNode) => Promise<FileNode | undefined>;
   onClose?: () => void;
   onOpenPreviewWindow?: () => void;
+  showCardWhileLoading?: boolean;
 }) => {
   const { t } = useT("translation");
   const { state, refetch } = useFileTextContent({
     file,
     fallbackUrl: resolvedUrl,
   });
+  const isLoading = state.status === "idle" || state.status === "loading";
 
   const viewerUrl =
     state.status === "success"
@@ -808,7 +841,7 @@ const DrawioDocumentViewer = ({
     });
   };
 
-  if (state.status === "idle" || state.status === "loading") {
+  if (isLoading && !showCardWhileLoading) {
     return <DocumentViewerSkeleton label={t("artifacts.viewer.loadingDoc")} />;
   }
 
@@ -847,7 +880,7 @@ const DrawioDocumentViewer = ({
     );
   }
 
-  if (!viewerUrl) {
+  if (!viewerUrl && !isLoading) {
     return (
       <StatusLayout
         icon={File}
@@ -872,12 +905,21 @@ const DrawioDocumentViewer = ({
         onDownload={handleDownload}
         onOpenPreviewWindow={onOpenPreviewWindow}
       />
-      <iframe
-        src={viewerUrl}
-        className="h-full w-full border-0 bg-background"
-        title={file.name || file.path || "drawio-diagram"}
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-      />
+      <div className="relative flex-1 min-h-0 overflow-hidden bg-background">
+        {viewerUrl && (
+          <iframe
+            src={viewerUrl}
+            className="h-full w-full border-0 bg-background"
+            title={file.name || file.path || "drawio-diagram"}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+          />
+        )}
+        {isLoading && showCardWhileLoading && (
+          <DocumentViewerOverlaySkeleton
+            label={t("artifacts.viewer.loadingDoc")}
+          />
+        )}
+      </div>
     </div>
   );
 };
@@ -1215,6 +1257,7 @@ const DocumentViewerComponent = ({
   const excalidrawFile = isExcalidrawFile(extension, file.mimeType);
   const drawioFile = isDrawioFile(extension, file.mimeType);
   const videoFile = isVideoFile(extension, file.mimeType);
+  const showCardWhileLoading = Boolean(onClose);
 
   const handleDownload = async () => {
     const refreshed = ensureFreshFile ? await ensureFreshFile(file) : file;
@@ -1270,6 +1313,7 @@ const DocumentViewerComponent = ({
         ensureFreshFile={ensureFreshFile}
         onClose={onClose}
         onOpenPreviewWindow={onOpenPreviewWindow}
+        showCardWhileLoading={showCardWhileLoading}
       />
     );
   }
@@ -1282,6 +1326,7 @@ const DocumentViewerComponent = ({
         ensureFreshFile={ensureFreshFile}
         onClose={onClose}
         onOpenPreviewWindow={onOpenPreviewWindow}
+        showCardWhileLoading={showCardWhileLoading}
       />
     );
   }
@@ -1336,6 +1381,7 @@ const DocumentViewerComponent = ({
         ensureFreshFile={ensureFreshFile}
         onClose={onClose}
         onOpenPreviewWindow={onOpenPreviewWindow}
+        showCardWhileLoading={showCardWhileLoading}
       />
     );
   }
@@ -1349,6 +1395,7 @@ const DocumentViewerComponent = ({
         ensureFreshFile={ensureFreshFile}
         onClose={onClose}
         onOpenPreviewWindow={onOpenPreviewWindow}
+        showCardWhileLoading={showCardWhileLoading}
       />
     );
   }
