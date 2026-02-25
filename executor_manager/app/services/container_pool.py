@@ -163,6 +163,7 @@ class ContainerPool:
             "WORKSPACE_PATH": "/workspace",
             "USER_ID": user_id,
             "SESSION_ID": session_id,
+            "EXECUTOR_TIMEZONE": self.settings.executor_timezone,
         }
         anthropic_api_key = (self.settings.anthropic_api_key or "").strip()
         if anthropic_api_key:
