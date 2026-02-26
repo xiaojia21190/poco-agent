@@ -592,7 +592,7 @@ export function ChatPanel({
 
       {/* Top Section: Todo List (full width) */}
       {hasTodos && (
-        <div className="px-4 pt-4 pb-2 shrink-0">
+        <div className={cn("pt-4 pb-2 shrink-0", contentPaddingClass)}>
           <TodoList
             todos={statePatch.todos!}
             progress={progress}
