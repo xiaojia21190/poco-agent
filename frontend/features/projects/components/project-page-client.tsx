@@ -171,7 +171,6 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
         title={projectTitle}
         mode={mode}
         onModeChange={setMode}
-        toggleDisabled={isSubmitting}
         footer={<ConnectorsBar forceExpanded={shouldExpandConnectors} />}
         composerProps={{
           textareaRef,

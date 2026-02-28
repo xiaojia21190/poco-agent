@@ -2,7 +2,6 @@
 
 import * as React from "react";
 
-import { ModeToggle } from "@/features/task-composer/components/mode-toggle";
 import { TaskComposer } from "@/features/task-composer/components/task-composer";
 import { KeyboardHints } from "@/features/task-composer/components/keyboard-hints";
 import type { ComposerMode } from "@/features/task-composer/types";
@@ -12,9 +11,11 @@ interface TaskEntrySectionProps {
   title: React.ReactNode;
   mode: ComposerMode;
   onModeChange: (mode: ComposerMode) => void;
-  toggleDisabled?: boolean;
   footer?: React.ReactNode;
-  composerProps: Omit<React.ComponentProps<typeof TaskComposer>, "mode">;
+  composerProps: Omit<
+    React.ComponentProps<typeof TaskComposer>,
+    "mode" | "onModeChange"
+  >;
   className?: string;
 }
 
@@ -22,7 +23,6 @@ export function TaskEntrySection({
   title,
   mode,
   onModeChange,
-  toggleDisabled = false,
   footer,
   composerProps,
   className,
@@ -41,16 +41,11 @@ export function TaskEntrySection({
           </h1>
         </div>
 
-        <div className="mb-5" data-onboarding="home-mode-toggle">
-          <ModeToggle
-            mode={mode}
-            onModeChange={onModeChange}
-            disabled={toggleDisabled}
-            className="w-full"
-          />
-        </div>
-
-        <TaskComposer {...composerProps} mode={mode} />
+        <TaskComposer
+          {...composerProps}
+          mode={mode}
+          onModeChange={onModeChange}
+        />
 
         {footer}
 

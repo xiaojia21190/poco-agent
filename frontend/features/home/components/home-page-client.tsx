@@ -230,7 +230,6 @@ export function HomePageClient() {
         title={t("hero.title")}
         mode={mode}
         onModeChange={setMode}
-        toggleDisabled={isSubmitting}
         footer={<ConnectorsBar forceExpanded={shouldExpandConnectors} />}
         composerProps={{
           textareaRef,

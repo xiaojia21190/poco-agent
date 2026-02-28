@@ -31,6 +31,7 @@ interface TaskComposerProps {
   value: string;
   onChange: (value: string) => void;
   mode: ComposerMode;
+  onModeChange: (mode: ComposerMode) => void;
   onSend: (options?: TaskSendOptions) => void | Promise<void>;
   isSubmitting?: boolean;
   allowProjectize?: boolean;
@@ -62,6 +63,7 @@ export function TaskComposer({
   value,
   onChange,
   mode,
+  onModeChange,
   onSend,
   isSubmitting,
   allowProjectize = true,
@@ -390,12 +392,13 @@ export function TaskComposer({
         <div className="flex-1 min-w-0">
           <ComposerToolbar
             mode={mode}
+            onModeChange={onModeChange}
             isSubmitting={isSubmitting}
             isUploading={upload.isUploading}
             canSubmit={canSubmit}
             browserEnabled={browserEnabled}
             onOpenRepoDialog={() => setRepoDialogOpen(true)}
-            onToggleBrowser={() => setBrowserEnabled((prev) => !prev)}
+            onBrowserEnabledChange={setBrowserEnabled}
             onOpenFileInput={() => fileInputRef.current?.click()}
             onSubmit={handleSubmit}
             scheduledSummary={

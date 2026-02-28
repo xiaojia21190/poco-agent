@@ -5,36 +5,48 @@ import {
   Loader2,
   ArrowUp,
   Plus,
-  Chrome,
+  SlidersHorizontal,
   Clock,
+  Chrome,
   Paperclip,
   Code2,
+  SquareTerminal,
+  ListTodo,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useT } from "@/lib/i18n/client";
-import { cn } from "@/lib/utils";
 import type { ComposerMode } from "@/features/task-composer/types";
+import { COMPOSER_MODE_SEQUENCE } from "@/features/task-composer/lib/mode-utils";
+
+const MODE_ICONS: Record<
+  ComposerMode,
+  React.ComponentType<React.SVGProps<SVGSVGElement>>
+> = {
+  task: SquareTerminal,
+  plan: ListTodo,
+  scheduled: Clock,
+};
 
 interface ComposerToolbarProps {
   mode: ComposerMode;
+  onModeChange: (mode: ComposerMode) => void;
   isSubmitting?: boolean;
   isUploading: boolean;
   canSubmit: boolean;
   browserEnabled: boolean;
   onOpenRepoDialog: () => void;
-  onToggleBrowser: () => void;
+  onBrowserEnabledChange: (enabled: boolean) => void;
   onOpenFileInput: () => void;
   onSubmit: () => void;
   scheduledSummary?: string;
@@ -48,12 +60,13 @@ interface ComposerToolbarProps {
  */
 export function ComposerToolbar({
   mode,
+  onModeChange,
   isSubmitting,
   isUploading,
   canSubmit,
   browserEnabled,
   onOpenRepoDialog,
-  onToggleBrowser,
+  onBrowserEnabledChange,
   onOpenFileInput,
   onSubmit,
   scheduledSummary,
@@ -61,16 +74,6 @@ export function ComposerToolbar({
 }: ComposerToolbarProps) {
   const { t } = useT("translation");
   const disabled = isSubmitting || isUploading;
-  const browserTooltipTitle = browserEnabled
-    ? t("hero.browser.enabledTooltipTitle")
-    : t("hero.browser.disabledTooltipTitle");
-  const browserTooltipDescription = browserEnabled
-    ? t("hero.browser.enabledTooltipDescription")
-    : t("hero.browser.disabledTooltipDescription");
-  const browserButtonClassName = cn(
-    "size-9 rounded-xl transition-opacity hover:bg-accent",
-    !browserEnabled && "text-muted-foreground/50",
-  );
 
   return (
     <div className="flex w-full flex-wrap items-center justify-between gap-3">
@@ -111,6 +114,56 @@ export function ComposerToolbar({
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Configure menu: mode + browser */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              disabled={disabled}
+              className="size-9 rounded-xl hover:bg-accent"
+              aria-label={t("hero.configure")}
+              title={t("hero.configure")}
+              data-onboarding="home-mode-toggle"
+            >
+              <SlidersHorizontal className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            side="top"
+            sideOffset={8}
+            className="w-52"
+          >
+            <DropdownMenuRadioGroup
+              value={mode}
+              onValueChange={(next) => onModeChange(next as ComposerMode)}
+            >
+              {COMPOSER_MODE_SEQUENCE.map((value) => {
+                const Icon = MODE_ICONS[value];
+                return (
+                  <DropdownMenuRadioItem key={value} value={value}>
+                    <Icon className="size-4" />
+                    <span>{t(`hero.modeLabels.${value}`)}</span>
+                  </DropdownMenuRadioItem>
+                );
+              })}
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuCheckboxItem
+              checked={browserEnabled}
+              onCheckedChange={(next) => {
+                if (next === "indeterminate") return;
+                onBrowserEnabledChange(Boolean(next));
+              }}
+            >
+              <Chrome className="size-4" />
+              <span>{t("hero.browser.toggle")}</span>
+            </DropdownMenuCheckboxItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         {/* Scheduled summary badge (scheduled mode only) */}
         {mode === "scheduled" &&
           scheduledSummary &&
@@ -136,36 +189,8 @@ export function ComposerToolbar({
           )}
       </div>
 
-      {/* Right: browser, send */}
+      {/* Right: send */}
       <div className="flex items-center gap-1">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              disabled={disabled}
-              className={browserButtonClassName}
-              aria-label={browserTooltipTitle}
-              title={browserTooltipTitle}
-              onClick={onToggleBrowser}
-            >
-              <Chrome
-                className={cn("size-4", !browserEnabled && "opacity-55")}
-                strokeWidth={2}
-              />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="top" sideOffset={8} className="max-w-56">
-            <div className="space-y-1">
-              <p className="text-xs font-medium">{browserTooltipTitle}</p>
-              <p className="text-[11px] leading-relaxed text-background/80">
-                {browserTooltipDescription}
-              </p>
-            </div>
-          </TooltipContent>
-        </Tooltip>
-
         <Button
           onClick={onSubmit}
           disabled={!canSubmit || disabled}
