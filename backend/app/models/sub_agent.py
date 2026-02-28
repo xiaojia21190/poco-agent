@@ -35,5 +35,4 @@ class SubAgent(Base, TimestampMixin):
 
     __table_args__ = (
         UniqueConstraint("user_id", "name", name="uq_sub_agent_user_name"),
-        {"sqlite_autoincrement": True},
     )

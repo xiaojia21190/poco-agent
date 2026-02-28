@@ -15,7 +15,9 @@ class Settings(BaseSettings):
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8000)
 
-    database_url: str = Field(default="sqlite:///./opencowork.db")
+    database_url: str = Field(
+        default="postgresql://postgres:password@localhost:5432/postgres"
+    )
     db_pool_size: int = Field(default=5)
     db_max_overflow: int = Field(default=10)
     db_pool_timeout_seconds: int = Field(default=30)

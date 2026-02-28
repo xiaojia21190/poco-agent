@@ -16,5 +16,4 @@ class UserClaudeMdSetting(Base, TimestampMixin):
 
     __table_args__ = (
         UniqueConstraint("user_id", name="uq_user_claude_md_settings_user_id"),
-        {"sqlite_autoincrement": True},
     )

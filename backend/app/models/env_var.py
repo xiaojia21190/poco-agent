@@ -16,5 +16,4 @@ class UserEnvVar(Base, TimestampMixin):
 
     __table_args__ = (
         UniqueConstraint("user_id", "key", name="uq_user_env_vars_user_key"),
-        {"sqlite_autoincrement": True},
     )
