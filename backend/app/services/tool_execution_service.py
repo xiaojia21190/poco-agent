@@ -74,7 +74,11 @@ class ToolExecutionService:
         after_id: uuid.UUID | None = None,
         limit: int = 200,
     ) -> ToolExecutionDeltaResponse:
-        """Gets incremental tool executions for polling."""
+        """Gets incremental tool executions for polling.
+
+        The cursor is ordered by ``updated_at`` + ``id`` so updates to existing
+        rows (for example ToolResult arriving later) are also returned.
+        """
         safe_limit = max(1, min(int(limit), 2000))
         fetched = ToolExecutionRepository.list_by_session_after_cursor(
             db,
@@ -89,7 +93,7 @@ class ToolExecutionService:
         items = [ToolExecutionResponse.model_validate(e) for e in items_db]
 
         if items_db:
-            next_after_created_at = items_db[-1].created_at
+            next_after_created_at = items_db[-1].updated_at
             next_after_id = items_db[-1].id
         else:
             next_after_created_at = after_created_at

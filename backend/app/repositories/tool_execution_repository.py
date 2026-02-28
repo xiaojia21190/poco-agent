@@ -87,7 +87,7 @@ class ToolExecutionRepository:
         after_id: uuid.UUID | None = None,
         limit: int = 100,
     ) -> list[ToolExecution]:
-        """Lists tool executions for a session using a composite cursor."""
+        """Lists tool executions for a session using an update-time composite cursor."""
         query = session_db.query(ToolExecution).filter(
             ToolExecution.session_id == session_id
         )
@@ -96,18 +96,18 @@ class ToolExecutionRepository:
             if after_id is not None:
                 query = query.filter(
                     or_(
-                        ToolExecution.created_at > after_created_at,
+                        ToolExecution.updated_at > after_created_at,
                         and_(
-                            ToolExecution.created_at == after_created_at,
+                            ToolExecution.updated_at == after_created_at,
                             ToolExecution.id > after_id,
                         ),
                     )
                 )
             else:
-                query = query.filter(ToolExecution.created_at > after_created_at)
+                query = query.filter(ToolExecution.updated_at > after_created_at)
 
         return (
-            query.order_by(ToolExecution.created_at.asc(), ToolExecution.id.asc())
+            query.order_by(ToolExecution.updated_at.asc(), ToolExecution.id.asc())
             .limit(limit)
             .all()
         )

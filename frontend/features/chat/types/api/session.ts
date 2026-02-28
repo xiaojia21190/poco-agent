@@ -84,6 +84,7 @@ export interface ToolExecutionResponse {
   is_error: boolean;
   duration_ms: number | null;
   created_at: string; // ISO datetime
+  updated_at: string; // ISO datetime
 }
 
 export interface ToolExecutionDeltaResponse {

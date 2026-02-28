@@ -31,16 +31,15 @@ export function useToolExecutions({
   const prevIsActiveRef = useRef(isActive);
   const cursorRef = useRef<{ afterCreatedAt?: string; afterId?: string }>({});
 
-  const mergeUniqueById = useCallback(
+  const mergeById = useCallback(
     (base: ToolExecutionResponse[], incoming: ToolExecutionResponse[]) => {
       if (incoming.length === 0) return base;
-      const merged = [...base];
-      const seen = new Set(base.map((item) => item.id));
+      const byId = new Map(base.map((item) => [item.id, item]));
       for (const item of incoming) {
-        if (seen.has(item.id)) continue;
-        seen.add(item.id);
-        merged.push(item);
+        // Delta can carry updates to an existing execution row. Keep the latest payload.
+        byId.set(item.id, item);
       }
+      const merged = Array.from(byId.values());
       merged.sort((a, b) => {
         if (a.created_at === b.created_at) {
           return a.id.localeCompare(b.id);
@@ -53,14 +52,29 @@ export function useToolExecutions({
   );
 
   const updateCursor = useCallback((items: ToolExecutionResponse[]) => {
-    const last = items.at(-1);
-    if (!last) {
+    if (items.length === 0) {
       cursorRef.current = {};
       return;
     }
+
+    let latest = items[0];
+    for (let i = 1; i < items.length; i += 1) {
+      const current = items[i];
+      if (current.updated_at > latest.updated_at) {
+        latest = current;
+        continue;
+      }
+      if (
+        current.updated_at === latest.updated_at &&
+        current.id.localeCompare(latest.id) > 0
+      ) {
+        latest = current;
+      }
+    }
+
     cursorRef.current = {
-      afterCreatedAt: last.created_at,
-      afterId: last.id,
+      afterCreatedAt: latest.updated_at,
+      afterId: latest.id,
     };
   }, []);
 
@@ -87,7 +101,7 @@ export function useToolExecutions({
           setExecutions(data);
           updateCursor(data);
         } else {
-          const merged = mergeUniqueById(executions, data);
+          const merged = mergeById(executions, data);
           setExecutions(merged);
           updateCursor(merged);
         }
@@ -104,7 +118,7 @@ export function useToolExecutions({
         hasLoadedOnceRef.current = true;
       }
     },
-    [executions, limit, mergeUniqueById, sessionId, updateCursor],
+    [executions, limit, mergeById, sessionId, updateCursor],
   );
 
   const fetchDelta = useCallback(async () => {
@@ -134,7 +148,9 @@ export function useToolExecutions({
         appended.push(...payload.items);
         hasMore = payload.has_more;
         currentCreatedAt =
-          payload.next_after_created_at ?? payload.items.at(-1)?.created_at;
+          payload.next_after_created_at ??
+          payload.items.at(-1)?.updated_at ??
+          currentCreatedAt;
         currentId = payload.next_after_id ?? payload.items.at(-1)?.id;
         if (!currentCreatedAt || !currentId) break;
         guard += 1;
@@ -143,17 +159,19 @@ export function useToolExecutions({
       if (seq !== requestSeqRef.current) return;
       if (appended.length === 0) return;
 
+      cursorRef.current = {
+        afterCreatedAt: currentCreatedAt,
+        afterId: currentId,
+      };
       setExecutions((prev) => {
-        const merged = mergeUniqueById(prev, appended);
-        updateCursor(merged);
-        return merged;
+        return mergeById(prev, appended);
       });
       setError(null);
     } catch (err) {
       if (seq !== requestSeqRef.current) return;
       setError(err as Error);
     }
-  }, [fetchSnapshot, limit, mergeUniqueById, sessionId, updateCursor]);
+  }, [fetchSnapshot, limit, mergeById, sessionId]);
 
   const loadMore = useCallback(() => {
     if (isLoadingMore || !hasMore || !sessionId) return;

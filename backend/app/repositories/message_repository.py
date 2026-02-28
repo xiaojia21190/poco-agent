@@ -57,15 +57,12 @@ class MessageRepository:
         limit: int = 100,
     ) -> list[AgentMessage]:
         """Lists messages for a session using an incremental ID cursor."""
-        query = (
-            session_db.query(AgentMessage)
-            .filter(AgentMessage.session_id == session_id)
-            .order_by(AgentMessage.id.asc())
-            .limit(limit)
+        query = session_db.query(AgentMessage).filter(
+            AgentMessage.session_id == session_id
         )
         if after_id > 0:
             query = query.filter(AgentMessage.id > after_id)
-        return query.all()
+        return query.order_by(AgentMessage.id.asc()).limit(limit).all()
 
     @staticmethod
     def count_by_session(session_db: Session, session_id: uuid.UUID) -> int:
