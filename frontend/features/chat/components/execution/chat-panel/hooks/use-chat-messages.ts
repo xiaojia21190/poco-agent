@@ -96,6 +96,23 @@ function applyHistoryMutation(
   });
 }
 
+function compareMessagesForRenderOrder(a: ChatMessage, b: ChatMessage): number {
+  const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+  const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+  if (timeA !== timeB) {
+    return timeA - timeB;
+  }
+
+  const idA = getNumericMessageId(a.id);
+  const idB = getNumericMessageId(b.id);
+  if (idA !== null && idB !== null) {
+    return idA - idB;
+  }
+  if (idA !== null) return -1;
+  if (idB !== null) return 1;
+  return a.id.localeCompare(b.id);
+}
+
 /**
  * Manages chat message loading, polling, and optimistic updates
  *
@@ -218,11 +235,7 @@ export function useChatMessages({
       });
 
       // Sort by timestamp
-      return finalMessages.sort((a, b) => {
-        const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-        const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-        return timeA - timeB;
-      });
+      return finalMessages.sort(compareMessagesForRenderOrder);
     },
     [],
   );
