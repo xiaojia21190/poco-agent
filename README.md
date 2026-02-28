@@ -1,11 +1,10 @@
 <div align="center">
-  <img src="assets/logo.JPG" alt="Poco Logo" width="150" height="150" style="border-radius: 25px;">
+
+![Poco Hero](assets/hero.png)
 
 # Poco: Your Pocket Coworker
 
-基于云端 Claude Code，打造 Manus 般的 Agent 体验
-
-你也可以把它看作是 **OpenClaw** 的**更安全**（沙盒隔离）、**更漂亮**（现代 UI）、**配置更简单**（开箱即用）的替代方案。
+A safer, more beautiful, and easier-to-use OpenClaw alternative
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-blue)](https://www.docker.com/)
@@ -14,62 +13,31 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com/)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/poco-ai/poco-agent)
 
-[English](./README_EN.md) | [中文](./README.md)
+[English](README.md) | [简体中文](README_zh.md)
 
 </div>
 
----
+## Core Features
 
-## 核心功能
+- **Secure Sandbox**: Tasks run in isolated containers - install dependencies or modify files freely without affecting your host environment.
+- **Beautiful UI & Mobile Support**: Provides an attractive web interface with output previews, allowing you to command your Agent from anywhere on your phone.
+- **Zero Configuration Ready-to-Use**: No complex local environment setup needed - one-click Docker launch with a complete runtime environment.
+- **Complete Capabilities & MCP/Skills Extensions**: Fully replicates Claude Code native features (Slash Commands, Plan Mode, AskQuestion), and supports MCP protocol or custom Skills for unlimited extensibility.
+- **Async & Scheduled Tasks**: Supports background execution and scheduled triggers - your Agent keeps working in the cloud even with the browser closed.
+- **More Features**: Built-in **browser** for autonomous web research, **GitHub repository connection** support, and many more powerful features waiting to be discovered!
 
-- **安全沙盒**：任务在隔离容器中运行，随意安装依赖或修改文件，绝不破坏宿主机环境。
-- **高颜值 UI & 移动端适配**：提供美观的 Web 界面和产物预览，手机上也能随时指挥 Agent。
-- **零配置开箱即用**：无需繁琐的本地环境配置，通过 Docker 一键启动，包含完整运行环境。
-- **全面能力 & MCP/skills 扩展**：完整复刻 Claude Code 原生功能（Slash Command、Plan Mode、AskQuestion），并支持 MCP 协议或自定义 Skills，能力无上限。
-- **异步与定时任务**：支持后台挂机运行和定时触发，关掉网页 Agent 依然在云端自动干活。
-- **更多功能**：内置**浏览器**可自主上网查资料，支持**GitHub 仓库连接**……更多强大功能等你发掘！
+## Quick Start
 
-![home](assets/home.png)
-
-<details>
-<summary><strong>点击查看更多功能演示</strong></summary>
-<br>
-
-1. 产物渲染，支持浏览器与终端回看
-   ![output](assets/output.png)
-   ![output-computer](assets/output-computer.png)
-   <video src="https://github.com/user-attachments/assets/3d732f0b-3f32-4aca-ab61-ec28c5fd274e" controls="controls"></video>
-   ![HTML](https://github.com/user-attachments/assets/0ef59c4c-8363-44a6-b9ed-7005ccfd71cb)
-   ![Multiple-file](https://github.com/user-attachments/assets/8135dab4-6396-4af8-97af-6f665853fb56)
-2. Plugin/MCP/Skills/Subagent/Slash Commands 全面支持，配置容易
-   ![mcp](assets/mcp.png)
-   ![skills](assets/skills.png)
-   <video src="https://github.com/user-attachments/assets/60df5a0f-c338-44ad-af03-e1ebb98d5743" controls="controls"></video>
-3. 定时任务
-   ![schedule](assets/schedule.png)
-4. 移动端优化，口袋里的 AI Coworker
-   <video src="https://github.com/user-attachments/assets/a8364763-8edf-4bb1-b873-5c27755a5712" controls="controls"></video>
-
-</details>
-
-## 快速开始
-
-运行一键启动脚本，按提示输入 API Key，自动生成配置文件并启动服务：
+Run the interactive setup script to automatically generate configuration and start services:
 
 ```bash
 ./scripts/quickstart.sh
 ```
 
-启动完成后访问：`http://localhost:3000`
+Visit: `http://localhost:3000` after startup completes.
 
-(可选) 如需使用外部 S3/R2 存储，请使用 `docker-compose.r2.yml` 启动。
-
-详细的部署指南与可能遇到的问题，请参考[部署文档](./docs/zh/README.md)。
+For detailed deployment documentation and troubleshooting, please refer to the [Deployment Guide](./docs/en/README.md).
 
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=poco-ai/poco-agent&type=date&legend=top-left)](https://www.star-history.com/#poco-ai/poco-agent&type=date&legend=top-left)
-
-## 致谢
-
-本项目灵感来源于[wegent](https://github.com/wecode-ai/Wegent)，并参考了其架构设计。感谢原作者的辛勤工作！
