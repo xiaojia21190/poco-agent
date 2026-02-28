@@ -63,8 +63,15 @@ export interface MessageResponse {
   id: number;
   role: string;
   content: Record<string, unknown>;
+  attachments?: InputFile[] | null;
   created_at: string; // ISO datetime
   updated_at: string; // ISO datetime
+}
+
+export interface MessageDeltaResponse {
+  items: MessageResponse[];
+  next_after_message_id: number | null;
+  has_more: boolean;
 }
 
 export interface ToolExecutionResponse {
@@ -77,6 +84,13 @@ export interface ToolExecutionResponse {
   is_error: boolean;
   duration_ms: number | null;
   created_at: string; // ISO datetime
+}
+
+export interface ToolExecutionDeltaResponse {
+  items: ToolExecutionResponse[];
+  next_after_created_at: string | null;
+  next_after_id: string | null;
+  has_more: boolean;
 }
 
 export interface UsageResponse {

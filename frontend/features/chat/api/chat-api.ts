@@ -18,12 +18,14 @@ import type {
   SessionResponse,
   SessionUpdateRequest,
   ToolExecutionResponse,
+  ToolExecutionDeltaResponse,
   ComputerBrowserScreenshotResponse,
   TaskEnqueueRequest,
   TaskEnqueueResponse,
   TaskConfig,
   InputFile,
   RunResponse,
+  MessageDeltaResponse,
 } from "@/features/chat/types";
 
 import {
@@ -201,6 +203,20 @@ export const chatService = {
     );
   },
 
+  getToolExecutionsDelta: async (
+    sessionId: string,
+    params?: {
+      after_created_at?: string;
+      after_id?: string;
+      limit?: number;
+    },
+  ): Promise<ToolExecutionDeltaResponse> => {
+    const query = buildQuery(params);
+    return apiClient.get<ToolExecutionDeltaResponse>(
+      `${API_ENDPOINTS.sessionToolExecutionsDelta(sessionId)}${query}`,
+    );
+  },
+
   getBrowserScreenshot: async (
     sessionId: string,
     toolUseId: string,
@@ -217,15 +233,29 @@ export const chatService = {
     options?: { realUserMessageIds?: number[] },
   ) => {
     try {
-      const rawMessages = await apiClient.get<RawApiMessage[]>(
-        API_ENDPOINTS.sessionMessagesWithFiles(sessionId),
-      );
+      const rawMessages = await chatService.getMessagesRaw(sessionId);
       const parsed = parseMessages(rawMessages, options?.realUserMessageIds);
       return parsed;
     } catch (error) {
       console.error("[Chat Service] Failed to get messages:", error);
       return { messages: [] };
     }
+  },
+
+  getMessagesRaw: async (sessionId: string): Promise<RawApiMessage[]> => {
+    return apiClient.get<RawApiMessage[]>(
+      API_ENDPOINTS.sessionMessagesWithFiles(sessionId),
+    );
+  },
+
+  getMessagesDeltaRaw: async (
+    sessionId: string,
+    params?: { after_message_id?: number; limit?: number },
+  ): Promise<MessageDeltaResponse> => {
+    const query = buildQuery(params);
+    return apiClient.get<MessageDeltaResponse>(
+      `${API_ENDPOINTS.sessionMessagesWithFilesDelta(sessionId)}${query}`,
+    );
   },
 
   // ---- Files ----

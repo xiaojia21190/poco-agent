@@ -23,8 +23,12 @@ export const API_ENDPOINTS = {
   sessionMessages: (sessionId: string) => `/sessions/${sessionId}/messages`,
   sessionMessagesWithFiles: (sessionId: string) =>
     `/sessions/${sessionId}/messages-with-files`,
+  sessionMessagesWithFilesDelta: (sessionId: string) =>
+    `/sessions/${sessionId}/messages-with-files/delta`,
   sessionToolExecutions: (sessionId: string) =>
     `/sessions/${sessionId}/tool-executions`,
+  sessionToolExecutionsDelta: (sessionId: string) =>
+    `/sessions/${sessionId}/tool-executions/delta`,
   sessionBrowserScreenshot: (sessionId: string, toolUseId: string) =>
     `/sessions/${sessionId}/computer/browser/${toolUseId}`,
   sessionUsage: (sessionId: string) => `/sessions/${sessionId}/usage`,

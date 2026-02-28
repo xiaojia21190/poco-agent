@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { sendMessageAction } from "@/features/chat/actions/session-actions";
 import {
-  getMessagesAction,
+  getMessagesDeltaRawAction,
+  getMessagesRawAction,
   getRunsBySessionAction,
 } from "@/features/chat/actions/query-actions";
 import type {
@@ -10,6 +11,10 @@ import type {
   InputFile,
   UsageResponse,
 } from "@/features/chat/types";
+import {
+  parseMessages,
+  type RawApiMessage,
+} from "@/features/chat/services/message-parser";
 
 interface UseChatMessagesOptions {
   session: ExecutionSession | null;
@@ -50,6 +55,7 @@ export function useChatMessages({
 
   const lastLoadedSessionIdRef = useRef<string | null>(null);
   const realUserMessageIdsRef = useRef<number[] | null>(null);
+  const rawMessagesRef = useRef<RawApiMessage[]>([]);
 
   const refreshRealUserMessageIds = useCallback(async () => {
     if (!session?.session_id) return;
@@ -76,18 +82,64 @@ export function useChatMessages({
     }
   }, [session?.session_id]);
 
-  const fetchMessagesWithFilter = useCallback(
+  const fetchMessagesFull = useCallback(
+    async (sessionId: string) => {
+      // Ensure we have a whitelist of real user input message ids (per run).
+      if (realUserMessageIdsRef.current === null) {
+        await refreshRealUserMessageIds();
+      }
+      const rawMessages = await getMessagesRawAction({ sessionId });
+      rawMessagesRef.current = rawMessages;
+      const realUserMessageIds = realUserMessageIdsRef.current ?? undefined;
+      const parsed = parseMessages(rawMessagesRef.current, realUserMessageIds);
+      return { messages: parsed.messages, changed: true };
+    },
+    [refreshRealUserMessageIds],
+  );
+
+  const fetchMessagesDelta = useCallback(
     async (sessionId: string) => {
       // Ensure we have a whitelist of real user input message ids (per run).
       if (realUserMessageIdsRef.current === null) {
         await refreshRealUserMessageIds();
       }
 
+      const knownIds = new Set(
+        rawMessagesRef.current.map((message) => message.id),
+      );
+      const appended: RawApiMessage[] = [];
+      let afterMessageId = rawMessagesRef.current.at(-1)?.id ?? 0;
+      let hasMore = true;
+      let guard = 0;
+
+      // Drain a few pages in one polling cycle so the UI can catch up quickly
+      // when callbacks are bursty.
+      while (hasMore && guard < 5) {
+        const payload = await getMessagesDeltaRawAction({
+          sessionId,
+          afterMessageId,
+          limit: 500,
+        });
+        for (const item of payload.items) {
+          if (knownIds.has(item.id)) continue;
+          knownIds.add(item.id);
+          appended.push(item);
+        }
+        hasMore = payload.has_more;
+        afterMessageId =
+          payload.next_after_message_id ??
+          payload.items.at(-1)?.id ??
+          afterMessageId;
+        guard += 1;
+      }
+
+      if (appended.length > 0) {
+        rawMessagesRef.current = [...rawMessagesRef.current, ...appended];
+      }
+
       const realUserMessageIds = realUserMessageIdsRef.current ?? undefined;
-      return getMessagesAction({
-        sessionId,
-        realUserMessageIds,
-      });
+      const parsed = parseMessages(rawMessagesRef.current, realUserMessageIds);
+      return { messages: parsed.messages, changed: appended.length > 0 };
     },
     [refreshRealUserMessageIds],
   );
@@ -172,19 +224,14 @@ export function useChatMessages({
         await refreshRealUserMessageIds();
 
         // Fetch latest messages immediately to confirm sync
-        const server = await fetchMessagesWithFilter(sessionId);
+        const server = await fetchMessagesFull(sessionId);
         setMessages((prev) => mergeMessages(prev, server.messages));
       } catch (error) {
         console.error("[Chat] Failed to send message or get reply:", error);
         setIsTyping(false);
       }
     },
-    [
-      session,
-      mergeMessages,
-      refreshRealUserMessageIds,
-      fetchMessagesWithFilter,
-    ],
+    [session, mergeMessages, refreshRealUserMessageIds, fetchMessagesFull],
   );
 
   // Load and poll for messages
@@ -197,13 +244,21 @@ export function useChatMessages({
       setMessages([]);
       setIsTyping(false);
       realUserMessageIdsRef.current = null;
+      rawMessagesRef.current = [];
       setRunUsageByUserMessageId({});
       lastLoadedSessionIdRef.current = session.session_id;
     }
 
-    const fetchMessages = async () => {
+    const fetchMessages = async (mode: "full" | "delta") => {
       try {
-        const history = await fetchMessagesWithFilter(session.session_id);
+        const history =
+          mode === "full"
+            ? await fetchMessagesFull(session.session_id)
+            : await fetchMessagesDelta(session.session_id);
+
+        if (mode === "delta" && !history.changed) {
+          return;
+        }
 
         setMessages((prev) => {
           // If it's the first load (empty prev), just set it
@@ -218,7 +273,7 @@ export function useChatMessages({
     };
 
     // Initial fetch
-    fetchMessages();
+    void fetchMessages("full");
 
     // Setup polling
     let interval: NodeJS.Timeout;
@@ -228,7 +283,9 @@ export function useChatMessages({
     );
 
     if (session.session_id && !isTerminal) {
-      interval = setInterval(fetchMessages, pollingInterval);
+      interval = setInterval(() => {
+        void fetchMessages("delta");
+      }, pollingInterval);
     } else if (session.session_id && isTerminal) {
       // Refresh run usage once the session becomes terminal so UI can display cost/tokens.
       void refreshRealUserMessageIds();
@@ -242,7 +299,8 @@ export function useChatMessages({
     session?.status,
     mergeMessages,
     pollingInterval,
-    fetchMessagesWithFilter,
+    fetchMessagesFull,
+    fetchMessagesDelta,
     refreshRealUserMessageIds,
   ]);
 
