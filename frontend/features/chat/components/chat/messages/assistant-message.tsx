@@ -178,7 +178,7 @@ export function AssistantMessage({
       </div>
 
       <div className="mt-2 flex min-w-0 items-center gap-2 pt-2">
-        <div className="shrink-0 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="shrink-0 flex items-center gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
           <Button
             variant="ghost"
             size="icon"

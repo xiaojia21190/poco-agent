@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import type { MessageBlock, InputFile } from "@/features/chat/types";
 import { useT } from "@/lib/i18n/client";
+import { cn } from "@/lib/utils";
 
 const MAX_LINES = 5;
 
@@ -34,6 +35,7 @@ export function UserMessage({
   const [isSubmittingEdit, setIsSubmittingEdit] = React.useState(false);
   const [draftContent, setDraftContent] = React.useState("");
   const observerRef = React.useRef<HTMLParagraphElement>(null);
+  const editTextareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   // Parse content if it's an array of blocks
   const parseContent = (content: string | MessageBlock[]): string => {
@@ -115,6 +117,18 @@ export function UserMessage({
     return () => observer.disconnect();
   }, [textContent]);
 
+  React.useEffect(() => {
+    if (!isEditing) return;
+    const rafId = window.requestAnimationFrame(() => {
+      const textarea = editTextareaRef.current;
+      if (!textarea) return;
+      textarea.focus();
+      const length = textarea.value.length;
+      textarea.setSelectionRange(length, length);
+    });
+    return () => window.cancelAnimationFrame(rafId);
+  }, [isEditing]);
+
   return (
     <div className="flex w-full min-w-0 flex-col items-end gap-2">
       {(hasRepo || hasAttachments) && (
@@ -149,14 +163,20 @@ export function UserMessage({
         </div>
       )}
       {(textContent || isEditing) && (
-        <div className="group flex min-w-0 max-w-[85%] flex-col items-end gap-2">
+        <div
+          className={cn(
+            "group flex min-w-0 flex-col items-end gap-2",
+            isEditing ? "w-[85%] min-w-[50%]" : "max-w-[85%]",
+          )}
+        >
           {isEditing ? (
             <div className="w-full min-w-0 max-w-full overflow-hidden rounded-lg border border-border bg-muted/60 px-3 py-3">
               <Textarea
+                ref={editTextareaRef}
                 value={draftContent}
                 onChange={(event) => setDraftContent(event.target.value)}
                 disabled={isSubmittingEdit}
-                className="min-h-24 resize-y bg-background"
+                className="min-h-8 max-h-60 resize-none overflow-y-auto border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
               <div className="mt-2 flex items-center justify-end gap-2">
                 <Button
