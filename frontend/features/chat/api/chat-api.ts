@@ -18,6 +18,8 @@ import type {
   SessionBranchRequest,
   SessionBranchResponse,
   SessionEditMessageRequest,
+  MessageAttachmentsResponse,
+  MessageResponse,
   SessionRegenerateRequest,
   SessionResponse,
   SessionUpdateRequest,
@@ -259,6 +261,45 @@ export const chatService = {
     } catch (error) {
       console.error("[Chat Service] Failed to get messages:", error);
       return { messages: [] };
+    }
+  },
+
+  getMessagesBase: async (
+    sessionId: string,
+    options?: { realUserMessageIds?: number[] },
+  ) => {
+    try {
+      const baseMessages = await apiClient.get<MessageResponse[]>(
+        API_ENDPOINTS.sessionMessages(sessionId),
+      );
+      const rawMessages: RawApiMessage[] = baseMessages.map((message) => ({
+        id: message.id,
+        role: message.role,
+        content: message.content,
+        created_at: message.created_at,
+        updated_at: message.updated_at,
+      }));
+      return parseMessages(rawMessages, options?.realUserMessageIds);
+    } catch (error) {
+      console.error("[Chat Service] Failed to get base messages:", error);
+      return { messages: [] };
+    }
+  },
+
+  getMessageAttachments: async (
+    sessionId: string,
+  ): Promise<Record<number, InputFile[]>> => {
+    try {
+      const response = await apiClient.get<MessageAttachmentsResponse[]>(
+        API_ENDPOINTS.sessionMessageAttachments(sessionId),
+      );
+      return response.reduce<Record<number, InputFile[]>>((acc, item) => {
+        acc[item.message_id] = item.attachments ?? [];
+        return acc;
+      }, {});
+    } catch (error) {
+      console.error("[Chat Service] Failed to get message attachments:", error);
+      return {};
     }
   },
 

@@ -12,7 +12,11 @@ from app.core.settings import get_settings
 from app.core.deps import get_current_user_id, get_db
 from app.core.errors.error_codes import ErrorCode
 from app.core.errors.exceptions import AppException
-from app.schemas.message import MessageResponse, MessageWithFilesResponse
+from app.schemas.message import (
+    MessageAttachmentsResponse,
+    MessageResponse,
+    MessageWithFilesResponse,
+)
 from app.schemas.response import Response, ResponseSchema
 from app.schemas.session import (
     SessionBranchRequest,
@@ -352,6 +356,32 @@ async def get_session_messages_with_files(
     return Response.success(
         data=messages,
         message="Messages retrieved successfully",
+    )
+
+
+@router.get(
+    "/{session_id}/message-attachments",
+    response_model=ResponseSchema[list[MessageAttachmentsResponse]],
+)
+async def get_session_message_attachments(
+    session_id: uuid.UUID,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    """Gets per-message attachments for a session."""
+    db_session = session_service.get_session(db, session_id)
+    if db_session.user_id != user_id:
+        raise AppException(
+            error_code=ErrorCode.FORBIDDEN,
+            message="Session does not belong to the user",
+        )
+
+    attachments = message_service.get_message_attachments(
+        db, session_id, user_id=user_id
+    )
+    return Response.success(
+        data=attachments,
+        message="Message attachments retrieved successfully",
     )
 
 

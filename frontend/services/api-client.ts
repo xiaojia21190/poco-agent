@@ -25,6 +25,8 @@ export const API_ENDPOINTS = {
     `/sessions/${sessionId}/edit-message`,
   sessionState: (sessionId: string) => `/sessions/${sessionId}/state`,
   sessionMessages: (sessionId: string) => `/sessions/${sessionId}/messages`,
+  sessionMessageAttachments: (sessionId: string) =>
+    `/sessions/${sessionId}/message-attachments`,
   sessionMessagesWithFiles: (sessionId: string) =>
     `/sessions/${sessionId}/messages-with-files`,
   sessionToolExecutions: (sessionId: string) =>

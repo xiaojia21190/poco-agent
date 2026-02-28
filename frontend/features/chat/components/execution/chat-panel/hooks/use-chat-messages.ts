@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { sendMessageAction } from "@/features/chat/actions/session-actions";
 import {
-  getMessagesAction,
+  getMessageAttachmentsAction,
+  getMessagesBaseAction,
   getRunsBySessionAction,
 } from "@/features/chat/actions/query-actions";
 import type {
@@ -76,26 +77,35 @@ export function useChatMessages({
     }
   }, [session?.session_id]);
 
-  const fetchMessagesWithFilter = useCallback(
-    async (sessionId: string) => {
-      // Ensure we have a whitelist of real user input message ids (per run).
-      if (realUserMessageIdsRef.current === null) {
-        await refreshRealUserMessageIds();
-      }
+  const fetchMessagesWithFilter = useCallback(async (sessionId: string) => {
+    const realUserMessageIds = realUserMessageIdsRef.current ?? undefined;
+    return getMessagesBaseAction({
+      sessionId,
+      realUserMessageIds,
+    });
+  }, []);
 
-      const realUserMessageIds = realUserMessageIdsRef.current ?? undefined;
-      return getMessagesAction({
-        sessionId,
-        realUserMessageIds,
-      });
-    },
-    [refreshRealUserMessageIds],
-  );
+  const fetchMessageAttachments = useCallback(async (sessionId: string) => {
+    return getMessageAttachmentsAction({ sessionId });
+  }, []);
 
   // Helper to merge new server messages with local optimistic messages
   const mergeMessages = useCallback(
     (currentMessages: ChatMessage[], serverMessages: ChatMessage[]) => {
-      const finalMessages = [...serverMessages];
+      const currentById = new Map(currentMessages.map((msg) => [msg.id, msg]));
+      const finalMessages = serverMessages.map((serverMsg) => {
+        const existing = currentById.get(serverMsg.id);
+        if (!existing || (existing.attachments?.length ?? 0) === 0) {
+          return serverMsg;
+        }
+        if ((serverMsg.attachments?.length ?? 0) > 0) {
+          return serverMsg;
+        }
+        return {
+          ...serverMsg,
+          attachments: existing.attachments,
+        };
+      });
 
       // Append local optimistic messages that haven't been synced yet
       currentMessages.forEach((localMsg) => {
@@ -137,6 +147,47 @@ export function useChatMessages({
     [],
   );
 
+  const mergeMessageAttachments = useCallback(
+    (
+      currentMessages: ChatMessage[],
+      attachmentsByMessageId: Record<number, InputFile[]>,
+    ) => {
+      let hasUpdates = false;
+      const updated = currentMessages.map((message) => {
+        const messageId = Number(message.id);
+        if (!Number.isInteger(messageId)) return message;
+        const nextAttachments = attachmentsByMessageId[messageId];
+        if (!nextAttachments) return message;
+
+        const currentAttachments = message.attachments ?? [];
+        const isSameLength =
+          currentAttachments.length === nextAttachments.length;
+        const isSame =
+          isSameLength &&
+          currentAttachments.every((currentFile, index) => {
+            const nextFile = nextAttachments[index];
+            return (
+              currentFile.name === nextFile.name &&
+              currentFile.source === nextFile.source &&
+              currentFile.size === nextFile.size &&
+              currentFile.content_type === nextFile.content_type &&
+              currentFile.url === nextFile.url
+            );
+          });
+        if (isSame) return message;
+
+        hasUpdates = true;
+        return {
+          ...message,
+          attachments: nextAttachments,
+        };
+      });
+
+      return hasUpdates ? updated : currentMessages;
+    },
+    [],
+  );
+
   // Send message and immediately fetch updated messages
   const sendMessage = useCallback(
     async (content: string, attachments?: InputFile[]) => {
@@ -174,6 +225,10 @@ export function useChatMessages({
         // Fetch latest messages immediately to confirm sync
         const server = await fetchMessagesWithFilter(sessionId);
         setMessages((prev) => mergeMessages(prev, server.messages));
+        const attachmentsByMessageId = await fetchMessageAttachments(sessionId);
+        setMessages((prev) =>
+          mergeMessageAttachments(prev, attachmentsByMessageId),
+        );
       } catch (error) {
         console.error("[Chat] Failed to send message or get reply:", error);
         setIsTyping(false);
@@ -182,8 +237,10 @@ export function useChatMessages({
     [
       session,
       mergeMessages,
+      mergeMessageAttachments,
       refreshRealUserMessageIds,
       fetchMessagesWithFilter,
+      fetchMessageAttachments,
     ],
   );
 
@@ -201,19 +258,50 @@ export function useChatMessages({
       lastLoadedSessionIdRef.current = session.session_id;
     }
 
+    let isCancelled = false;
+
     const fetchMessages = async () => {
       try {
         const history = await fetchMessagesWithFilter(session.session_id);
+        if (isCancelled) return;
 
         setMessages((prev) => {
           // If it's the first load (empty prev), just set it
           // Otherwise merge
           return mergeMessages(prev, history.messages);
         });
+
+        const attachmentsByMessageId = await fetchMessageAttachments(
+          session.session_id,
+        );
+        if (isCancelled) return;
+        setMessages((prev) =>
+          mergeMessageAttachments(prev, attachmentsByMessageId),
+        );
+
+        if (realUserMessageIdsRef.current === null) {
+          void refreshRealUserMessageIds()
+            .then(async () => {
+              if (isCancelled) return;
+              const refreshed = await fetchMessagesWithFilter(
+                session.session_id,
+              );
+              if (isCancelled) return;
+              setMessages((prev) => mergeMessages(prev, refreshed.messages));
+            })
+            .catch((error) => {
+              console.error(
+                "[Chat] Failed to refresh run filters after base message load:",
+                error,
+              );
+            });
+        }
       } catch (error) {
         console.error("[Chat] Failed to load messages:", error);
       } finally {
-        setIsLoadingHistory(false);
+        if (!isCancelled) {
+          setIsLoadingHistory(false);
+        }
       }
     };
 
@@ -235,14 +323,17 @@ export function useChatMessages({
     }
 
     return () => {
+      isCancelled = true;
       if (interval) clearInterval(interval);
     };
   }, [
     session?.session_id,
     session?.status,
     mergeMessages,
+    mergeMessageAttachments,
     pollingInterval,
     fetchMessagesWithFilter,
+    fetchMessageAttachments,
     refreshRealUserMessageIds,
   ]);
 

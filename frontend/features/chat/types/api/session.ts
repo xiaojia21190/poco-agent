@@ -83,8 +83,14 @@ export interface MessageResponse {
   id: number;
   role: string;
   content: Record<string, unknown>;
+  text_preview?: string | null;
   created_at: string; // ISO datetime
   updated_at: string; // ISO datetime
+}
+
+export interface MessageAttachmentsResponse {
+  message_id: number;
+  attachments: InputFile[];
 }
 
 export interface ToolExecutionResponse {
@@ -114,6 +120,7 @@ export interface InputFile {
   size?: number | null;
   content_type?: string | null;
   path?: string | null;
+  url?: string | null;
 }
 
 export interface TaskConfig {
