@@ -258,7 +258,7 @@ export function ChatInput({
                 variant="ghost"
                 size="icon"
                 className="size-9 rounded-xl hover:bg-accent"
-                title={t("hero.attachFile")}
+                title={t("hero.uploadFile")}
                 disabled={disabled || isUploading}
                 onClick={() => fileInputRef.current?.click()}
               >

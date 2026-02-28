@@ -45,7 +45,6 @@
   "hero": {
     "title": "What can I do for you?",
     "subtitle": "Assign a task, or ask any question.",
-    "attachFile": "Add attachment",
     "uploadFile": "Upload file",
     "importCode": "Import code",
     "voiceInput": "Voice input",
@@ -59,7 +58,6 @@
       "shortcutHint": "/ for Slash Command, Shift+Enter for new line, Enter to send"
     },
     "tools": "Connect your tools to Poco",
-    "importLocal": "Import from local file",
     "importFigma": "Import from Figma (coming soon)",
     "connect": "Connect",
     "configure": "Configure",

@@ -25,6 +25,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useT } from "@/lib/i18n/client";
 import type { ComposerMode } from "@/features/task-composer/types";
 import { COMPOSER_MODE_SEQUENCE } from "@/features/task-composer/lib/mode-utils";
@@ -79,90 +84,102 @@ export function ComposerToolbar({
     <div className="flex w-full flex-wrap items-center justify-between gap-3">
       {/* Left: attach menu */}
       <div className="flex items-center gap-1">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              disabled={disabled}
-              className="size-9 rounded-xl hover:bg-accent"
-              aria-label={t("hero.attachFile")}
-              title={t("hero.attachFile")}
+        <Tooltip>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  disabled={disabled}
+                  className="size-9 rounded-xl hover:bg-accent"
+                  aria-label={t("hero.uploadFile")}
+                >
+                  {isUploading ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Plus className="size-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              side="top"
+              sideOffset={8}
+              className="w-44"
             >
-              {isUploading ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Plus className="size-4" />
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            side="top"
-            sideOffset={8}
-            className="w-44"
-          >
-            <DropdownMenuItem onSelect={onOpenFileInput}>
-              <Paperclip className="size-4" />
-              <span>{t("hero.uploadFile")}</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onOpenRepoDialog}>
-              <Code2 className="size-4" />
-              <span>{t("hero.importCode")}</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuItem onSelect={onOpenFileInput}>
+                <Paperclip className="size-4" />
+                <span>{t("hero.uploadFile")}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={onOpenRepoDialog}>
+                <Code2 className="size-4" />
+                <span>{t("hero.importCode")}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <TooltipContent side="top" sideOffset={8}>
+            {t("hero.uploadFile")}
+          </TooltipContent>
+        </Tooltip>
 
         {/* Configure menu: mode + browser */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              disabled={disabled}
-              className="size-9 rounded-xl hover:bg-accent"
-              aria-label={t("hero.configure")}
-              title={t("hero.configure")}
-              data-onboarding="home-mode-toggle"
+        <Tooltip>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  disabled={disabled}
+                  className="size-9 rounded-xl hover:bg-accent"
+                  aria-label={t("hero.configure")}
+                  data-onboarding="home-mode-toggle"
+                >
+                  <SlidersHorizontal className="size-4" />
+                </Button>
+              </TooltipTrigger>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              side="top"
+              sideOffset={8}
+              className="w-52"
             >
-              <SlidersHorizontal className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            side="top"
-            sideOffset={8}
-            className="w-52"
-          >
-            <DropdownMenuRadioGroup
-              value={mode}
-              onValueChange={(next) => onModeChange(next as ComposerMode)}
-            >
-              {COMPOSER_MODE_SEQUENCE.map((value) => {
-                const Icon = MODE_ICONS[value];
-                return (
-                  <DropdownMenuRadioItem key={value} value={value}>
-                    <Icon className="size-4" />
-                    <span>{t(`hero.modeLabels.${value}`)}</span>
-                  </DropdownMenuRadioItem>
-                );
-              })}
-            </DropdownMenuRadioGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuCheckboxItem
-              checked={browserEnabled}
-              onCheckedChange={(next) => {
-                if (next === "indeterminate") return;
-                onBrowserEnabledChange(Boolean(next));
-              }}
-            >
-              <Chrome className="size-4" />
-              <span>{t("hero.browser.toggle")}</span>
-            </DropdownMenuCheckboxItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuRadioGroup
+                value={mode}
+                onValueChange={(next) => onModeChange(next as ComposerMode)}
+              >
+                {COMPOSER_MODE_SEQUENCE.map((value) => {
+                  const Icon = MODE_ICONS[value];
+                  return (
+                    <DropdownMenuRadioItem key={value} value={value}>
+                      <Icon className="size-4" />
+                      <span>{t(`hero.modeLabels.${value}`)}</span>
+                    </DropdownMenuRadioItem>
+                  );
+                })}
+              </DropdownMenuRadioGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem
+                checked={browserEnabled}
+                onCheckedChange={(next) => {
+                  if (next === "indeterminate") return;
+                  onBrowserEnabledChange(Boolean(next));
+                }}
+              >
+                <Chrome className="size-4" />
+                <span>{t("hero.browser.toggle")}</span>
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <TooltipContent side="top" sideOffset={8}>
+            {t("hero.configure")}
+          </TooltipContent>
+        </Tooltip>
 
         {/* Scheduled summary badge (scheduled mode only) */}
         {mode === "scheduled" &&

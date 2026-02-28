@@ -474,7 +474,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
                 disabled={disabled || isUploading}
                 onClick={() => fileInputRef.current?.click()}
                 className="flex-shrink-0 flex items-center justify-center size-8 rounded-md hover:bg-accent text-muted-foreground transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label={t("hero.importLocal")}
+                aria-label={t("hero.uploadFile")}
               >
                 {isUploading ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -484,7 +484,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               </button>
             </TooltipTrigger>
             <TooltipContent side="top" sideOffset={8}>
-              {t("hero.importLocal")}
+              {t("hero.uploadFile")}
             </TooltipContent>
           </Tooltip>
 

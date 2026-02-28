@@ -44,7 +44,6 @@
   "hero": {
     "title": "Чем я могу вам помочь?",
     "subtitle": "Назначьте задачу или задайте вопрос.",
-    "attachFile": "Добавить вложение",
     "uploadFile": "Загрузить файл",
     "importCode": "Импортировать код",
     "voiceInput": "Голосовой ввод",
@@ -58,7 +57,6 @@
       "shortcutHint": "/ для Slash Command, Shift+Enter для новой строки, Enter для отправки"
     },
     "tools": "Подключите ваши инструменты к Poco",
-    "importLocal": "Импорт из локального файла",
     "importFigma": "Импорт из Figma (скоро)",
     "connect": "Подключить",
     "configure": "Настроить",

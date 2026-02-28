@@ -44,7 +44,6 @@
   "hero": {
     "title": "何かお手伝いできることはありますか？",
     "subtitle": "タスクを割り当てるか、質問してください。",
-    "attachFile": "添付ファイルを追加",
     "uploadFile": "ファイルをアップロード",
     "importCode": "コードをインポート",
     "voiceInput": "音声入力",
@@ -58,7 +57,6 @@
       "shortcutHint": "/ でスラッシュコマンド、Shift+Enter で改行、Enter で送信"
     },
     "tools": "Poco にツールを接続",
-    "importLocal": "ローカルファイルからインポート",
     "importFigma": "Figmaからインポート（近日公開）",
     "connect": "接続",
     "configure": "設定",
