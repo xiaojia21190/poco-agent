@@ -115,6 +115,13 @@ class SessionRegenerateRequest(BaseModel):
     assistant_message_id: int = Field(gt=0)
 
 
+class SessionEditMessageRequest(BaseModel):
+    """Request to edit a user message then regenerate from that point."""
+
+    user_message_id: int = Field(gt=0)
+    content: str = Field(min_length=1)
+
+
 class SessionBranchResponse(BaseModel):
     """Session branch response."""
 

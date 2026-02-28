@@ -21,6 +21,8 @@ export const API_ENDPOINTS = {
   sessionCancel: (sessionId: string) => `/sessions/${sessionId}/cancel`,
   sessionBranch: (sessionId: string) => `/sessions/${sessionId}/branch`,
   sessionRegenerate: (sessionId: string) => `/sessions/${sessionId}/regenerate`,
+  sessionEditMessage: (sessionId: string) =>
+    `/sessions/${sessionId}/edit-message`,
   sessionState: (sessionId: string) => `/sessions/${sessionId}/state`,
   sessionMessages: (sessionId: string) => `/sessions/${sessionId}/messages`,
   sessionMessagesWithFiles: (sessionId: string) =>

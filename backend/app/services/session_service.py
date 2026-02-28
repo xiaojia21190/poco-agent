@@ -561,3 +561,118 @@ class SessionService:
             run_id=db_run.id,
             status=db_run.status,
         )
+
+    def edit_message_and_regenerate(
+        self,
+        db: Session,
+        session_id: uuid.UUID,
+        *,
+        user_id: str,
+        user_message_id: int,
+        content: str,
+    ) -> TaskEnqueueResponse:
+        """Replace a user message then regenerate by deleting all later history."""
+        db_session = self.get_session(db, session_id)
+        if db_session.user_id != user_id:
+            raise AppException(
+                error_code=ErrorCode.FORBIDDEN,
+                message="Session does not belong to the user",
+            )
+
+        user_message = MessageRepository.get_by_id(db, user_message_id)
+        if (
+            not user_message
+            or user_message.session_id != db_session.id
+            or user_message.role != "user"
+        ):
+            raise AppException(
+                error_code=ErrorCode.BAD_REQUEST,
+                message="user_message_id is invalid for this session",
+            )
+
+        prompt = content.strip()
+        if not prompt:
+            raise AppException(
+                error_code=ErrorCode.BAD_REQUEST,
+                message="content cannot be empty",
+            )
+
+        latest_target_run = (
+            db.query(AgentRun)
+            .filter(AgentRun.session_id == db_session.id)
+            .filter(AgentRun.user_message_id == user_message_id)
+            .order_by(AgentRun.created_at.desc())
+            .first()
+        )
+        permission_mode = (
+            latest_target_run.permission_mode if latest_target_run else "default"
+        )
+        run_config_snapshot = dict(
+            self._deepcopy_json(db_session.config_snapshot) or {}
+        )
+        if latest_target_run and isinstance(latest_target_run.config_snapshot, dict):
+            input_files = latest_target_run.config_snapshot.get("input_files")
+            if isinstance(input_files, list):
+                run_config_snapshot["input_files"] = self._deepcopy_json(input_files)
+
+        user_message.content = {
+            "_type": "UserMessage",
+            "content": [{"_type": "TextBlock", "text": prompt}],
+        }
+        user_message.text_preview = prompt[:500]
+
+        runs_to_delete = (
+            db.query(AgentRun)
+            .filter(AgentRun.session_id == db_session.id)
+            .filter(AgentRun.user_message_id >= user_message_id)
+            .all()
+        )
+        for run in runs_to_delete:
+            db.delete(run)
+
+        messages_to_delete = (
+            db.query(AgentMessage)
+            .filter(AgentMessage.session_id == db_session.id)
+            .filter(AgentMessage.id > user_message_id)
+            .all()
+        )
+        for message in messages_to_delete:
+            db.delete(message)
+
+        pending_requests = UserInputRequestRepository.list_pending_by_session(
+            db, db_session.id
+        )
+        now = datetime.now(timezone.utc)
+        for entry in pending_requests:
+            entry.status = "expired"
+            entry.expires_at = now
+
+        db.flush()
+
+        db_run = RunRepository.create(
+            session_db=db,
+            session_id=db_session.id,
+            user_message_id=user_message_id,
+            permission_mode=permission_mode,
+            schedule_mode="immediate",
+            config_snapshot=run_config_snapshot or None,
+        )
+        db_session.state_patch = {}
+        db_session.status = "pending"
+        # Start a fresh upstream SDK thread, otherwise removed turns may still affect context.
+        db_session.sdk_session_id = None
+
+        db.commit()
+        db.refresh(db_run)
+
+        logger.info(
+            "Edited and regenerated session %s from user_message=%s run=%s",
+            db_session.id,
+            user_message_id,
+            db_run.id,
+        )
+        return TaskEnqueueResponse(
+            session_id=db_session.id,
+            run_id=db_run.id,
+            status=db_run.status,
+        )

@@ -254,6 +254,7 @@
     "copyMessage": "Nachricht kopieren",
     "likeResponse": "Antwort liken",
     "createBranch": "Branch erstellen",
+    "editMessageFailed": "Nachricht konnte nicht bearbeitet werden",
     "regenerateFailed": "Neu generieren fehlgeschlagen",
     "branchCreated": "Branch erstellt",
     "branchCreateFailed": "Branch-Erstellung fehlgeschlagen",

@@ -27,7 +27,10 @@ export interface ChatMessageListProps {
   repoUrl?: string | null;
   gitBranch?: string | null;
   runUsageByUserMessageId?: Record<string, UsageResponse | null>;
-  onEditMessage?: (content: string) => void;
+  onEditMessage?: (args: {
+    messageId: string;
+    content: string;
+  }) => Promise<void>;
   onRegenerateMessage?: (args: {
     userMessageId: string;
     assistantMessageId: string;
@@ -477,6 +480,7 @@ export function ChatMessageList({
                   }}
                 >
                   <UserMessage
+                    messageId={message.id}
                     content={message.content}
                     attachments={message.attachments}
                     repoUrl={message.id === firstUserMessageId ? repoUrl : null}

@@ -20,6 +20,7 @@ from app.schemas.session import (
     SessionCancelRequest,
     SessionCancelResponse,
     SessionCreateRequest,
+    SessionEditMessageRequest,
     SessionRegenerateRequest,
     SessionResponse,
     SessionStateResponse,
@@ -265,6 +266,26 @@ async def regenerate_message(
         assistant_message_id=request.assistant_message_id,
     )
     return Response.success(data=result, message="Message regenerated successfully")
+
+
+@router.post(
+    "/{session_id}/edit-message", response_model=ResponseSchema[TaskEnqueueResponse]
+)
+async def edit_message_and_regenerate(
+    session_id: uuid.UUID,
+    request: SessionEditMessageRequest,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    """Edit a user message and regenerate by pruning all subsequent history."""
+    result = session_service.edit_message_and_regenerate(
+        db,
+        session_id,
+        user_id=user_id,
+        user_message_id=request.user_message_id,
+        content=request.content,
+    )
+    return Response.success(data=result, message="Message edited and regenerated")
 
 
 @router.delete("/{session_id}", response_model=ResponseSchema[dict])

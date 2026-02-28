@@ -254,6 +254,7 @@
     "copyMessage": "复制消息",
     "likeResponse": "点赞回复",
     "createBranch": "新建分支",
+    "editMessageFailed": "编辑消息失败",
     "regenerateFailed": "重新生成失败",
     "branchCreated": "已创建分支",
     "branchCreateFailed": "创建分支失败",

@@ -253,6 +253,7 @@
     "copyMessage": "Копировать сообщение",
     "likeResponse": "Оценить ответ",
     "createBranch": "Создать ветку",
+    "editMessageFailed": "Не удалось изменить сообщение",
     "regenerateFailed": "Не удалось перегенерировать",
     "branchCreated": "Ветка создана",
     "branchCreateFailed": "Не удалось создать ветку",

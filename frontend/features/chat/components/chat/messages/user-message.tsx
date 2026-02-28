@@ -5,28 +5,34 @@ import { ChevronDown, ChevronUp, Copy, Check, Pencil } from "lucide-react";
 import { FileCard } from "@/components/shared/file-card";
 import { RepoCard } from "@/components/shared/repo-card";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import type { MessageBlock, InputFile } from "@/features/chat/types";
 import { useT } from "@/lib/i18n/client";
 
 const MAX_LINES = 5;
 
 export function UserMessage({
+  messageId,
   content,
   attachments,
   repoUrl,
   gitBranch,
   onEdit,
 }: {
+  messageId: string;
   content: string | MessageBlock[];
   attachments?: InputFile[];
   repoUrl?: string | null;
   gitBranch?: string | null;
-  onEdit?: (content: string) => void;
+  onEdit?: (args: { messageId: string; content: string }) => Promise<void>;
 }) {
   const { t } = useT("translation");
   const [isExpanded, setIsExpanded] = React.useState(false);
   const [shouldCollapse, setShouldCollapse] = React.useState(false);
   const [isCopied, setIsCopied] = React.useState(false);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [isSubmittingEdit, setIsSubmittingEdit] = React.useState(false);
+  const [draftContent, setDraftContent] = React.useState("");
   const observerRef = React.useRef<HTMLParagraphElement>(null);
 
   // Parse content if it's an array of blocks
@@ -64,7 +70,27 @@ export function UserMessage({
 
   // Edit handler
   const handleEdit = () => {
-    onEdit?.(textContent);
+    setDraftContent(textContent);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    if (isSubmittingEdit) return;
+    setIsEditing(false);
+    setDraftContent(textContent);
+  };
+
+  const handleSubmitEdit = async () => {
+    if (!onEdit || isSubmittingEdit) return;
+    const nextContent = draftContent.trim();
+    if (!nextContent) return;
+    setIsSubmittingEdit(true);
+    try {
+      await onEdit({ messageId, content: nextContent });
+      setIsEditing(false);
+    } finally {
+      setIsSubmittingEdit(false);
+    }
   };
 
   // Check if content overflows using ResizeObserver
@@ -122,62 +148,92 @@ export function UserMessage({
           ))}
         </div>
       )}
-      {textContent && (
+      {(textContent || isEditing) && (
         <div className="group flex min-w-0 max-w-[85%] flex-col items-end gap-2">
-          <div className="w-fit min-w-0 max-w-full overflow-hidden rounded-lg bg-muted px-4 py-2 text-foreground">
-            <p
-              ref={observerRef}
-              className={`text-base whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] ${
-                shouldCollapse && !isExpanded ? "line-clamp-5" : ""
-              }`}
-            >
-              {textContent}
-            </p>
-          </div>
-          <div className="flex items-center justify-between w-full gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-            {shouldCollapse && (
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-              >
-                {isExpanded ? (
-                  <>
-                    <ChevronUp className="h-4 w-4" />
-                    {t("chat.collapse")}
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="h-4 w-4" />
-                    {t("chat.expand")}
-                  </>
-                )}
-              </button>
-            )}
-            <div className="flex items-center gap-1 ml-auto">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 text-muted-foreground hover:text-foreground"
-                onClick={onCopy}
-                title={t("chat.copyMessage")}
-              >
-                {isCopied ? (
-                  <Check className="size-3.5" />
-                ) : (
-                  <Copy className="size-3.5" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-7 text-muted-foreground hover:text-foreground"
-                onClick={handleEdit}
-                title={t("chat.editMessage")}
-              >
-                <Pencil className="size-3.5" />
-              </Button>
+          {isEditing ? (
+            <div className="w-full min-w-0 max-w-full overflow-hidden rounded-lg border border-border bg-muted/60 px-3 py-3">
+              <Textarea
+                value={draftContent}
+                onChange={(event) => setDraftContent(event.target.value)}
+                disabled={isSubmittingEdit}
+                className="min-h-24 resize-y bg-background"
+              />
+              <div className="mt-2 flex items-center justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCancelEdit}
+                  disabled={isSubmittingEdit}
+                >
+                  {t("common.cancel")}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSubmitEdit}
+                  disabled={!draftContent.trim() || isSubmittingEdit}
+                >
+                  {t("hero.send")}
+                </Button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="w-fit min-w-0 max-w-full overflow-hidden rounded-lg bg-muted px-4 py-2 text-foreground">
+                <p
+                  ref={observerRef}
+                  className={`text-base whitespace-pre-wrap break-words break-all [overflow-wrap:anywhere] ${
+                    shouldCollapse && !isExpanded ? "line-clamp-5" : ""
+                  }`}
+                >
+                  {textContent}
+                </p>
+              </div>
+              <div className="flex items-center justify-between w-full gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                {shouldCollapse && (
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  >
+                    {isExpanded ? (
+                      <>
+                        <ChevronUp className="h-4 w-4" />
+                        {t("chat.collapse")}
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="h-4 w-4" />
+                        {t("chat.expand")}
+                      </>
+                    )}
+                  </button>
+                )}
+                <div className="flex items-center gap-1 ml-auto">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 text-muted-foreground hover:text-foreground"
+                    onClick={onCopy}
+                    title={t("chat.copyMessage")}
+                  >
+                    {isCopied ? (
+                      <Check className="size-3.5" />
+                    ) : (
+                      <Copy className="size-3.5" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 text-muted-foreground hover:text-foreground"
+                    onClick={handleEdit}
+                    title={t("chat.editMessage")}
+                  >
+                    <Pencil className="size-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

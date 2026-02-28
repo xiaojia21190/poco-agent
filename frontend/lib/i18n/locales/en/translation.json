@@ -254,6 +254,7 @@
     "copyMessage": "Copy message",
     "likeResponse": "Like response",
     "createBranch": "Create branch",
+    "editMessageFailed": "Failed to edit message",
     "regenerateFailed": "Failed to regenerate message",
     "branchCreated": "Branch created",
     "branchCreateFailed": "Failed to create branch",

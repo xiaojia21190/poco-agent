@@ -17,6 +17,7 @@ import type {
   SessionCancelResponse,
   SessionBranchRequest,
   SessionBranchResponse,
+  SessionEditMessageRequest,
   SessionRegenerateRequest,
   SessionResponse,
   SessionUpdateRequest,
@@ -155,6 +156,16 @@ export const chatService = {
   ): Promise<TaskEnqueueResponse> => {
     return apiClient.post<TaskEnqueueResponse>(
       API_ENDPOINTS.sessionRegenerate(sessionId),
+      payload,
+    );
+  },
+
+  editMessageAndRegenerate: async (
+    sessionId: string,
+    payload: SessionEditMessageRequest,
+  ): Promise<TaskEnqueueResponse> => {
+    return apiClient.post<TaskEnqueueResponse>(
+      API_ENDPOINTS.sessionEditMessage(sessionId),
       payload,
     );
   },

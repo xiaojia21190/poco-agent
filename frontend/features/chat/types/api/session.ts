@@ -42,6 +42,11 @@ export interface SessionRegenerateRequest {
   assistant_message_id: number;
 }
 
+export interface SessionEditMessageRequest {
+  user_message_id: number;
+  content: string;
+}
+
 export interface SessionBranchResponse {
   session_id: string;
   source_session_id: string;

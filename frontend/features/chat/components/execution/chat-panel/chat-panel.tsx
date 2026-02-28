@@ -28,6 +28,7 @@ import { useUserInputRequests } from "./hooks/use-user-input-requests";
 import {
   branchSessionAction,
   cancelSessionAction,
+  editMessageAndRegenerateAction,
   regenerateMessageAction,
   renameSessionTitleAction,
 } from "@/features/chat/actions/session-actions";
@@ -400,10 +401,30 @@ export function ChatPanel({
     [messages],
   );
 
-  // Handle edit message - load content into input
-  const handleEditMessage = React.useCallback((content: string) => {
-    inputRef.current?.setValueAndFocus(content);
-  }, []);
+  const handleEditMessage = React.useCallback(
+    async ({ messageId, content }: { messageId: string; content: string }) => {
+      if (!session?.session_id) return;
+      const userMessageId = Number(messageId);
+      if (!Number.isInteger(userMessageId) || userMessageId <= 0) {
+        toast.error(t("chat.editMessageFailed"));
+        return;
+      }
+
+      try {
+        updateSession({ status: "pending" });
+        await editMessageAndRegenerateAction({
+          sessionId: session.session_id,
+          userMessageId,
+          content,
+        });
+        await refreshTasks();
+      } catch (error) {
+        console.error("[ChatPanel] Failed to edit message:", error);
+        toast.error(t("chat.editMessageFailed"));
+      }
+    },
+    [refreshTasks, session?.session_id, t, updateSession],
+  );
 
   const handleInsertQuote = React.useCallback(() => {
     if (!quoteSelection) return;

@@ -171,6 +171,32 @@ export async function regenerateMessageAction(input: RegenerateMessageInput) {
   };
 }
 
+const editMessageAndRegenerateSchema = z.object({
+  sessionId: z.string().trim().min(1, VALIDATION_ERRORS.missingSessionId),
+  userMessageId: z.number().int().positive(),
+  content: z.string().trim().min(1, VALIDATION_ERRORS.messageContentRequired),
+});
+
+export type EditMessageAndRegenerateInput = z.infer<
+  typeof editMessageAndRegenerateSchema
+>;
+
+export async function editMessageAndRegenerateAction(
+  input: EditMessageAndRegenerateInput,
+) {
+  const { sessionId, userMessageId, content } =
+    editMessageAndRegenerateSchema.parse(input);
+  const result = await chatService.editMessageAndRegenerate(sessionId, {
+    user_message_id: userMessageId,
+    content,
+  });
+  return {
+    sessionId: result.session_id,
+    runId: result.run_id,
+    status: result.status,
+  };
+}
+
 const cancelSessionSchema = z.object({
   sessionId: z.string().trim().min(1, VALIDATION_ERRORS.missingSessionId),
   reason: z.string().optional().nullable(),
