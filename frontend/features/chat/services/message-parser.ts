@@ -41,7 +41,7 @@ export interface RawApiMessage {
   id: number;
   role: string;
   content: Record<string, unknown>;
-  attachments?: InputFile[];
+  attachments?: InputFile[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -310,7 +310,7 @@ export function parseMessages(
           content: textContent,
           status: "completed",
           timestamp: msg.created_at,
-          attachments: msg.attachments,
+          attachments: msg.attachments ?? undefined,
         });
       } else {
         if (currentAssistantMessage) {
