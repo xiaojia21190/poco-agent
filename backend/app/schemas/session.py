@@ -100,3 +100,24 @@ class SessionCancelResponse(BaseModel):
     canceled_runs: int = 0
     expired_user_input_requests: int = 0
     executor_cancelled: bool = False
+
+
+class SessionBranchRequest(BaseModel):
+    """Request to branch a session from a message checkpoint."""
+
+    message_id: int = Field(gt=0)
+
+
+class SessionRegenerateRequest(BaseModel):
+    """Request to regenerate an assistant message within the same session."""
+
+    user_message_id: int = Field(gt=0)
+    assistant_message_id: int = Field(gt=0)
+
+
+class SessionBranchResponse(BaseModel):
+    """Session branch response."""
+
+    session_id: UUID
+    source_session_id: UUID
+    cutoff_message_id: int

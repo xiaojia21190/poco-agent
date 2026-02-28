@@ -28,6 +28,11 @@ export interface ChatMessageListProps {
   gitBranch?: string | null;
   runUsageByUserMessageId?: Record<string, UsageResponse | null>;
   onEditMessage?: (content: string) => void;
+  onRegenerateMessage?: (args: {
+    userMessageId: string;
+    assistantMessageId: string;
+  }) => void;
+  onCreateBranch?: (assistantMessageId: string) => void;
   showUserPromptTimeline?: boolean;
   contentPaddingClassName?: string;
   scrollButtonClassName?: string;
@@ -82,6 +87,8 @@ export function ChatMessageList({
   gitBranch,
   runUsageByUserMessageId,
   onEditMessage,
+  onRegenerateMessage,
+  onCreateBranch,
   showUserPromptTimeline = false,
   contentPaddingClassName,
   scrollButtonClassName,
@@ -497,6 +504,20 @@ export function ChatMessageList({
                   message={message}
                   runUsage={runUsage}
                   sessionStatus={sessionStatus}
+                  onRegenerate={
+                    userMessageIdForUsage && onRegenerateMessage
+                      ? () =>
+                          onRegenerateMessage({
+                            userMessageId: userMessageIdForUsage,
+                            assistantMessageId: message.id,
+                          })
+                      : undefined
+                  }
+                  onCreateBranch={
+                    onCreateBranch && /^\d+$/.test(message.id)
+                      ? () => onCreateBranch(message.id)
+                      : undefined
+                  }
                 />
               </div>
             );

@@ -15,13 +15,17 @@ from app.core.errors.exceptions import AppException
 from app.schemas.message import MessageResponse, MessageWithFilesResponse
 from app.schemas.response import Response, ResponseSchema
 from app.schemas.session import (
+    SessionBranchRequest,
+    SessionBranchResponse,
     SessionCancelRequest,
     SessionCancelResponse,
     SessionCreateRequest,
+    SessionRegenerateRequest,
     SessionResponse,
     SessionStateResponse,
     SessionUpdateRequest,
 )
+from app.schemas.task import TaskEnqueueResponse
 from app.schemas.computer import ComputerBrowserScreenshotResponse
 from app.schemas.tool_execution import ToolExecutionResponse
 from app.schemas.usage import UsageResponse
@@ -215,6 +219,52 @@ async def cancel_session(
         ),
         message="Session canceled successfully",
     )
+
+
+@router.post(
+    "/{session_id}/branch", response_model=ResponseSchema[SessionBranchResponse]
+)
+async def branch_session(
+    session_id: uuid.UUID,
+    request: SessionBranchRequest,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    """Create a branched session by cloning state up to a message checkpoint."""
+    branched = session_service.branch_session(
+        db,
+        session_id,
+        user_id=user_id,
+        cutoff_message_id=request.message_id,
+    )
+    return Response.success(
+        data=SessionBranchResponse(
+            session_id=branched.id,
+            source_session_id=session_id,
+            cutoff_message_id=request.message_id,
+        ),
+        message="Session branched successfully",
+    )
+
+
+@router.post(
+    "/{session_id}/regenerate", response_model=ResponseSchema[TaskEnqueueResponse]
+)
+async def regenerate_message(
+    session_id: uuid.UUID,
+    request: SessionRegenerateRequest,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    """Regenerate from a prior turn by pruning later messages then queueing a new run."""
+    result = session_service.regenerate_from_message(
+        db,
+        session_id,
+        user_id=user_id,
+        user_message_id=request.user_message_id,
+        assistant_message_id=request.assistant_message_id,
+    )
+    return Response.success(data=result, message="Message regenerated successfully")
 
 
 @router.delete("/{session_id}", response_model=ResponseSchema[dict])

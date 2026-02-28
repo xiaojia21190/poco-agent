@@ -33,6 +33,21 @@ export interface SessionCancelResponse {
   executor_cancelled: boolean;
 }
 
+export interface SessionBranchRequest {
+  message_id: number;
+}
+
+export interface SessionRegenerateRequest {
+  user_message_id: number;
+  assistant_message_id: number;
+}
+
+export interface SessionBranchResponse {
+  session_id: string;
+  source_session_id: string;
+  cutoff_message_id: number;
+}
+
 export interface SessionResponse {
   session_id: string; // UUID
   user_id: string;

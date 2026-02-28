@@ -19,6 +19,8 @@ export const API_ENDPOINTS = {
   sessionsWithTitles: "/sessions/list-with-titles",
   session: (sessionId: string) => `/sessions/${sessionId}`,
   sessionCancel: (sessionId: string) => `/sessions/${sessionId}/cancel`,
+  sessionBranch: (sessionId: string) => `/sessions/${sessionId}/branch`,
+  sessionRegenerate: (sessionId: string) => `/sessions/${sessionId}/regenerate`,
   sessionState: (sessionId: string) => `/sessions/${sessionId}/state`,
   sessionMessages: (sessionId: string) => `/sessions/${sessionId}/messages`,
   sessionMessagesWithFiles: (sessionId: string) =>

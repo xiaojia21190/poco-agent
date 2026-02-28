@@ -15,6 +15,9 @@ import type {
   FileNode,
   SessionCancelRequest,
   SessionCancelResponse,
+  SessionBranchRequest,
+  SessionBranchResponse,
+  SessionRegenerateRequest,
   SessionResponse,
   SessionUpdateRequest,
   ToolExecutionResponse,
@@ -133,6 +136,26 @@ export const chatService = {
     return apiClient.post<SessionCancelResponse>(
       API_ENDPOINTS.sessionCancel(sessionId),
       payload ?? {},
+    );
+  },
+
+  branchSession: async (
+    sessionId: string,
+    payload: SessionBranchRequest,
+  ): Promise<SessionBranchResponse> => {
+    return apiClient.post<SessionBranchResponse>(
+      API_ENDPOINTS.sessionBranch(sessionId),
+      payload,
+    );
+  },
+
+  regenerateMessage: async (
+    sessionId: string,
+    payload: SessionRegenerateRequest,
+  ): Promise<TaskEnqueueResponse> => {
+    return apiClient.post<TaskEnqueueResponse>(
+      API_ENDPOINTS.sessionRegenerate(sessionId),
+      payload,
     );
   },
 
