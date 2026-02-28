@@ -12,7 +12,6 @@ import {
   submitScheduledTask,
   submitTask,
   useAutosizeTextarea,
-  useComposerModeHotkeys,
 } from "@/features/task-composer";
 import type { ModelConfigResponse } from "@/features/chat/types";
 
@@ -41,7 +40,6 @@ export function HomePageClient() {
   const [selectedModel, setSelectedModel] = React.useState<string | null>(null);
 
   useAutosizeTextarea(textareaRef, inputValue);
-  useComposerModeHotkeys({ textareaRef, setMode });
 
   React.useEffect(() => {
     let active = true;

@@ -5,7 +5,7 @@ import {
   Loader2,
   ArrowUp,
   Plus,
-  SlidersHorizontal,
+  Settings2,
   Clock,
   Chrome,
   Paperclip,
@@ -135,11 +135,11 @@ export function ComposerToolbar({
                   variant="ghost"
                   size="icon"
                   disabled={disabled}
-                  className="size-9 rounded-xl hover:bg-accent"
+                  className="size-9 rounded-xl border border-transparent text-muted-foreground hover:bg-accent hover:text-foreground data-[state=open]:border-border data-[state=open]:bg-accent/60 data-[state=open]:text-foreground"
                   aria-label={t("hero.configure")}
                   data-onboarding="home-mode-toggle"
                 >
-                  <SlidersHorizontal className="size-4" />
+                  <Settings2 className="size-4" />
                 </Button>
               </TooltipTrigger>
             </DropdownMenuTrigger>
@@ -180,6 +180,36 @@ export function ComposerToolbar({
             {t("hero.configure")}
           </TooltipContent>
         </Tooltip>
+
+        {/* Plan mode indicator */}
+        {mode === "plan" ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge
+                variant="secondary"
+                role="button"
+                tabIndex={0}
+                className="inline-flex size-9 cursor-pointer items-center justify-center rounded-xl select-none border border-primary/25 bg-primary/10 p-0 text-primary hover:bg-primary/15"
+                aria-label={t("hero.modeLabels.plan")}
+                onClick={() => {
+                  if (disabled) return;
+                  onModeChange("task");
+                }}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter" && e.key !== " ") return;
+                  e.preventDefault();
+                  if (disabled) return;
+                  onModeChange("task");
+                }}
+              >
+                <ListTodo className="size-4" />
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={8}>
+              {t("hero.modes.planHelp")}
+            </TooltipContent>
+          </Tooltip>
+        ) : null}
 
         {/* Scheduled summary badge (scheduled mode only) */}
         {mode === "scheduled" &&

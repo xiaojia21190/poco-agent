@@ -54,7 +54,7 @@
     "placeholder": "Weise eine Aufgabe zu oder stelle eine Frage",
     "inputPrompts": {
       "taskDefault": "Weise Poco eine beliebige Aufgabe zu",
-      "planDefault": "Erstelle mit Poco einen Aufgabenplan",
+      "planDefault": "Zuerst planen, dann ausführen. Ideal für komplexe Aufgaben.",
       "shortcutHint": "/ für Slash Commands, Shift+Enter für neue Zeile, Enter zum Senden"
     },
     "tools": "Verbinde deine Tools mit Poco",
@@ -66,7 +66,7 @@
       "task": "Aufgabe",
       "taskHelp": "Einmal sofort ausführen. Geeignet für die meisten Probleme.",
       "plan": "Schritt für Schritt",
-      "planHelp": "Zuerst einen Ausführungsplan vorschlagen, dann nach Bestätigung schrittweise ausführen.",
+      "planHelp": "Zuerst planen, dann nach Bestätigung ausführen. Besser für komplexe Aufgaben.",
       "scheduled": "Geplant",
       "scheduledHelp": "Nach einem Cron-Zeitplan ausführen und optional den Arbeitsbereich wiederverwenden.",
       "planPlaceholder": "Beschreibe eine komplexe Aufgabe. Ich werde zuerst einen Plan vorschlagen und dann nach deiner Bestätigung ausführen…",

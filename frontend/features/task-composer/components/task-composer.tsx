@@ -12,6 +12,7 @@ import { ComposerAttachments } from "@/features/task-composer/components/compose
 import { ComposerToolbar } from "@/features/task-composer/components/composer-toolbar";
 import { RepoDialog } from "@/features/task-composer/components/repo-dialog";
 import { SlashAutocompleteDropdown } from "@/features/task-composer/components/slash-autocomplete-dropdown";
+import { getNextComposerMode } from "@/features/task-composer/lib/mode-utils";
 import { useSlashCommandAutocomplete } from "@/features/chat/hooks/use-slash-command-autocomplete";
 import { useAppShell } from "@/components/shell/app-shell-context";
 import { useFileUpload } from "@/features/task-composer/hooks/use-file-upload";
@@ -365,6 +366,12 @@ export function TaskComposer({
           onFocus={onFocus}
           onBlur={onBlur}
           onKeyDown={(e) => {
+            if (e.shiftKey && e.key === "Tab") {
+              e.preventDefault();
+              e.stopPropagation();
+              onModeChange(getNextComposerMode(mode));
+              return;
+            }
             if (slashAutocomplete.handleKeyDown(e)) return;
             if (e.key === "Enter") {
               if (e.shiftKey) return;

@@ -12,7 +12,6 @@ import {
   submitScheduledTask,
   submitTask,
   useAutosizeTextarea,
-  useComposerModeHotkeys,
 } from "@/features/task-composer";
 import type { ProjectItem, TaskHistoryItem } from "@/features/projects/types";
 
@@ -43,7 +42,6 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   useAutosizeTextarea(textareaRef, inputValue);
-  useComposerModeHotkeys({ textareaRef, setMode });
 
   const shouldExpandConnectors = isInputFocused || inputValue.trim().length > 0;
 

@@ -54,7 +54,7 @@
     "placeholder": "Assign a task or ask any question",
     "inputPrompts": {
       "taskDefault": "Assign any task to Poco (Ask Poco Anything)",
-      "planDefault": "Create a task plan with Poco",
+      "planDefault": "Plan first, then execute. Best for complex tasks.",
       "shortcutHint": "/ for Slash Command, Shift+Enter for new line, Enter to send"
     },
     "tools": "Connect your tools to Poco",
@@ -66,7 +66,7 @@
       "task": "Task",
       "taskHelp": "Run once immediately. Good for most problems.",
       "plan": "Step-by-step",
-      "planHelp": "Propose an execution plan first, then execute step by step after confirmation.",
+      "planHelp": "Plan first, then execute after confirmation. Better for complex tasks.",
       "scheduled": "Scheduled",
       "scheduledHelp": "Run on a Cron schedule and optionally reuse the workspace.",
       "planPlaceholder": "Describe a complex task. I will propose a plan first, then execute after you confirm…",

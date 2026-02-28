@@ -53,7 +53,7 @@
     "placeholder": "タスクを入力するか、質問してください",
     "inputPrompts": {
       "taskDefault": "Poco にどんなタスクでも割り当てる",
-      "planDefault": "Poco と一緒にタスク計画を作成する",
+      "planDefault": "まず計画を立ててから実行します。複雑なタスク向けです。",
       "shortcutHint": "/ でスラッシュコマンド、Shift+Enter で改行、Enter で送信"
     },
     "tools": "Poco にツールを接続",
@@ -65,7 +65,7 @@
       "task": "タスク",
       "taskHelp": "すぐに1回実行します。ほとんどの問題に適しています。",
       "plan": "ステップバイステップ",
-      "planHelp": "最初に実行計画を提案し、確認後にステップごとに実行します。",
+      "planHelp": "まず計画を立て、確認後に実行します。複雑なタスクに適しています。",
       "scheduled": "スケジュール",
       "scheduledHelp": "Cronスケジュールで実行し、オプションでワークスペースを再利用します。",
       "planPlaceholder": "複雑なタスクを説明してください。最初に計画を提案し、確認後に実行します…",
