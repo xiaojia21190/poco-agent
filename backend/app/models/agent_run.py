@@ -6,6 +6,7 @@ from sqlalchemy import (
     BigInteger,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     JSON,
     String,
@@ -26,6 +27,15 @@ if TYPE_CHECKING:
 
 class AgentRun(Base, TimestampMixin):
     __tablename__ = "agent_runs"
+    __table_args__ = (
+        Index(
+            "ix_agent_runs_status_scheduled_at_created_at",
+            "status",
+            "scheduled_at",
+            "created_at",
+        ),
+        Index("ix_agent_runs_session_id_status", "session_id", "status"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True,

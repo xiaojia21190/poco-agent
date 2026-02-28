@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import DateTime, ForeignKey, JSON, String, text
+from sqlalchemy import DateTime, ForeignKey, Index, JSON, String, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models import Base, TimestampMixin
@@ -13,6 +13,14 @@ if TYPE_CHECKING:
 
 class UserInputRequest(Base, TimestampMixin):
     __tablename__ = "user_input_requests"
+    __table_args__ = (
+        Index(
+            "ix_user_input_requests_session_id_status_created_at",
+            "session_id",
+            "status",
+            "created_at",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True, server_default=text("gen_random_uuid()")

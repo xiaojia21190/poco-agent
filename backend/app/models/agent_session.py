@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import ForeignKey, JSON, Boolean, String, Text, text
+from sqlalchemy import Boolean, ForeignKey, Index, JSON, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models import Base, TimestampMixin
@@ -17,18 +17,33 @@ if TYPE_CHECKING:
 
 class AgentSession(Base, TimestampMixin):
     __tablename__ = "agent_sessions"
+    __table_args__ = (
+        Index(
+            "ix_agent_sessions_user_id_is_deleted_created_at",
+            "user_id",
+            "is_deleted",
+            "created_at",
+        ),
+        Index(
+            "ix_agent_sessions_sdk_session_id_is_deleted",
+            "sdk_session_id",
+            "is_deleted",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         primary_key=True,
         server_default=text("gen_random_uuid()"),
     )
-    user_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     project_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("projects.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
     )
-    sdk_session_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    sdk_session_id: Mapped[str | None] = mapped_column(
+        String(255), nullable=True, index=True
+    )
     config_snapshot: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     workspace_archive_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     state_patch: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)

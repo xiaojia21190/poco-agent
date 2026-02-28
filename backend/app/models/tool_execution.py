@@ -2,10 +2,11 @@ import uuid
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
-    JSON,
     Boolean,
     ForeignKey,
+    Index,
     Integer,
+    JSON,
     String,
     UniqueConstraint,
     text,
@@ -22,6 +23,12 @@ if TYPE_CHECKING:
 class ToolExecution(Base, TimestampMixin):
     __tablename__ = "tool_executions"
     __table_args__ = (
+        Index(
+            "ix_tool_executions_session_id_created_at_id",
+            "session_id",
+            "created_at",
+            "id",
+        ),
         UniqueConstraint(
             "session_id",
             "tool_use_id",
@@ -33,7 +40,9 @@ class ToolExecution(Base, TimestampMixin):
         primary_key=True, server_default=text("gen_random_uuid()")
     )
     session_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("agent_sessions.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("agent_sessions.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     message_id: Mapped[int] = mapped_column(
         ForeignKey("agent_messages.id", ondelete="CASCADE"), nullable=False
