@@ -32,6 +32,7 @@ export function GlobalSearchDialog({
   const router = useRouter();
   const lng = useLanguage();
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [isComposing, setIsComposing] = React.useState(false);
   const { tasks, projects, messages, isLoading } = useSearchData(searchQuery, {
     enabled: open,
   });
@@ -42,8 +43,27 @@ export function GlobalSearchDialog({
   }, []);
 
   React.useEffect(() => {
-    if (!open) setSearchQuery("");
+    if (!open) {
+      setSearchQuery("");
+      setIsComposing(false);
+    }
   }, [open]);
+
+  const handleInputKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key !== "Enter") return;
+      // Keep search behavior predictable: Enter in the input should not trigger
+      // result navigation implicitly (especially with IME composition).
+      if (isComposing || event.nativeEvent.isComposing) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    [isComposing],
+  );
 
   const hasResults =
     tasks.length > 0 || projects.length > 0 || messages.length > 0;
@@ -56,8 +76,7 @@ export function GlobalSearchDialog({
         router.push(lng ? `/${lng}/chat/${id}` : `/chat/${id}`);
         break;
       case "project":
-        // TODO: Navigate to project page when implemented
-        router.push(lng ? `/${lng}/chat/new` : `/chat/new`);
+        router.push(lng ? `/${lng}/projects/${id}` : `/projects/${id}`);
         break;
       case "message":
         // Navigate to chat page and scroll to message
@@ -69,11 +88,18 @@ export function GlobalSearchDialog({
   if (!mounted) return null;
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
+    <CommandDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      commandProps={{ shouldFilter: false }}
+    >
       <CommandInput
         placeholder={t("search.placeholder")}
         value={searchQuery}
         onValueChange={setSearchQuery}
+        onKeyDown={handleInputKeyDown}
+        onCompositionStart={() => setIsComposing(true)}
+        onCompositionEnd={() => setIsComposing(false)}
       />
       <CommandList>
         {isLoading ? (
