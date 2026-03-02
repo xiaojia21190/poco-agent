@@ -288,6 +288,18 @@ function createExportHeader(exportWidth: number, logoSrc: string): HTMLElement {
   return header;
 }
 
+function disableMotionForExport(node: HTMLElement): void {
+  const elements = [
+    node,
+    ...Array.from(node.querySelectorAll<HTMLElement>("*")),
+  ];
+
+  elements.forEach((element) => {
+    element.style.setProperty("animation", "none", "important");
+    element.style.setProperty("transition", "none", "important");
+  });
+}
+
 function prepareCloneForExport(clone: HTMLElement, exportWidth: number): void {
   clone.style.width = `${exportWidth}px`;
   clone.style.maxWidth = `${exportWidth}px`;
@@ -346,6 +358,8 @@ function prepareCloneForExport(clone: HTMLElement, exportWidth: number): void {
     node.style.setProperty("-webkit-line-clamp", "unset");
     node.style.setProperty("-webkit-box-orient", "unset");
   });
+
+  disableMotionForExport(clone);
 }
 
 function buildExportNode(
@@ -526,6 +540,9 @@ export async function exportConversationImage(
   host.style.top = "0";
   host.style.pointerEvents = "none";
   host.style.zIndex = "-1";
+  if (document.documentElement.classList.contains("dark")) {
+    host.classList.add("dark");
+  }
   document.body.appendChild(host);
 
   try {
