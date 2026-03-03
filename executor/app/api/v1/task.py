@@ -37,7 +37,11 @@ async def run_task(req: TaskRun, background_tasks: BackgroundTasks) -> dict:
     )
     user_input_client = UserInputClient(base_url=base_url)
     computer_client = ComputerClient(base_url=base_url)
-    memory_client = MemoryClient(base_url=base_url, session_id=req.session_id)
+    memory_client = (
+        MemoryClient(base_url=base_url, session_id=req.session_id)
+        if req.config.memory_enabled
+        else None
+    )
     hooks: list[AgentHook] = [
         WorkspaceHook(),
         TodoHook(),
@@ -65,6 +69,7 @@ async def run_task(req: TaskRun, background_tasks: BackgroundTasks) -> dict:
             "resume": bool(req.sdk_session_id),
             "git_branch": cfg.git_branch,
             "has_repo_url": bool((cfg.repo_url or "").strip()),
+            "memory_enabled": cfg.memory_enabled,
             "mcp_server_count": len(cfg.mcp_config or {}),
             "skill_count": len(cfg.skill_files or {}),
             "plugin_count": len(cfg.plugin_files or {}),
