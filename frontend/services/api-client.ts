@@ -42,6 +42,7 @@ export const API_ENDPOINTS = {
   sessionBrowserScreenshot: (sessionId: string, toolUseId: string) =>
     `/sessions/${sessionId}/computer/browser/${toolUseId}`,
   sessionUsage: (sessionId: string) => `/sessions/${sessionId}/usage`,
+  usageAnalytics: "/usage/analytics",
   sessionWorkspaceFiles: (sessionId: string) =>
     `/sessions/${sessionId}/workspace/files`,
   sessionWorkspaceArchive: (sessionId: string) =>

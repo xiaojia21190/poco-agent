@@ -19,3 +19,42 @@ export type ApiProviderConfig = {
   useCustomBaseUrl: boolean;
   baseUrl: string;
 };
+
+export interface UsageAnalyticsMetricSummary {
+  input_tokens: number;
+  output_tokens: number;
+  cache_creation_input_tokens: number;
+  cache_read_input_tokens: number;
+  total_tokens: number;
+  total_cost_usd: number;
+}
+
+export interface UsageAnalyticsBucket extends UsageAnalyticsMetricSummary {
+  bucket_id: string;
+  label: string;
+}
+
+export interface UsageAnalyticsSummary {
+  month: UsageAnalyticsMetricSummary;
+  day: UsageAnalyticsMetricSummary;
+  all_time: UsageAnalyticsMetricSummary;
+}
+
+export interface UsageAnalyticsMonthView {
+  month: string;
+  buckets: UsageAnalyticsBucket[];
+}
+
+export interface UsageAnalyticsDayView {
+  day: string;
+  buckets: UsageAnalyticsBucket[];
+}
+
+export interface UsageAnalyticsResponse {
+  timezone: string;
+  month: string;
+  day: string;
+  summary: UsageAnalyticsSummary;
+  month_view: UsageAnalyticsMonthView;
+  day_view: UsageAnalyticsDayView;
+}
