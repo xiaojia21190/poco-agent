@@ -21,6 +21,7 @@ import { ConnectorsBar } from "@/features/connectors";
 import { useAppShell } from "@/components/shell/app-shell-context";
 import { toast } from "sonner";
 import { modelConfigService } from "@/features/home/api/model-config-api";
+import { buildModelCatalogOptions } from "@/features/chat/lib/model-catalog";
 
 const MODEL_STORAGE_KEY = "poco_selected_model";
 
@@ -38,6 +39,15 @@ export function HomePageClient() {
   const [modelConfig, setModelConfig] =
     React.useState<ModelConfigResponse | null>(null);
   const [selectedModel, setSelectedModel] = React.useState<string | null>(null);
+  const selectableModelIds = React.useMemo(
+    () =>
+      new Set(
+        buildModelCatalogOptions(modelConfig)
+          .filter((option) => option.isAvailable && !option.isDefault)
+          .map((option) => option.modelId),
+      ),
+    [modelConfig],
+  );
 
   useAutosizeTextarea(textareaRef, inputValue);
 
@@ -74,13 +84,18 @@ export function HomePageClient() {
       return;
     }
 
-    const allowed = new Set(
-      (modelConfig?.model_list || [])
-        .map((m) => (m || "").trim())
-        .filter(Boolean),
-    );
-    setSelectedModel(allowed.has(cleaned) ? cleaned : null);
-  }, [modelConfig]);
+    if (!selectableModelIds.has(cleaned)) {
+      try {
+        localStorage.removeItem(MODEL_STORAGE_KEY);
+      } catch {
+        // Ignore storage failures (e.g., privacy mode).
+      }
+      setSelectedModel(null);
+      return;
+    }
+
+    setSelectedModel(cleaned);
+  }, [modelConfig, selectableModelIds]);
 
   const handleSelectModel = React.useCallback((model: string | null) => {
     const cleaned = (model || "").trim();

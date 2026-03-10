@@ -5,6 +5,7 @@ import { ChevronDown, Coins } from "lucide-react";
 
 import { useT } from "@/lib/i18n/client";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +19,10 @@ import { RepoLinkButton } from "@/components/shared/repo-link-button";
 import { PageHeaderShell } from "@/components/shared/page-header-shell";
 import type { SettingsTabId } from "@/features/settings/types";
 import type { ModelConfigResponse } from "@/features/chat/types";
+import {
+  buildModelCatalogOptions,
+  findModelCatalogOption,
+} from "@/features/chat/lib/model-catalog";
 
 interface HomeHeaderProps {
   onOpenSettings?: (tab?: SettingsTabId) => void;
@@ -35,28 +40,26 @@ export function HomeHeader({
   const { t } = useT("translation");
 
   const defaultModel = (modelConfig?.default_model || "").trim();
-  const effectiveModel = (selectedModel || defaultModel).trim();
+  const modelOptions = React.useMemo(
+    () => buildModelCatalogOptions(modelConfig),
+    [modelConfig],
+  );
+  const defaultOption = React.useMemo(
+    () => findModelCatalogOption(modelConfig, defaultModel),
+    [defaultModel, modelConfig],
+  );
+  const effectiveOption = React.useMemo(
+    () =>
+      findModelCatalogOption(modelConfig, selectedModel || defaultModel) ??
+      null,
+    [defaultModel, modelConfig, selectedModel],
+  );
+  const hasSelectableModel = React.useMemo(
+    () => modelOptions.some((option) => option.isAvailable),
+    [modelOptions],
+  );
 
-  const modelItems = React.useMemo(() => {
-    const items: string[] = [];
-    const seen = new Set<string>();
-
-    const push = (value: string) => {
-      const cleaned = (value || "").trim();
-      if (!cleaned) return;
-      if (seen.has(cleaned)) return;
-      seen.add(cleaned);
-      items.push(cleaned);
-    };
-
-    push(defaultModel);
-    for (const item of modelConfig?.model_list || []) {
-      push(item);
-    }
-    return items;
-  }, [defaultModel, modelConfig?.model_list]);
-
-  const isSelectorReady = Boolean(defaultModel && onSelectModel);
+  const isSelectorReady = Boolean(defaultModel && onSelectModel && hasSelectableModel);
 
   return (
     <PageHeaderShell
@@ -72,7 +75,9 @@ export function HomeHeader({
                 disabled={!isSelectorReady}
               >
                 <span className="min-w-0 max-w-[220px] truncate text-base font-medium font-serif">
-                  {effectiveModel || t("status.loading")}
+                  {effectiveOption?.displayName ||
+                    defaultModel ||
+                    t("status.loading")}
                 </span>
                 <ChevronDown className="size-3.5 text-muted-foreground" />
               </Button>
@@ -82,34 +87,66 @@ export function HomeHeader({
                 <>
                   <DropdownMenuItem
                     onClick={() => onSelectModel?.(null)}
+                    disabled={!defaultOption?.isAvailable}
                     className="flex items-center justify-between gap-3"
                   >
                     <div className="min-w-0">
-                      <div className="truncate font-medium">{defaultModel}</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="truncate font-medium">
+                        {defaultOption?.displayName || defaultModel}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         {t("models.defaultTag")}
+                        <span>/</span>
+                        <span>{defaultOption?.providerName || "-"}</span>
+                        <span>/</span>
+                        <span>
+                          {defaultOption?.credentialState === "user"
+                            ? t("settings.providerStatusUser")
+                            : defaultOption?.credentialState === "system"
+                              ? t("settings.providerStatusSystem")
+                              : t("settings.providerStatusNone")}
+                        </span>
                       </div>
                     </div>
                     {!selectedModel ? (
                       <div className="text-primary text-sm">✓</div>
                     ) : null}
                   </DropdownMenuItem>
-                  {modelItems.filter((m) => m !== defaultModel).length > 0 ? (
+                  {modelOptions.filter((option) => !option.isDefault).length >
+                  0 ? (
                     <DropdownMenuSeparator />
                   ) : null}
                 </>
               ) : null}
 
-              {modelItems
-                .filter((m) => m !== defaultModel)
-                .map((m) => (
+              {modelOptions
+                .filter((option) => !option.isDefault)
+                .map((option) => (
                   <DropdownMenuItem
-                    key={m}
-                    onClick={() => onSelectModel?.(m)}
-                    className="flex items-center justify-between gap-3"
+                    key={option.modelId}
+                    onClick={() => onSelectModel?.(option.modelId)}
+                    disabled={!option.isAvailable}
+                    className="flex items-start justify-between gap-3"
                   >
-                    <div className="min-w-0 truncate font-medium">{m}</div>
-                    {m === selectedModel ? (
+                    <div className="min-w-0">
+                      <div className="truncate font-medium">
+                        {option.displayName}
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{option.providerName}</span>
+                        <Badge
+                          variant="outline"
+                          className="h-5 px-1.5 text-[10px]"
+                        >
+                          {option.credentialState === "user"
+                            ? t("settings.providerStatusUser")
+                            : option.credentialState === "system"
+                              ? t("settings.providerStatusSystem")
+                              : t("settings.providerStatusNone")}
+                        </Badge>
+                      </div>
+                    </div>
+                    {option.modelId === selectedModel ? (
                       <div className="text-primary text-sm">✓</div>
                     ) : null}
                   </DropdownMenuItem>
