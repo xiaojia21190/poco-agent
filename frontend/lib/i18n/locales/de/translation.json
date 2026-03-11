@@ -57,6 +57,7 @@
     "voiceInput": "Spracheingabe",
     "startVoiceInput": "Spracheingabe starten",
     "stopVoiceInput": "Spracheingabe stoppen",
+    "transcribingVoiceInput": "Sprache wird transkribiert",
     "send": "Senden",
     "placeholder": "Weise eine Aufgabe zu oder stelle eine Frage",
     "inputPrompts": {
@@ -155,7 +156,8 @@
       "fileTooLarge": "Datei zu groß, maximal 100 MB unterstützt",
       "duplicateFileName": "Ein Anhang mit dem Namen {{name}} existiert bereits. Bitte entfernen oder benennen Sie ihn um.",
       "voiceInputNotSupported": "Spracheingabe wird in diesem Browser nicht unterstützt",
-      "voiceInputFailed": "Spracheingabe konnte nicht gestartet werden, bitte versuchen Sie es erneut"
+      "voiceInputFailed": "Spracheingabe fehlgeschlagen, bitte versuchen Sie es erneut",
+      "voiceInputPermissionDenied": "Mikrofonberechtigung verweigert. Bitte aktivieren und erneut versuchen"
     },
     "mcpSelector": {
       "title": "MCP-Server auswählen",

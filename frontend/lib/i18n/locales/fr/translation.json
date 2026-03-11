@@ -56,6 +56,7 @@
     "voiceInput": "Saisie vocale",
     "startVoiceInput": "Démarrer la saisie vocale",
     "stopVoiceInput": "Arrêter la saisie vocale",
+    "transcribingVoiceInput": "Transcription vocale en cours",
     "send": "Envoyer",
     "placeholder": "Assignez une tâche ou posez une question",
     "inputPrompts": {
@@ -154,7 +155,8 @@
       "fileTooLarge": "Fichier trop volumineux, max 100 Mo supporté",
       "duplicateFileName": "Une pièce jointe nommée {{name}} existe déjà. Veuillez la supprimer ou la renommer.",
       "voiceInputNotSupported": "La saisie vocale n'est pas prise en charge dans ce navigateur",
-      "voiceInputFailed": "Impossible de démarrer la saisie vocale, veuillez réessayer"
+      "voiceInputFailed": "La saisie vocale a échoué, veuillez réessayer",
+      "voiceInputPermissionDenied": "Accès au microphone refusé, veuillez l'autoriser puis réessayer"
     },
     "mcpSelector": {
       "title": "Sélectionner les serveurs MCP",
