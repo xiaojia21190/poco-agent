@@ -56,6 +56,7 @@
     "voiceInput": "音声入力",
     "startVoiceInput": "音声入力を開始",
     "stopVoiceInput": "音声入力を停止",
+    "transcribingVoiceInput": "音声を文字起こし中",
     "send": "送信",
     "placeholder": "タスクを入力するか、質問してください",
     "inputPrompts": {
@@ -154,7 +155,8 @@
       "fileTooLarge": "ファイルが大きすぎます。最大100MBまでサポートしています",
       "duplicateFileName": "{{name}}という名前の添付ファイルが既に存在します。削除または名前を変更してください。",
       "voiceInputNotSupported": "このブラウザでは音声入力がサポートされていません",
-      "voiceInputFailed": "音声入力の開始に失敗しました。もう一度お試しください"
+      "voiceInputFailed": "音声入力に失敗しました。もう一度お試しください",
+      "voiceInputPermissionDenied": "マイクの権限が拒否されました。許可してから再試行してください"
     },
     "mcpSelector": {
       "title": "MCPサーバーを選択",

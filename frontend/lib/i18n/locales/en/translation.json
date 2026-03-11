@@ -58,6 +58,7 @@
     "voiceInput": "Voice input",
     "startVoiceInput": "Start voice input",
     "stopVoiceInput": "Stop voice input",
+    "transcribingVoiceInput": "Transcribing voice input",
     "send": "Send",
     "placeholder": "Assign a task or ask any question",
     "inputPrompts": {
@@ -156,7 +157,8 @@
       "fileTooLarge": "File too large, max 100MB supported",
       "duplicateFileName": "An attachment named {{name}} already exists. Please remove or rename it.",
       "voiceInputNotSupported": "Voice input is not supported in this browser",
-      "voiceInputFailed": "Failed to start voice input, please try again"
+      "voiceInputFailed": "Voice input failed, please try again",
+      "voiceInputPermissionDenied": "Microphone permission denied, please enable it and try again"
     },
     "mcpSelector": {
       "title": "Select MCP Servers",

@@ -79,6 +79,7 @@ export const API_ENDPOINTS = {
 
   // Attachments
   attachmentsUpload: "/attachments/upload",
+  audioTranscriptions: "/audio/transcriptions",
 
   // Environment Variables
   envVars: "/env-vars",
