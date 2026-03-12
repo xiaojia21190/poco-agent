@@ -133,9 +133,7 @@ export function usePendingMessages({
   }, [refreshPendingMessages, sessionId, shouldPoll]);
 
   const addPendingMessage = useCallback(
-    (
-      message: Omit<PendingMessage, "sequenceNo"> & { sequenceNo?: number },
-    ) => {
+    (message: Omit<PendingMessage, "sequenceNo"> & { sequenceNo?: number }) => {
       setPendingMessages((prev) => {
         const maxSequenceNo = prev.reduce(
           (max, item) => Math.max(max, item.sequenceNo),
@@ -147,7 +145,9 @@ export function usePendingMessages({
         const nextMessage: PendingMessage = {
           ...message,
           sequenceNo:
-            message.sequenceNo ?? existingMessage?.sequenceNo ?? maxSequenceNo + 1,
+            message.sequenceNo ??
+            existingMessage?.sequenceNo ??
+            maxSequenceNo + 1,
         };
 
         if (existingIndex >= 0) {
@@ -167,7 +167,9 @@ export function usePendingMessages({
       if (!sessionId) return;
 
       const previousMessages = pendingMessages;
-      setPendingMessages((prev) => prev.filter((item) => item.id !== messageId));
+      setPendingMessages((prev) =>
+        prev.filter((item) => item.id !== messageId),
+      );
 
       try {
         await deleteQueuedQueryAction({ sessionId, itemId: messageId });

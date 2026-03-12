@@ -95,7 +95,9 @@ export const chatService = {
     offset?: number;
   }) => {
     const query = buildQuery(params);
-    return apiClient.get<SessionResponse[]>(`${API_ENDPOINTS.sessions}${query}`);
+    return apiClient.get<SessionResponse[]>(
+      `${API_ENDPOINTS.sessions}${query}`,
+    );
   },
 
   getSessionRaw: async (sessionId: string) => {
@@ -123,7 +125,10 @@ export const chatService = {
     sessionId: string,
     payload: SessionUpdateRequest,
   ): Promise<SessionResponse> => {
-    return apiClient.patch<SessionResponse>(API_ENDPOINTS.session(sessionId), payload);
+    return apiClient.patch<SessionResponse>(
+      API_ENDPOINTS.session(sessionId),
+      payload,
+    );
   },
 
   cancelSession: async (
@@ -166,7 +171,9 @@ export const chatService = {
     );
   },
 
-  enqueueTask: async (request: TaskEnqueueRequest): Promise<TaskEnqueueResponse> => {
+  enqueueTask: async (
+    request: TaskEnqueueRequest,
+  ): Promise<TaskEnqueueResponse> => {
     return apiClient.post<TaskEnqueueResponse>(API_ENDPOINTS.tasks, request);
   },
 
@@ -209,7 +216,9 @@ export const chatService = {
     });
   },
 
-  listQueuedQueries: async (sessionId: string): Promise<SessionQueueItemResponse[]> => {
+  listQueuedQueries: async (
+    sessionId: string,
+  ): Promise<SessionQueueItemResponse[]> => {
     return apiClient.get<SessionQueueItemResponse[]>(
       API_ENDPOINTS.sessionQueuedQueries(sessionId),
     );
@@ -249,7 +258,9 @@ export const chatService = {
     params?: { limit?: number; offset?: number },
   ): Promise<RunResponse[]> => {
     const query = buildQuery(params);
-    return apiClient.get<RunResponse[]>(`${API_ENDPOINTS.runsBySession(sessionId)}${query}`);
+    return apiClient.get<RunResponse[]>(
+      `${API_ENDPOINTS.runsBySession(sessionId)}${query}`,
+    );
   },
 
   getToolExecutions: async (
@@ -391,7 +402,8 @@ export const chatService = {
       if (!rawFiles || rawFiles.length === 0) {
         try {
           const session = await chatService.getSessionRaw(sessionId);
-          const fileChanges = session.state_patch?.workspace_state?.file_changes || [];
+          const fileChanges =
+            session.state_patch?.workspace_state?.file_changes || [];
           rawFiles = fileChanges.map((change) => ({
             id: change.path,
             name: change.path.split("/").pop() || change.path,
@@ -399,7 +411,10 @@ export const chatService = {
             type: "file",
           }));
         } catch (err) {
-          console.error("[Chat Service] Fallback to session state failed:", err);
+          console.error(
+            "[Chat Service] Fallback to session state failed:",
+            err,
+          );
         }
       }
 

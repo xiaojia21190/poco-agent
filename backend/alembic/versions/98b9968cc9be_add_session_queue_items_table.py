@@ -56,13 +56,17 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["linked_run_id"], ["agent_runs.id"], ondelete="SET NULL"),
+        sa.ForeignKeyConstraint(
+            ["linked_run_id"], ["agent_runs.id"], ondelete="SET NULL"
+        ),
         sa.ForeignKeyConstraint(
             ["linked_user_message_id"],
             ["agent_messages.id"],
             ondelete="SET NULL",
         ),
-        sa.ForeignKeyConstraint(["session_id"], ["agent_sessions.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["session_id"], ["agent_sessions.id"], ondelete="CASCADE"
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint(
             "session_id",

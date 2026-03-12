@@ -101,4 +101,3 @@ class ContainerStatsResponse(BaseModel):
     persistent_containers: int
     ephemeral_containers: int
     containers: list[dict]
-

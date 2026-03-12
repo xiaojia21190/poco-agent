@@ -118,10 +118,7 @@ class CallbackService:
         )
         if latest_terminal_run is None or latest_terminal_run.id == db_run.id:
             return True
-        if (
-            export_status == "ready"
-            and db_session.workspace_export_status != "ready"
-        ):
+        if export_status == "ready" and db_session.workspace_export_status != "ready":
             return True
 
         logger.info(
@@ -141,15 +138,13 @@ class CallbackService:
         callback: AgentCallbackRequest,
     ) -> bool:
         has_existing_ready_workspace = (
-            (db_session.workspace_export_status or "").strip().lower()
-            == "ready"
-            and any(
-                value
-                for value in (
-                    db_session.workspace_files_prefix,
-                    db_session.workspace_manifest_key,
-                    db_session.workspace_archive_key,
-                )
+            db_session.workspace_export_status or ""
+        ).strip().lower() == "ready" and any(
+            value
+            for value in (
+                db_session.workspace_files_prefix,
+                db_session.workspace_manifest_key,
+                db_session.workspace_archive_key,
             )
         )
         if not has_existing_ready_workspace:
@@ -385,7 +380,10 @@ class CallbackService:
                 callback.new_message
             )
 
-        if derived_sdk_session_id and derived_sdk_session_id != db_session.sdk_session_id:
+        if (
+            derived_sdk_session_id
+            and derived_sdk_session_id != db_session.sdk_session_id
+        ):
             db_session.sdk_session_id = derived_sdk_session_id
 
         if callback.new_message and isinstance(callback.new_message, dict):
@@ -453,8 +451,12 @@ class CallbackService:
 
         if callback.status == CallbackStatus.COMPLETED:
             blocking_run = RunRepository.get_blocking_by_session(db, db_session.id)
-            if blocking_run is None and self._session_queue.has_active_items(db, db_session.id):
-                promoted_run = self._session_queue.promote_next_if_available(db, db_session)
+            if blocking_run is None and self._session_queue.has_active_items(
+                db, db_session.id
+            ):
+                promoted_run = self._session_queue.promote_next_if_available(
+                    db, db_session
+                )
                 if promoted_run is not None:
                     db_session.status = "pending"
 

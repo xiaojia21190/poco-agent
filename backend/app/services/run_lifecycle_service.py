@@ -17,9 +17,7 @@ class RunLifecycleService:
     def __init__(self) -> None:
         self._session_queue_service = SessionQueueService()
 
-    def _sync_scheduled_task_last_status(
-        self, db: Session, db_run: AgentRun
-    ) -> None:
+    def _sync_scheduled_task_last_status(self, db: Session, db_run: AgentRun) -> None:
         if not db_run.scheduled_task_id:
             return
 

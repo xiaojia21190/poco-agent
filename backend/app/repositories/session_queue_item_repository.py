@@ -133,7 +133,10 @@ class SessionQueueItemRepository:
         return (
             session_db.query(AgentSessionQueueItem)
             .filter(AgentSessionQueueItem.session_id == session_id)
-            .filter(AgentSessionQueueItem.status == SessionQueueItemRepository.PROMOTABLE_STATUS)
+            .filter(
+                AgentSessionQueueItem.status
+                == SessionQueueItemRepository.PROMOTABLE_STATUS
+            )
             .order_by(
                 AgentSessionQueueItem.sequence_no.asc(),
                 AgentSessionQueueItem.created_at.asc(),

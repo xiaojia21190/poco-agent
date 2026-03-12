@@ -87,4 +87,3 @@ async def run_task(req: TaskRun, background_tasks: BackgroundTasks) -> dict:
     )
 
     return {"status": "accepted", "session_id": req.session_id}
-

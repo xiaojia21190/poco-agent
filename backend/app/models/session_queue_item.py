@@ -85,9 +85,7 @@ class AgentSessionQueueItem(Base, TimestampMixin):
     )
 
     session: Mapped["AgentSession"] = relationship(back_populates="queue_items")
-    linked_run: Mapped["AgentRun | None"] = relationship(
-        foreign_keys=[linked_run_id]
-    )
+    linked_run: Mapped["AgentRun | None"] = relationship(foreign_keys=[linked_run_id])
     linked_user_message: Mapped["AgentMessage | None"] = relationship(
         foreign_keys=[linked_user_message_id]
     )

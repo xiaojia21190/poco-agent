@@ -131,7 +131,10 @@ export interface TaskEnqueueActionResult {
 }
 
 function createClientRequestId(): string {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     return crypto.randomUUID();
   }
   return `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -166,7 +169,8 @@ export async function createSessionAction(input: CreateSessionInput) {
     scheduled_at,
   } = createSessionSchema.parse(input);
   const hasInputFiles = Boolean(config?.input_files?.length);
-  const finalPrompt = prompt.trim() || (hasInputFiles ? "Uploaded files" : prompt);
+  const finalPrompt =
+    prompt.trim() || (hasInputFiles ? "Uploaded files" : prompt);
   const result = await chatService.createSession(
     finalPrompt,
     config,
@@ -184,7 +188,8 @@ export async function createSessionAction(input: CreateSessionInput) {
 
 export async function sendMessageAction(input: SendMessageInput) {
   const { sessionId, content, attachments } = sendMessageSchema.parse(input);
-  const finalContent = content.trim() || (attachments?.length ? "Uploaded files" : content);
+  const finalContent =
+    content.trim() || (attachments?.length ? "Uploaded files" : content);
   const result = await chatService.sendMessage(
     sessionId,
     finalContent,

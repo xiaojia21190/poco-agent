@@ -103,11 +103,7 @@ class AgentSession(Base, TimestampMixin):
     @property
     def next_queued_query_preview(self) -> str | None:
         queued_items = sorted(
-            (
-                item
-                for item in self.queue_items
-                if item.status in {"queued", "paused"}
-            ),
+            (item for item in self.queue_items if item.status in {"queued", "paused"}),
             key=lambda item: (item.sequence_no, item.created_at),
         )
         if not queued_items:

@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 from app.core.settings import get_settings
 from app.core.errors.error_codes import ErrorCode
 from app.core.errors.exceptions import AppException
-from app.repositories.message_repository import MessageRepository
 from app.repositories.project_repository import ProjectRepository
 from app.repositories.run_repository import RunRepository
 from app.repositories.session_repository import SessionRepository
@@ -313,7 +312,11 @@ class TaskService:
             ]
         run_config_snapshot = run_config_snapshot or None
 
-        if blocking_run is not None and schedule_mode == "immediate" and db_session is not None:
+        if (
+            blocking_run is not None
+            and schedule_mode == "immediate"
+            and db_session is not None
+        ):
             item = session_queue_service.enqueue(
                 db,
                 db_session=db_session,
@@ -364,7 +367,6 @@ class TaskService:
         )
 
     def _build_config_snapshot(
-
         self,
         db: Session,
         user_id: str,

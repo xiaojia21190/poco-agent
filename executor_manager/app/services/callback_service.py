@@ -144,8 +144,8 @@ class CallbackService:
                 "session_id": callback.session_id,
                 "status": callback.status,
                 "progress": callback.progress,
-"sdk_session_id": callback.sdk_session_id,
-"run_id": callback.run_id,
+                "sdk_session_id": callback.sdk_session_id,
+                "run_id": callback.run_id,
             },
         )
 
@@ -236,9 +236,9 @@ class CallbackService:
             result = None
 
         payload_model = AgentCallbackRequest(
-session_id=callback.session_id,
-run_id=callback.run_id,
-time=datetime.now(timezone.utc),
+            session_id=callback.session_id,
+            run_id=callback.run_id,
+            time=datetime.now(timezone.utc),
             status=callback.status,
             progress=100 if callback.status == "completed" else callback.progress,
             error_message=callback.error_message,

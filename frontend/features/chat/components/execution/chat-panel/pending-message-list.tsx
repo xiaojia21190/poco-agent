@@ -162,7 +162,9 @@ export function PendingMessageList({
                     ) : (
                       <ArrowUp className="size-4" />
                     )}
-                    <span>{isLoading ? t("status.loading") : t("pending.queued")}</span>
+                    <span>
+                      {isLoading ? t("status.loading") : t("pending.queued")}
+                    </span>
                   </div>
                   {summaryPreview ? (
                     <p className="mt-2 line-clamp-2 text-sm text-foreground">
@@ -197,7 +199,8 @@ export function PendingMessageList({
                       </span>
 
                       <div className="min-w-0 flex-1">
-                        {message.attachments && message.attachments.length > 0 ? (
+                        {message.attachments &&
+                        message.attachments.length > 0 ? (
                           <div className="text-xs text-muted-foreground">
                             {t("chatPanel.fileAttachment", {
                               count: message.attachments.length,

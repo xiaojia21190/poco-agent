@@ -545,7 +545,9 @@ export function ChatPanel({
           pendingMessages[0]?.content ?? "",
           pendingMessages[0]?.attachments,
           t,
-        ) || session.next_queued_query_preview || null;
+        ) ||
+        session.next_queued_query_preview ||
+        null;
       const nextPreview = getQueuedQueryPreview(content, attachments, t);
 
       touchTask(session.session_id, {
@@ -583,7 +585,7 @@ export function ChatPanel({
         queued_query_count: result.queuedQueryCount,
         next_queued_query_preview:
           result.queuedQueryCount > 0
-            ? previousQueueHeadPreview ?? nextPreview
+            ? (previousQueueHeadPreview ?? nextPreview)
             : null,
       });
 

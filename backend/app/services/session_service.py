@@ -38,9 +38,7 @@ class SessionService:
             return deepcopy(value)
         return value
 
-    def _ensure_no_active_queue_items(
-        self, db: Session, session_id: uuid.UUID
-    ) -> None:
+    def _ensure_no_active_queue_items(self, db: Session, session_id: uuid.UUID) -> None:
         if SessionQueueItemRepository.has_active_items(db, session_id):
             raise HTTPException(
                 status_code=409,
@@ -280,7 +278,6 @@ class SessionService:
         return db_session, canceled_runs, canceled_queue_items, expired_requests
 
     def branch_session(
-
         self,
         db: Session,
         session_id: uuid.UUID,

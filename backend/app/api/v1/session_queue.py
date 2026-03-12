@@ -16,7 +16,9 @@ from app.schemas.task import TaskEnqueueResponse
 from app.services.session_queue_service import SessionQueueService
 from app.services.session_service import SessionService
 
-router = APIRouter(prefix="/sessions/{session_id}/queued-queries", tags=["session-queue"])
+router = APIRouter(
+    prefix="/sessions/{session_id}/queued-queries", tags=["session-queue"]
+)
 
 session_service = SessionService()
 session_queue_service = SessionQueueService()

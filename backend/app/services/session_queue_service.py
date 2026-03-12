@@ -170,7 +170,9 @@ class SessionQueueService:
         run_config_snapshot: dict[str, Any] | None,
         client_request_id: str | None = None,
     ) -> AgentSessionQueueItem:
-        sequence_no = SessionQueueItemRepository.get_max_sequence_no(db, db_session.id) + 1
+        sequence_no = (
+            SessionQueueItemRepository.get_max_sequence_no(db, db_session.id) + 1
+        )
         normalized_request_id = (client_request_id or "").strip() or None
         item = SessionQueueItemRepository.create(
             db,
@@ -254,7 +256,11 @@ class SessionQueueService:
         request: SessionQueueItemUpdateRequest,
     ) -> AgentSessionQueueItem:
         item = SessionQueueItemRepository.get_by_id_for_update(db, item_id)
-        if not item or item.session_id != db_session.id or item.status not in {"queued", "paused"}:
+        if (
+            not item
+            or item.session_id != db_session.id
+            or item.status not in {"queued", "paused"}
+        ):
             raise AppException(
                 error_code=ErrorCode.NOT_FOUND,
                 message=f"Queued query not found: {item_id}",
@@ -288,7 +294,11 @@ class SessionQueueService:
         item_id: uuid.UUID,
     ) -> AgentSessionQueueItem:
         item = SessionQueueItemRepository.get_by_id_for_update(db, item_id)
-        if not item or item.session_id != db_session.id or item.status not in {"queued", "paused"}:
+        if (
+            not item
+            or item.session_id != db_session.id
+            or item.status not in {"queued", "paused"}
+        ):
             raise AppException(
                 error_code=ErrorCode.NOT_FOUND,
                 message=f"Queued query not found: {item_id}",

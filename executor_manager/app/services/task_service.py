@@ -257,4 +257,3 @@ class TaskService:
                 error_code=ErrorCode.BACKEND_UNAVAILABLE,
                 message=str(e),
             )
-

@@ -469,4 +469,3 @@ PY
         injected = dict(mcp_servers)
         injected[MEMORY_MCP_SERVER_KEY] = self.memory_mcp_server
         return injected
-
