@@ -98,13 +98,12 @@ class TaskService:
             container_mode = config.get("container_mode", "ephemeral")
 
             if container_id or container_mode == "persistent":
-                container_pool = TaskDispatcher.get_container_pool()
                 step_started = time.perf_counter()
                 browser_enabled = bool(config.get("browser_enabled"))
                 (
                     container_url,
                     container_id,
-                ) = await container_pool.get_or_create_container(
+                ) = await TaskDispatcher.resolve_executor_target(
                     session_id=session_id,
                     user_id=user_id,
                     browser_enabled=browser_enabled,
@@ -124,7 +123,6 @@ class TaskService:
                         "browser_enabled": browser_enabled,
                     },
                 )
-
             enqueued_at = time.perf_counter()
             step_started = time.perf_counter()
             scheduler.add_job(
