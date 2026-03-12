@@ -43,9 +43,15 @@ interface ChatInputProps {
   className?: string;
 }
 
+export interface ChatInputDraft {
+  value: string;
+  attachments?: InputFile[];
+}
+
 export interface ChatInputRef {
   setValueAndFocus: (value: string) => void;
   appendValueAndFocus: (value: string) => void;
+  setDraftAndFocus: (draft: ChatInputDraft) => void;
 }
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
@@ -124,6 +130,14 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
       appendValueAndFocus: (newValue: string) => {
         setHistoryIndex(-1);
         appendValue(newValue);
+      },
+      setDraftAndFocus: ({
+        value: newValue,
+        attachments: nextAttachments,
+      }: ChatInputDraft) => {
+        setHistoryIndex(-1);
+        setAttachments(nextAttachments ?? []);
+        applyValue(newValue);
       },
     }));
 
