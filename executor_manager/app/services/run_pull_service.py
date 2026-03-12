@@ -10,6 +10,7 @@ from app.core.settings import get_settings
 from app.scheduler.task_dispatcher import TaskDispatcher
 from app.services.backend_client import BackendClient
 from app.services.executor_client import ExecutorClient
+from app.services.executor_runtime_service import ExecutorRuntimeService
 from app.services.config_resolver import ConfigResolver
 from app.services.skill_stager import SkillStager
 from app.services.plugin_stager import PluginStager
@@ -45,7 +46,8 @@ class RunPullService:
         self.settings = get_settings()
         self.backend_client = BackendClient()
         self.executor_client = ExecutorClient()
-        self.container_pool = TaskDispatcher.get_container_pool()
+        self.runtime_service = ExecutorRuntimeService(self.settings)
+        self.container_pool = None
         self.config_resolver = ConfigResolver(self.backend_client)
         self.skill_stager = SkillStager()
         self.plugin_stager = PluginStager()
@@ -142,7 +144,12 @@ class RunPullService:
         if self._shutdown:
             return
 
-        lease_seconds = max(5, int(self.settings.task_claim_lease_seconds))
+        lease_source = (
+            self.settings.task_claim_lease_seconds
+            if self.runtime_service.uses_docker_runtime()
+            else self.settings.task_claim_lease_seconds_direct
+        )
+        lease_seconds = max(5, int(lease_source))
 
         if not self._logged_started:
             logger.info(
@@ -174,8 +181,15 @@ class RunPullService:
                             "schedule_modes": schedule_modes,
                         },
                     )
+            except asyncio.CancelledError:
+                self._semaphore.release()
+                return
             except Exception as e:
-                logger.error(f"Failed to claim run from backend: {e}")
+                logger.error(
+                    "Failed to claim run from backend: %s: %r",
+                    type(e).__name__,
+                    e,
+                )
                 self._semaphore.release()
                 return
 
@@ -243,7 +257,8 @@ class RunPullService:
         container_mode = config_snapshot.get("container_mode", "ephemeral")
         container_id = config_snapshot.get("container_id")
 
-        callback_url = f"{self.settings.callback_base_url}/api/v1/callback"
+        callback_url = self.runtime_service.get_callback_url()
+        callback_base_url = self.runtime_service.get_callback_base_url()
         ctx = {
             "run_id": run_id_str,
             "session_id": session_id,
@@ -399,16 +414,39 @@ class RunPullService:
 
             step_started = time.perf_counter()
             browser_enabled = bool(resolved_config.get("browser_enabled"))
-            (
-                executor_url,
-                container_id,
-            ) = await self.container_pool.get_or_create_container(
-                session_id=session_id,
-                user_id=user_id,
-                browser_enabled=browser_enabled,
-                container_mode=container_mode,
-                container_id=container_id,
+            runtime_env = (
+                self.runtime_service.build_runtime_env(
+                    session_id=session_id,
+                    user_id=user_id,
+                    browser_enabled=browser_enabled,
+                )
+                if not self.runtime_service.uses_docker_runtime()
+                else {}
             )
+            if self.runtime_service.uses_docker_runtime():
+                if self.container_pool is None:
+                    self.container_pool = TaskDispatcher.get_container_pool()
+                (
+                    executor_url,
+                    container_id,
+                ) = await self.container_pool.get_or_create_container(
+                    session_id=session_id,
+                    user_id=user_id,
+                    browser_enabled=browser_enabled,
+                    container_mode=container_mode,
+                    container_id=container_id,
+                )
+            else:
+                (
+                    executor_url,
+                    container_id,
+                ) = self.runtime_service.resolve_direct_target(
+                    session_id=session_id,
+                    user_id=user_id,
+                    browser_enabled=browser_enabled,
+                    container_mode=container_mode,
+                    container_id=container_id,
+                )
             logger.info(
                 "timing",
                 extra={
@@ -430,9 +468,10 @@ class RunPullService:
                 callback_url=callback_url,
                 callback_token=self.settings.callback_token,
                 config=resolved_config,
-                callback_base_url=self.settings.callback_base_url,
+                callback_base_url=callback_base_url,
                 sdk_session_id=sdk_session_id,
                 permission_mode=permission_mode,
+                runtime_env=runtime_env,
             )
             logger.info(
                 "timing",
@@ -486,10 +525,17 @@ class RunPullService:
                 logger.error(f"Failed to mark run {run_id} as failed: {fail_err}")
 
             try:
-                await self.container_pool.cancel_task(session_id)
+                if self.runtime_service.uses_docker_runtime() and self.container_pool:
+                    await self.container_pool.cancel_task(session_id)
             except Exception as cancel_err:
                 logger.error(
                     f"Failed to cancel task for session {session_id}: {cancel_err}"
                 )
         finally:
             await self._release_inflight_run(run_id_str)
+
+
+
+
+
+

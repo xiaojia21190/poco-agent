@@ -55,14 +55,17 @@ class AgentExecutor:
         session_id: str,
         hooks: list,
         sdk_session_id: str | None = None,
+        *,
+        run_id: str | None = None,
         user_input_client: UserInputClient | None = None,
         memory_client: MemoryClient | None = None,
-        *,
         request_id: str | None = None,
         trace_id: str | None = None,
+        runtime_env: dict[str, str] | None = None,
     ):
         self.session_id = session_id
         self.sdk_session_id = sdk_session_id
+        self.run_id = run_id
         self.hooks = HookManager(hooks)
         self.user_input_client = user_input_client
         self.memory_client = memory_client
@@ -71,16 +74,34 @@ class AgentExecutor:
         )
         self._request_id = request_id
         self._trace_id = trace_id
+        self._runtime_env = {
+            str(key): str(value)
+            for key, value in (runtime_env or {}).items()
+            if value is not None
+        }
         self.workspace = WorkspaceManager(
-            mount_path=os.environ.get("WORKSPACE_PATH", "/workspace")
+            mount_path=self._get_runtime_value("WORKSPACE_PATH", "/workspace")
         )
+
+    def _get_runtime_value(self, name: str, default: str | None = None) -> str | None:
+        value = self._runtime_env.get(name)
+        if value is not None:
+            return value
+        env_value = os.environ.get(name)
+        if env_value is not None:
+            return env_value
+        return default
 
     async def execute(
         self, prompt: str, config: TaskConfig, *, permission_mode: str = "default"
     ):
         # Initialize context early so we can always report failures via callbacks,
         # even if workspace preparation (e.g. repo clone) fails.
-        ctx = ExecutionContext(self.session_id, str(self.workspace.root_path))
+        ctx = ExecutionContext(
+            self.session_id,
+            str(self.workspace.root_path),
+            run_id=self.run_id,
+        )
         if config.browser_enabled:
             ctx.current_state.browser = BrowserState(enabled=True)
 
@@ -290,7 +311,9 @@ class AgentExecutor:
 
             selected_model = (config.model or "").strip()
             if not selected_model:
-                selected_model = os.environ["DEFAULT_MODEL"]
+                selected_model = self._get_runtime_value("DEFAULT_MODEL") or ""
+            if not selected_model:
+                raise RuntimeError("DEFAULT_MODEL is not configured for executor runtime")
 
             options = ClaudeAgentOptions(
                 cwd=ctx.cwd,
@@ -316,6 +339,7 @@ class AgentExecutor:
                 hooks={"PreToolUse": [HookMatcher(matcher=None, hooks=[dummy_hook])]},
                 agents=agents,
                 plugins=plugins,
+                env=self._runtime_env,
             )
 
             async with ClaudeSDKClient(options=options) as client:
@@ -390,8 +414,7 @@ class AgentExecutor:
 
         return configs
 
-    @staticmethod
-    def _inject_playwright_mcp(mcp_servers: dict) -> dict:
+    def _inject_playwright_mcp(self, mcp_servers: dict) -> dict:
         """Inject built-in Playwright MCP (CDP mode) for browser-enabled tasks.
 
         This keeps the Playwright MCP concept/config hidden from end users: they only toggle `browser_enabled`, and the executor wires the MCP server internally.
@@ -403,20 +426,20 @@ class AgentExecutor:
             return mcp_servers
 
         cdp_endpoint = (
-            os.environ.get("POCO_BROWSER_CDP_ENDPOINT", "http://127.0.0.1:9222").strip()
+            (self._get_runtime_value("POCO_BROWSER_CDP_ENDPOINT", "http://127.0.0.1:9222") or "").strip()
             or "http://127.0.0.1:9222"
         )
 
-        viewport_raw = (os.environ.get("POCO_BROWSER_VIEWPORT_SIZE") or "").strip()
+        viewport_raw = (self._get_runtime_value("POCO_BROWSER_VIEWPORT_SIZE", "") or "").strip()
         viewport = parse_viewport_size(viewport_raw) or (1366, 768)
         viewport_size = format_viewport_size(*viewport)
         output_mode = (
-            (os.environ.get("PLAYWRIGHT_MCP_OUTPUT_MODE") or "").strip().lower()
+            (self._get_runtime_value("PLAYWRIGHT_MCP_OUTPUT_MODE", "") or "").strip().lower()
         )
         if output_mode not in {"file", "stdout"}:
             output_mode = "file"
         image_responses = (
-            (os.environ.get("PLAYWRIGHT_MCP_IMAGE_RESPONSES") or "").strip().lower()
+            (self._get_runtime_value("PLAYWRIGHT_MCP_IMAGE_RESPONSES", "") or "").strip().lower()
         )
         if image_responses not in {"allow", "omit"}:
             image_responses = "omit"
@@ -464,3 +487,4 @@ PY
         injected = dict(mcp_servers)
         injected[MEMORY_MCP_SERVER_KEY] = self.memory_mcp_server
         return injected
+

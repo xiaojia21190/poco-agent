@@ -54,10 +54,12 @@ async def run_task(req: TaskRun, background_tasks: BackgroundTasks) -> dict:
         req.session_id,
         hooks,
         req.sdk_session_id,
+        run_id=req.run_id,
         user_input_client=user_input_client,
         memory_client=memory_client,
         request_id=get_request_id(),
         trace_id=get_trace_id(),
+        runtime_env=req.runtime_env,
     )
 
     cfg = req.config
@@ -86,3 +88,4 @@ async def run_task(req: TaskRun, background_tasks: BackgroundTasks) -> dict:
     )
 
     return {"status": "accepted", "session_id": req.session_id}
+
