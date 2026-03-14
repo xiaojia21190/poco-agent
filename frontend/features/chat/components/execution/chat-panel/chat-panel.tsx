@@ -599,6 +599,8 @@ export function ChatPanel({
             sessionId: session.session_id,
             userMessageId,
             content: trimmedContent,
+            model: selectedModelSelection.modelId ?? undefined,
+            model_provider_id: selectedModelSelection.providerId ?? undefined,
           });
           commitOptimisticHistoryMutation(mutationToken);
           void refreshTasks();
@@ -618,6 +620,7 @@ export function ChatPanel({
       commitOptimisticHistoryMutation,
       refreshTasks,
       rollbackOptimisticHistoryMutation,
+      selectedModelSelection,
       session?.session_id,
       session?.status,
       t,
@@ -882,6 +885,8 @@ export function ChatPanel({
             sessionId: session.session_id,
             userMessageId: userMessageIdNumber,
             assistantMessageId: assistantMessageIdNumber,
+            model: selectedModelSelection.modelId ?? undefined,
+            model_provider_id: selectedModelSelection.providerId ?? undefined,
           });
           commitOptimisticHistoryMutation(mutationToken);
           void refreshTasks();
@@ -899,6 +904,7 @@ export function ChatPanel({
       commitOptimisticHistoryMutation,
       refreshTasks,
       rollbackOptimisticHistoryMutation,
+      selectedModelSelection,
       session?.session_id,
       session?.status,
       t,

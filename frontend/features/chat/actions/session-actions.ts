@@ -211,16 +211,20 @@ const regenerateMessageSchema = z.object({
   sessionId: z.string().trim().min(1, VALIDATION_ERRORS.missingSessionId),
   userMessageId: z.number().int().positive(),
   assistantMessageId: z.number().int().positive(),
+  model: z.string().trim().optional().nullable(),
+  model_provider_id: z.string().trim().optional().nullable(),
 });
 
 export type RegenerateMessageInput = z.infer<typeof regenerateMessageSchema>;
 
 export async function regenerateMessageAction(input: RegenerateMessageInput) {
-  const { sessionId, userMessageId, assistantMessageId } =
+  const { sessionId, userMessageId, assistantMessageId, model, model_provider_id } =
     regenerateMessageSchema.parse(input);
   const result = await chatService.regenerateMessage(sessionId, {
     user_message_id: userMessageId,
     assistant_message_id: assistantMessageId,
+    model,
+    model_provider_id,
   });
   return mapTaskEnqueueResult(result);
 }
@@ -229,6 +233,8 @@ const editMessageAndRegenerateSchema = z.object({
   sessionId: z.string().trim().min(1, VALIDATION_ERRORS.missingSessionId),
   userMessageId: z.number().int().positive(),
   content: z.string().trim().min(1, VALIDATION_ERRORS.messageContentRequired),
+  model: z.string().trim().optional().nullable(),
+  model_provider_id: z.string().trim().optional().nullable(),
 });
 
 export type EditMessageAndRegenerateInput = z.infer<
@@ -238,11 +244,13 @@ export type EditMessageAndRegenerateInput = z.infer<
 export async function editMessageAndRegenerateAction(
   input: EditMessageAndRegenerateInput,
 ) {
-  const { sessionId, userMessageId, content } =
+  const { sessionId, userMessageId, content, model, model_provider_id } =
     editMessageAndRegenerateSchema.parse(input);
   const result = await chatService.editMessageAndRegenerate(sessionId, {
     user_message_id: userMessageId,
     content,
+    model,
+    model_provider_id,
   });
   return mapTaskEnqueueResult(result);
 }
