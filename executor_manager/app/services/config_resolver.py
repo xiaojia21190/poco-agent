@@ -1,7 +1,7 @@
 import logging
 import re
 import time
-from typing import Any
+from typing import Any, TypedDict
 from urllib.parse import urlparse
 
 from app.core.settings import get_settings
@@ -13,7 +13,19 @@ from app.services.backend_client import BackendClient
 _ENV_PATTERN = re.compile(r"\$\{([^}]+)\}")
 logger = logging.getLogger(__name__)
 _GITHUB_HOSTS = {"github.com", "www.github.com"}
-_PROVIDER_RUNTIME_SPECS = {
+
+
+class ProviderRuntimeSpec(TypedDict):
+    source_api_key_env_keys: tuple[str, ...]
+    source_base_url_env_keys: tuple[str, ...]
+    source_api_key_settings_fields: tuple[str, ...]
+    source_base_url_settings_fields: tuple[str, ...]
+    default_base_url: str
+    runtime_api_key_env_key: str
+    runtime_base_url_env_key: str
+
+
+_PROVIDER_RUNTIME_SPECS: dict[str, ProviderRuntimeSpec] = {
     "anthropic": {
         "source_api_key_env_keys": ("ANTHROPIC_API_KEY",),
         "source_base_url_env_keys": ("ANTHROPIC_BASE_URL",),
