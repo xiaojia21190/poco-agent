@@ -20,6 +20,7 @@ import { useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 import { getFilesAction } from "@/features/chat/actions/query-actions";
 import { FileSidebar } from "@/features/chat/components/execution/file-panel/file-sidebar";
+import { DocumentViewer } from "@/features/chat/components/execution/file-panel/document-viewer";
 import { skillsService } from "@/features/capabilities/skills/api/skills-api";
 import type { FileNode, PendingSkillCreation } from "@/features/chat/types";
 
@@ -106,12 +107,14 @@ export function SkillCreationReviewCard({
   const [files, setFiles] = React.useState<FileNode[]>([]);
   const [selectedFile, setSelectedFile] = React.useState<FileNode>();
   const [isLoadingFiles, setIsLoadingFiles] = React.useState(false);
+  const [isPreviewVisible, setIsPreviewVisible] = React.useState(false);
   const [conflict, setConflict] = React.useState(false);
 
   React.useEffect(() => {
     setResolvedName(creation.resolved_name || creation.detected_name);
     setDescription(creation.description || "");
     setOverwrite(false);
+    setIsPreviewVisible(false);
   }, [
     creation.description,
     creation.detected_name,
@@ -126,6 +129,7 @@ export function SkillCreationReviewCard({
       if (!creation.session_id) {
         setFiles([]);
         setSelectedFile(undefined);
+        setIsPreviewVisible(false);
         return;
       }
       try {
@@ -141,11 +145,13 @@ export function SkillCreationReviewCard({
         const flatFiles = flattenFiles(filtered);
         setFiles(filtered);
         setSelectedFile(flatFiles[0]);
+        setIsPreviewVisible(false);
       } catch (error) {
         console.error("[SkillCreationReviewCard] Failed to load files", error);
         if (!cancelled) {
           setFiles([]);
           setSelectedFile(undefined);
+          setIsPreviewVisible(false);
         }
       } finally {
         if (!cancelled) {
@@ -188,6 +194,21 @@ export function SkillCreationReviewCard({
     };
   }, [resolvedName]);
 
+  React.useEffect(() => {
+    if (!isPreviewVisible) {
+      return;
+    }
+
+    const handleClosePreview = () => {
+      setIsPreviewVisible(false);
+    };
+
+    window.addEventListener("close-document-viewer", handleClosePreview);
+    return () => {
+      window.removeEventListener("close-document-viewer", handleClosePreview);
+    };
+  }, [isPreviewVisible]);
+
   const handleConfirm = async () => {
     try {
       await onConfirm({
@@ -215,7 +236,7 @@ export function SkillCreationReviewCard({
   return (
     <div
       className={cn(
-        "flex h-[60vh] max-h-[80vh] flex-col overflow-hidden rounded-lg border border-border bg-card/70 p-4 shadow-sm",
+        "flex flex-col overflow-visible rounded-lg border border-border bg-card/70 p-4 shadow-sm md:h-[60vh] md:max-h-[80vh] md:overflow-hidden",
         className,
       )}
     >
@@ -240,78 +261,8 @@ export function SkillCreationReviewCard({
         ) : null}
       </div>
 
-      <div className="mt-4 grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(440px,0.8fr)]">
-        <div className="min-h-0 space-y-4 overflow-y-auto pr-1">
-          <div className="space-y-2">
-            <Label
-              htmlFor={`skill-creation-name-${creation.id}`}
-              className="flex items-center gap-2"
-            >
-              <PencilLine className="size-4 text-muted-foreground" />
-              {t("chat.skillCreationReview.nameLabel")}
-            </Label>
-            <Input
-              id={`skill-creation-name-${creation.id}`}
-              value={resolvedName}
-              disabled={isSubmitting}
-              onChange={(event) => setResolvedName(event.target.value)}
-              placeholder={creation.detected_name}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              <AlignLeft className="size-4" />
-              {t("chat.skillCreationReview.descriptionLabel")}
-            </div>
-            <Textarea
-              value={description}
-              disabled={isSubmitting}
-              onChange={(event) => setDescription(event.target.value)}
-              placeholder={t("chat.skillCreationReview.emptyDescription")}
-              className="min-h-28 resize-y"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              <FolderTree className="size-4" />
-              {t("chat.skillCreationReview.pathLabel")}
-            </div>
-            <code className="block rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-              {creation.skill_relative_path}
-            </code>
-          </div>
-
-          {conflict ? (
-            <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
-              <div className="flex items-start gap-2">
-                <TriangleAlert className="mt-0.5 size-4 shrink-0" />
-                <div className="space-y-2">
-                  <div>{t("chat.skillCreationReview.conflictWarning")}</div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox
-                      id={`skill-creation-overwrite-${creation.id}`}
-                      checked={overwrite}
-                      disabled={isSubmitting}
-                      onCheckedChange={(checked) =>
-                        setOverwrite(checked === true)
-                      }
-                    />
-                    <Label
-                      htmlFor={`skill-creation-overwrite-${creation.id}`}
-                      className="text-sm font-normal"
-                    >
-                      {t("chat.skillCreationReview.overwriteLabel")}
-                    </Label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </div>
-
-        <div className="min-h-0 overflow-hidden rounded-lg border border-border/60 bg-background">
+      <div className="mt-4 grid gap-4 md:min-h-0 md:flex-1 md:grid-cols-[minmax(200px,0.6fr)_minmax(0,1.5fr)] md:overflow-hidden">
+        <div className="min-h-[220px] overflow-hidden rounded-lg border border-border/60 bg-background md:min-h-0">
           {isLoadingFiles ? (
             <div className="flex h-full min-h-[320px] items-center justify-center text-sm text-muted-foreground">
               <Loader2 className="mr-2 size-4 animate-spin" />
@@ -324,10 +275,98 @@ export function SkillCreationReviewCard({
           ) : (
             <FileSidebar
               files={files}
-              onFileSelect={setSelectedFile}
+              onFileSelect={(file) => {
+                setSelectedFile(file);
+                setIsPreviewVisible(true);
+              }}
               selectedFile={selectedFile}
               embedded
             />
+          )}
+        </div>
+
+        <div
+          className={cn(
+            "min-h-[320px] overflow-hidden rounded-lg bg-background md:min-h-0",
+            isPreviewVisible && selectedFile
+              ? "bg-transparent"
+              : "border border-border/60",
+          )}
+        >
+          {isPreviewVisible && selectedFile ? (
+            <div className="h-[60vh] min-h-[360px] overflow-hidden md:h-full md:min-h-0">
+              <DocumentViewer file={selectedFile} />
+            </div>
+          ) : (
+            <div className="space-y-4 p-4 md:min-h-0 md:overflow-y-auto">
+              <div className="space-y-2">
+                <Label
+                  htmlFor={`skill-creation-name-${creation.id}`}
+                  className="flex items-center gap-2"
+                >
+                  <PencilLine className="size-4 text-muted-foreground" />
+                  {t("chat.skillCreationReview.nameLabel")}
+                </Label>
+                <Input
+                  id={`skill-creation-name-${creation.id}`}
+                  value={resolvedName}
+                  disabled={isSubmitting}
+                  onChange={(event) => setResolvedName(event.target.value)}
+                  placeholder={creation.detected_name}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <AlignLeft className="size-4" />
+                  {t("chat.skillCreationReview.descriptionLabel")}
+                </div>
+                <Textarea
+                  value={description}
+                  disabled={isSubmitting}
+                  onChange={(event) => setDescription(event.target.value)}
+                  placeholder={t("chat.skillCreationReview.emptyDescription")}
+                  className="min-h-28 resize-y"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <FolderTree className="size-4" />
+                  {t("chat.skillCreationReview.pathLabel")}
+                </div>
+                <code className="block rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+                  {creation.skill_relative_path}
+                </code>
+              </div>
+
+              {conflict ? (
+                <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
+                  <div className="flex items-start gap-2">
+                    <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+                    <div className="space-y-2">
+                      <div>{t("chat.skillCreationReview.conflictWarning")}</div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={`skill-creation-overwrite-${creation.id}`}
+                          checked={overwrite}
+                          disabled={isSubmitting}
+                          onCheckedChange={(checked) =>
+                            setOverwrite(checked === true)
+                          }
+                        />
+                        <Label
+                          htmlFor={`skill-creation-overwrite-${creation.id}`}
+                          className="text-sm font-normal"
+                        >
+                          {t("chat.skillCreationReview.overwriteLabel")}
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
           )}
         </div>
       </div>
