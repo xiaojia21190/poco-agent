@@ -70,6 +70,37 @@ function cleanText(text: string): string {
   return text.replace(/\uFFFD/g, "");
 }
 
+function appendAssistantTextBlock(
+  message: ChatMessage,
+  text: string,
+): ChatMessage {
+  const normalized = text.trim();
+  if (!normalized) return message;
+
+  if (!Array.isArray(message.content)) {
+    return {
+      ...message,
+      content: normalized,
+    };
+  }
+
+  const existingBlocks = message.content as MessageBlock[];
+  const lastTextBlock = [...existingBlocks]
+    .reverse()
+    .find((block) => block._type === "TextBlock");
+  if (lastTextBlock?._type === "TextBlock") {
+    const lastNormalized = cleanText(lastTextBlock.text).trim();
+    if (lastNormalized === normalized) {
+      return message;
+    }
+  }
+
+  return {
+    ...message,
+    content: [...existingBlocks, { _type: "TextBlock", text: normalized }],
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Config snapshot parser
 // ---------------------------------------------------------------------------
@@ -322,9 +353,11 @@ export function parseMessages(
         });
       } else {
         if (currentAssistantMessage) {
-          const existingBlocks =
-            currentAssistantMessage.content as MessageBlock[];
-          existingBlocks.push({ _type: "TextBlock", text: textContent });
+          currentAssistantMessage = appendAssistantTextBlock(
+            currentAssistantMessage,
+            textContent,
+          );
+          processedMessages[processedMessages.length - 1] = currentAssistantMessage;
         } else {
           processedMessages.push({
             id: msg.id.toString(),
