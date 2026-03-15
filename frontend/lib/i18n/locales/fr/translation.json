@@ -5,6 +5,7 @@
   "language": "Langue",
   "sidebar": {
     "newTask": "Nouvelle tâche",
+    "newTaskWithShortcut": "Nouvelle tâche ({{shortcut}})",
     "search": "Rechercher",
     "library": "Capacités",
     "scheduledTasks": "Tâches planifiées",
@@ -1428,6 +1429,10 @@
         "slashCommand": {
           "action": "Slash command",
           "hint": "Type / to open slash command suggestions."
+        },
+        "newTask": {
+          "action": "Nouvelle tâche",
+          "hint": "Créer une nouvelle tâche et aller à l'accueil."
         },
         "search": {
           "action": "Global search",

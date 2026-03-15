@@ -5,6 +5,7 @@
   "language": "言語",
   "sidebar": {
     "newTask": "新しいタスク",
+    "newTaskWithShortcut": "新しいタスク ({{shortcut}})",
     "search": "検索",
     "library": "機能",
     "scheduledTasks": "スケジュールタスク",
@@ -1428,6 +1429,10 @@
         "slashCommand": {
           "action": "Slash command",
           "hint": "Type / to open slash command suggestions."
+        },
+        "newTask": {
+          "action": "新しいタスク",
+          "hint": "新しいタスクを作成してホームに移動します。"
         },
         "search": {
           "action": "Global search",

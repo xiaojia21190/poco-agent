@@ -5,6 +5,7 @@
   "language": "语言",
   "sidebar": {
     "newTask": "新建任务",
+    "newTaskWithShortcut": "新建任务 ({{shortcut}})",
     "search": "搜索",
     "library": "能力",
     "openMain": "打开主侧边栏",
@@ -1532,6 +1533,10 @@
         "slashCommand": {
           "action": "Slash Command",
           "hint": "输入 / 打开 slash command 提示。"
+        },
+        "newTask": {
+          "action": "新建任务",
+          "hint": "创建新任务并跳转到首页。"
         },
         "search": {
           "action": "全局搜索",

@@ -5,6 +5,7 @@
   "language": "Language",
   "sidebar": {
     "newTask": "New Task",
+    "newTaskWithShortcut": "New Task ({{shortcut}})",
     "search": "Search",
     "library": "Capabilities",
     "openMain": "Open main sidebar",
@@ -1532,6 +1533,10 @@
         "slashCommand": {
           "action": "Slash command",
           "hint": "Type / to open slash command suggestions."
+        },
+        "newTask": {
+          "action": "New task",
+          "hint": "Create a new task and go to home."
         },
         "search": {
           "action": "Global search",

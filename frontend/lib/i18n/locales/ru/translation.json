@@ -5,6 +5,7 @@
   "language": "Язык",
   "sidebar": {
     "newTask": "Новая задача",
+    "newTaskWithShortcut": "Новая задача ({{shortcut}})",
     "search": "Поиск",
     "library": "Возможности",
     "scheduledTasks": "Запланированные задачи",
@@ -1428,6 +1429,10 @@
         "slashCommand": {
           "action": "Slash command",
           "hint": "Type / to open slash command suggestions."
+        },
+        "newTask": {
+          "action": "Новая задача",
+          "hint": "Создать новую задачу и перейти на главную."
         },
         "search": {
           "action": "Global search",

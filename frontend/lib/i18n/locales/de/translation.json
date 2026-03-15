@@ -5,6 +5,7 @@
   "language": "Sprache",
   "sidebar": {
     "newTask": "Neue Aufgabe",
+    "newTaskWithShortcut": "Neue Aufgabe ({{shortcut}})",
     "search": "Suche",
     "library": "Funktionen",
     "openMain": "Hauptseitenleiste öffnen",
@@ -1432,6 +1433,10 @@
         "slashCommand": {
           "action": "Slash command",
           "hint": "Type / to open slash command suggestions."
+        },
+        "newTask": {
+          "action": "Neue Aufgabe",
+          "hint": "Neue Aufgabe erstellen und zur Startseite wechseln."
         },
         "search": {
           "action": "Global search",
