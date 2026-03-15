@@ -10,9 +10,11 @@ import {
 } from "@/features/scheduled-tasks/utils/schedule";
 import { RunScheduleDialog } from "@/features/task-composer/components/run-schedule-dialog";
 import { ComposerAttachments } from "@/features/task-composer/components/composer-attachments";
+import { CapabilityRecommendations } from "@/features/task-composer/components/capability-recommendations";
 import { ComposerToolbar } from "@/features/task-composer/components/composer-toolbar";
 import { RepoDialog } from "@/features/task-composer/components/repo-dialog";
 import { SlashAutocompleteDropdown } from "@/features/task-composer/components/slash-autocomplete-dropdown";
+import { useCapabilityRecommendations } from "@/features/task-composer/hooks/use-capability-recommendations";
 import { getNextComposerMode } from "@/features/task-composer/lib/mode-utils";
 import { useSlashCommandAutocomplete } from "@/features/chat/hooks/use-slash-command-autocomplete";
 import { useAppShell } from "@/components/shell/app-shell-context";
@@ -20,12 +22,15 @@ import { useMemoryFeatureEnabled } from "@/hooks/use-memory-feature-enabled";
 import { useFileDropUpload } from "@/features/task-composer/hooks/use-file-drop-upload";
 import { useFileUpload } from "@/features/task-composer/hooks/use-file-upload";
 import { appendTranscribedText, useVoiceInput } from "@/features/voice";
+import { playInstallSound } from "@/lib/utils/sound";
+import { useCapabilityToggle } from "@/features/connectors";
 import type { RunScheduleMode } from "@/features/task-composer/model/run-schedule";
 import type {
   ComposerMode,
   RepoUsageMode,
   TaskSendOptions,
 } from "@/features/task-composer/types";
+import type { CapabilityRecommendation } from "@/features/task-composer/types/capability-recommendation";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -81,9 +86,13 @@ export function TaskComposer({
   const { t } = useT("translation");
   const { lng } = useAppShell();
   const memoryFeatureEnabled = useMemoryFeatureEnabled();
+  const capabilityToggle = useCapabilityToggle();
   const isComposing = React.useRef(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const latestValueRef = React.useRef(value);
+  const trackedCapabilityItemsRef = React.useRef<CapabilityRecommendation[]>(
+    [],
+  );
 
   React.useEffect(() => {
     latestValueRef.current = value;
@@ -124,6 +133,13 @@ export function TaskComposer({
   // ---- Browser toggle ----
   const [browserEnabled, setBrowserEnabled] = React.useState(true);
   const [memoryEnabled, setMemoryEnabled] = React.useState(false);
+  const [mcpConfig, setMcpConfig] = React.useState<Record<string, boolean>>({});
+  const [skillConfig, setSkillConfig] = React.useState<Record<string, boolean>>(
+    {},
+  );
+  const [trackedCapabilityItems, setTrackedCapabilityItems] = React.useState<
+    CapabilityRecommendation[]
+  >([]);
 
   // ---- Repo state ----
   const [repoDialogOpen, setRepoDialogOpen] = React.useState(false);
@@ -151,6 +167,21 @@ export function TaskComposer({
   const [scheduledEnabled, setScheduledEnabled] = React.useState(true);
   const [scheduledReuseSession, setScheduledReuseSession] =
     React.useState(true);
+
+  const capabilityRecommendations = useCapabilityRecommendations(value, {
+    enabled: !isSubmitting,
+    limit: 3,
+  });
+  const showRecommendationEmptyState =
+    capabilityRecommendations.hasFetched &&
+    value.trim().length >= capabilityRecommendations.minQueryLength;
+  const hasInput = value.trim().length > 0;
+  const showRecommendationsInFooter =
+    hasInput &&
+    (capabilityRecommendations.isLoading ||
+      capabilityRecommendations.items.length > 0 ||
+      trackedCapabilityItems.length > 0 ||
+      showRecommendationEmptyState);
 
   // ---- Derived values ----
   const firstLine =
@@ -185,6 +216,26 @@ export function TaskComposer({
     if (memoryFeatureEnabled) return;
     setMemoryEnabled(false);
   }, [memoryFeatureEnabled]);
+
+  React.useEffect(() => {
+    trackedCapabilityItemsRef.current = trackedCapabilityItems;
+  }, [trackedCapabilityItems]);
+
+  // Reset capability recommendation state when input is cleared
+  React.useEffect(() => {
+    if (value.trim().length > 0) return;
+    const prev = trackedCapabilityItemsRef.current;
+    for (const item of prev) {
+      if (item.type === "mcp") {
+        capabilityToggle?.toggleMcp(item.id, item.default_enabled);
+      } else {
+        capabilityToggle?.toggleSkill(item.id, item.default_enabled);
+      }
+    }
+    setTrackedCapabilityItems([]);
+    setMcpConfig({});
+    setSkillConfig({});
+  }, [value, capabilityToggle]);
 
   // Default scheduled name from input
   React.useEffect(() => {
@@ -254,6 +305,8 @@ export function TaskComposer({
           : null,
       browser_enabled: browserEnabled,
       memory_enabled: memoryFeatureEnabled ? memoryEnabled : false,
+      mcp_config: mcpConfig,
+      skill_config: skillConfig,
       run_schedule:
         mode === "scheduled"
           ? null
@@ -279,6 +332,9 @@ export function TaskComposer({
 
     onSend(payload);
     upload.clearAttachments();
+    setMcpConfig({});
+    setSkillConfig({});
+    setTrackedCapabilityItems([]);
     setRunScheduleMode("immediate");
     setRunScheduledAt(null);
   }, [
@@ -288,6 +344,7 @@ export function TaskComposer({
     gitBranch,
     gitTokenEnvKey,
     isSubmitting,
+    mcpConfig,
     memoryEnabled,
     memoryFeatureEnabled,
     mode,
@@ -303,10 +360,69 @@ export function TaskComposer({
     scheduledName,
     scheduledReuseSession,
     scheduledTimezone,
+    skillConfig,
     upload,
     value,
     voiceInput.isBusy,
   ]);
+
+  const isCapabilityEnabled = React.useCallback(
+    (item: CapabilityRecommendation) => {
+      const key = String(item.id);
+      const override = item.type === "mcp" ? mcpConfig[key] : skillConfig[key];
+      return typeof override === "boolean" ? override : item.default_enabled;
+    },
+    [mcpConfig, skillConfig],
+  );
+
+  const handleToggleCapability = React.useCallback(
+    (item: CapabilityRecommendation, enabled: boolean) => {
+      const key = String(item.id);
+
+      const updateToggleMap = (prev: Record<string, boolean>) => {
+        if (enabled === item.default_enabled) {
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        }
+        return { ...prev, [key]: enabled };
+      };
+
+      if (item.type === "mcp") {
+        setMcpConfig(updateToggleMap);
+        capabilityToggle?.toggleMcp(item.id, enabled);
+      } else {
+        setSkillConfig(updateToggleMap);
+        capabilityToggle?.toggleSkill(item.id, enabled);
+      }
+
+      if (enabled) {
+        playInstallSound();
+      }
+
+      setTrackedCapabilityItems((prev) => {
+        const existingIndex = prev.findIndex(
+          (entry) => entry.type === item.type && entry.id === item.id,
+        );
+
+        if (enabled === item.default_enabled) {
+          if (existingIndex === -1) {
+            return prev;
+          }
+          return prev.filter((_, index) => index !== existingIndex);
+        }
+
+        if (existingIndex !== -1) {
+          return prev.map((entry, index) =>
+            index === existingIndex ? item : entry,
+          );
+        }
+
+        return [...prev, item];
+      });
+    },
+    [capabilityToggle],
+  );
 
   // ---- Render ----
   return (
@@ -479,6 +595,20 @@ export function TaskComposer({
           <div className="border-t border-border/60">{bottomAddon}</div>
         ) : null}
       </div>
+
+      {showRecommendationsInFooter ? (
+        <div className="mt-3">
+          <CapabilityRecommendations
+            recommendations={capabilityRecommendations.items}
+            trackedItems={trackedCapabilityItems}
+            isLoading={capabilityRecommendations.isLoading}
+            showEmptyState={showRecommendationEmptyState}
+            isEnabled={isCapabilityEnabled}
+            onToggle={handleToggleCapability}
+            footerMode
+          />
+        </div>
+      ) : null}
 
       {fileDrop.isDragActive ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm">

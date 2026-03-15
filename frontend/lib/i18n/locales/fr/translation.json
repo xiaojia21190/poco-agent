@@ -5,6 +5,7 @@
   "language": "Langue",
   "sidebar": {
     "newTask": "Nouvelle tâche",
+    "newTaskWithShortcut": "Nouvelle tâche ({{shortcut}})",
     "search": "Rechercher",
     "library": "Capacités",
     "scheduledTasks": "Tâches planifiées",
@@ -45,6 +46,15 @@
   },
   "hero": {
     "title": "Que puis-je faire pour vous ?",
+    "rotatingWords": [
+      "Créer des diapositives",
+      "Rechercher des informations",
+      "Faire des cartes mentales",
+      "Analyser des dépôts GitHub",
+      "Analyser des données",
+      "Planifier un voyage",
+      "Écrire du code"
+    ],
     "subtitle": "Assignez une tâche ou posez une question.",
     "uploadFile": "Téléverser un fichier",
     "dragDrop": {
@@ -175,6 +185,20 @@
       "toggleServer": "Activer ou désactiver {{name}}",
       "cancel": "Annuler",
       "confirm": "Confirmer"
+    },
+    "capabilityRecommendations": {
+      "title": "Capacités suggérées",
+      "selectedTitle": "Activées pour cette tâche",
+      "loading": "Recherche de correspondances...",
+      "empty": "Aucun MCP ou compétence correspondant à cette saisie.",
+      "useForTask": "Utiliser pour cette tâche",
+      "added": "Ajouté",
+      "enabledByDefault": "Déjà activé",
+      "noDescription": "Aucune description fournie",
+      "remove": "Retirer {{name}}",
+      "mcpLabel": "MCP",
+      "skillLabel": "Compétence",
+      "hint": "En fonction de votre tâche, Poco vous recommande les capacités ci-dessus. Cliquez pour charger."
     },
     "warnings": {
       "tooManyMcps": "Trop de serveurs MCP activés ({{count}}). Cela peut ralentir le chargement du système et réduire les performances.",
@@ -480,6 +504,28 @@
         "structured": "Structured data",
         "empty": "No data"
       }
+    },
+    "skillCreationReview": {
+      "title": "Vérifier la compétence créée",
+      "subtitle": "L'agent a créé une compétence dans cette session. Vérifiez-la avant de l'enregistrer.",
+      "badge": "Créé par l'agent",
+      "nameLabel": "Nom de la compétence",
+      "descriptionLabel": "Description",
+      "emptyDescription": "Aucune description n'a été générée.",
+      "pathLabel": "Chemin de l’espace de travail",
+      "conflictWarning": "Une compétence portant ce nom existe déjà.",
+      "overwriteLabel": "Remplacer la compétence existante",
+      "filesTitle": "Fichiers générés",
+      "loadingFiles": "Chargement des fichiers générés…",
+      "emptyFiles": "Aucun fichier d’aperçu n’est encore disponible.",
+      "selectFile": "Sélectionnez un fichier à prévisualiser.",
+      "cancel": "Annuler",
+      "confirm": "Créer la compétence",
+      "confirmOverwrite": "Remplacer et créer",
+      "createSuccess": "Compétence créée",
+      "createFailed": "Échec de la création de la compétence",
+      "cancelSuccess": "Création de compétence ignorée",
+      "cancelFailed": "Impossible d’ignorer la création de compétence"
     }
   },
   "status": {
@@ -589,7 +635,8 @@
       "processing": "Traitement du fichier",
       "notSupported": "Prévisualisation non supportée pour ce format",
       "openInNewWindow": "Ouvrir dans une nouvelle fenêtre",
-      "downloadOriginal": "Télécharger le fichier original"
+      "downloadOriginal": "Télécharger le fichier original",
+      "frontMatter": "Front matter"
     },
     "summary": {
       "total": "Total",
@@ -1036,7 +1083,11 @@
       },
       "scope": {
         "system": "Système",
-        "user": "Utilisateur"
+        "user": "Utilisateur",
+        "builtin": "Intégré"
+      },
+      "source": {
+        "skillCreator": "Créé par l'agent"
       },
       "fields": {
         "id": "id",
@@ -1191,7 +1242,8 @@
       "zip": "ZIP",
       "system": "Système",
       "manual": "Manuel",
-      "unknown": "Inconnu"
+      "unknown": "Inconnu",
+      "skillCreator": "Skill Creator"
     },
     "pluginsManager": {
       "toasts": {
@@ -1297,6 +1349,22 @@
     "anthropicBaseUrl": "URL de base Anthropic",
     "anthropicBaseUrlHint": "Remplacer le endpoint Anthropic par défaut.",
     "anthropicBaseUrlPlaceholder": "https://api.anthropic.com",
+    "providerConfigDescription": "Gérez les identifiants du fournisseur et la liste des modèles affichés dans le sélecteur.",
+    "providerListEmpty": "Aucun fournisseur de modèles disponible pour le moment.",
+    "providerStatusNone": "Non configuré",
+    "providerStatusSystem": "Service prédéfini",
+    "providerStatusUser": "Personnalisé",
+    "providerModels": "S'applique à : {{models}}",
+    "providerApiKeyLabel": "Clé API {{provider}}",
+    "providerApiKeyHint": "Laissez vide pour conserver la clé personnalisée existante.",
+    "providerApiKeyPlaceholder": "Entrez votre clé API {{provider}}",
+    "providerBaseUrlLabel": "URL de base personnalisée",
+    "providerBaseUrlHint": "Laissez ce champ vide pour utiliser l'endpoint API par défaut.",
+    "providerBaseUrlRequired": "Une URL de base est requise lorsque l'endpoint personnalisé est activé.",
+    "providerSaveSuccess": "Paramètres du fournisseur enregistrés",
+    "providerSaveError": "Échec de l'enregistrement des paramètres du fournisseur",
+    "providerClearSuccess": "Paramètres personnalisés du fournisseur supprimés",
+    "providerClearCustom": "Supprimer la configuration personnalisée",
     "claudeCode": "Claude Code",
     "language": "Langue",
     "english": "English",
@@ -1362,6 +1430,10 @@
           "action": "Slash command",
           "hint": "Type / to open slash command suggestions."
         },
+        "newTask": {
+          "action": "Nouvelle tâche",
+          "hint": "Créer une nouvelle tâche et aller à l'accueil."
+        },
         "search": {
           "action": "Global search",
           "hint": "Open or close global search dialog."
@@ -1379,7 +1451,16 @@
           "hint": "Open the settings dialog."
         }
       }
-    }
+    },
+    "providerDiscoverError": "Impossible de récupérer les modèles du fournisseur",
+    "providerModelsPlaceholder": "Aucun modèle personnalisé ajouté pour l'instant",
+    "providerModelsSearchPlaceholder": "Saisissez un nom de modèle puis appuyez sur Entrée",
+    "providerModelsAdd": "Ajouter un modèle",
+    "providerModelsDiscovering": "Chargement des modèles...",
+    "providerModelsManualHint": "Ce fournisseur ne prend pas en charge la découverte automatique. Saisissez les noms des modèles manuellement.",
+    "providerModelsEmpty": "Aucun modèle trouvé",
+    "providerModelsUseCustom": "Utiliser un modèle personnalisé : {{model}}",
+    "providerFieldAnnotation": "Laissez le champ API Key vide pour conserver la clé actuelle. Laissez Base URL vide pour utiliser l'endpoint par défaut. Saisissez les noms de modèle manuellement puis appuyez sur Entrée ou cliquez sur ajouter."
   },
   "validation": {
     "projectNameRequired": "Veuillez entrer un nom de projet",
@@ -1405,8 +1486,19 @@
   "fileSidebar": {
     "title": "Liste des fichiers",
     "fileList": "Liste des fichiers",
+    "actions": "Actions",
     "downloadAll": "Tout télécharger",
+    "download": "Télécharger",
+    "downloadFile": "Télécharger le fichier",
     "noFiles": "Aucun fichier pour le moment",
+    "packageAsSkill": "Créer un skill",
+    "packageSkillTitle": "Créer un skill depuis le dossier",
+    "packageSkillDescription": "Soumettez ce dossier de l'espace de travail pour validation du skill.",
+    "skillName": "Nom du skill",
+    "skillNamePlaceholder": "Saisissez un nom de skill",
+    "submitSkill": "Soumettre pour validation",
+    "skillSubmitted": "Skill soumis pour validation",
+    "skillSubmitFailed": "Échec de la soumission du skill",
     "downloadStarted": "Début du téléchargement de l'archive de l'espace de travail",
     "downloadStart": "Début du téléchargement de l'archive de l'espace de travail",
     "archiveNotAvailable": "Archive non disponible pour le moment",
@@ -1600,7 +1692,17 @@
     },
     "gpt4Turbo": {
       "description": "Rapide et efficace"
-    }
+    },
+    "customBadge": "Personnalisé",
+    "customModelAction": "Modèle personnalisé",
+    "customModelTitle": "Utiliser un modèle personnalisé",
+    "customModelDescription": "Ajoutez n'importe quel nom de modèle pris en charge par le fournisseur configuré.",
+    "customModelPlaceholder": "ex. gpt-5 ou claude-sonnet-4-5",
+    "customModelHint": "Préfixes pris en charge : claude-, gpt, o1/o3/o4, glm-, MiniMax-, deepseek-.",
+    "customModelRequired": "Saisissez un nom de modèle.",
+    "customModelUnsupported": "Ce nom de modèle ne correspond à aucun fournisseur pris en charge.",
+    "customModelProviderUnavailable": "Configurez d'abord les identifiants du fournisseur avant d'utiliser ce modèle.",
+    "customModelSaved": "Modèle personnalisé ajouté"
   },
   "creditsPopover": {
     "proPlan": "Forfait Pro",

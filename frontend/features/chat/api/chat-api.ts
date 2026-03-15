@@ -30,11 +30,13 @@ import type {
   SessionRegenerateRequest,
   SessionResponse,
   SessionUpdateRequest,
+  SubmitSkillResponse,
   TaskConfig,
   TaskEnqueueRequest,
   TaskEnqueueResponse,
   ToolExecutionDeltaResponse,
   ToolExecutionResponse,
+  WorkspaceArchiveResponse,
 } from "@/features/chat/types";
 
 import {
@@ -204,14 +206,32 @@ export const chatService = {
   sendMessage: async (
     sessionId: string,
     content: string,
+    model?: string | null,
+    modelProviderId?: string | null,
     attachments?: InputFile[],
     clientRequestId?: string,
   ): Promise<TaskEnqueueResponse> => {
+    const normalizedModel = (model || "").trim() || undefined;
+    const normalizedModelProviderId =
+      (modelProviderId || "").trim() || undefined;
+    const hasModelOverride = Boolean(normalizedModel);
+    const hasAttachments = (attachments?.length ?? 0) > 0;
+    const config: TaskConfig | undefined =
+      hasModelOverride || hasAttachments
+        ? {
+            ...(hasModelOverride ? { model: normalizedModel } : {}),
+            ...(hasModelOverride && normalizedModelProviderId
+              ? { model_provider_id: normalizedModelProviderId }
+              : {}),
+            ...(hasAttachments ? { input_files: attachments } : {}),
+          }
+        : undefined;
+
     return chatService.enqueueTask({
       prompt: content,
       session_id: sessionId,
       schedule_mode: "immediate",
-      config: attachments?.length ? { input_files: attachments } : undefined,
+      config,
       client_request_id: clientRequestId,
     });
   },
@@ -423,5 +443,25 @@ export const chatService = {
       console.error("[Chat Service] Failed to get files:", error);
       return [];
     }
+  },
+
+  submitSkill: async (
+    sessionId: string,
+    body: { folder_path: string; skill_name?: string },
+  ): Promise<SubmitSkillResponse> => {
+    return apiClient.post<SubmitSkillResponse>(
+      API_ENDPOINTS.sessionWorkspaceSubmitSkill(sessionId),
+      body,
+    );
+  },
+
+  getFolderArchive: async (
+    sessionId: string,
+    folderPath: string,
+  ): Promise<WorkspaceArchiveResponse> => {
+    const params = new URLSearchParams({ path: folderPath });
+    return apiClient.get<WorkspaceArchiveResponse>(
+      `${API_ENDPOINTS.sessionWorkspaceFolderArchive(sessionId)}?${params.toString()}`,
+    );
   },
 };

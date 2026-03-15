@@ -6,7 +6,6 @@ import {
   Image as ImageIcon,
   Loader2,
   MessageSquare,
-  MoreHorizontal,
   PanelRightClose,
   PanelRightOpen,
   Quote,
@@ -18,6 +17,7 @@ import { PendingMessageList } from "./pending-message-list";
 import { ChatInput, type ChatInputRef } from "./chat-input";
 import { UserInputRequestCard } from "./user-input-request-card";
 import { PlanApprovalCard } from "./plan-approval-card";
+import { SkillCreationReviewCard } from "./skill-creation-review-card";
 import {
   PanelHeader,
   PanelHeaderAction,
@@ -25,14 +25,13 @@ import {
 import { useChatMessages } from "./hooks/use-chat-messages";
 import { usePendingMessages } from "./hooks/use-pending-messages";
 import { useUserInputRequests } from "./hooks/use-user-input-requests";
+import { usePendingSkillCreations } from "./hooks/use-pending-skill-creations";
 import {
   branchSessionAction,
   cancelSessionAction,
   editMessageAndRegenerateAction,
   regenerateMessageAction,
-  renameSessionTitleAction,
 } from "@/features/chat/actions/session-actions";
-import { RenameTaskDialog, TaskActionsDropdown } from "@/features/projects";
 import type {
   ExecutionSession,
   InputFile,
@@ -54,8 +53,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useLanguage } from "@/hooks/use-language";
-import { useAppShell } from "@/components/shell/app-shell-context";
+import { ModelSelector } from "@/features/chat/components/chat/model-selector";
+import { useModelCatalog } from "@/features/chat/hooks/use-model-catalog";
+import {
+  normalizeModelSelection,
+  type ModelSelection,
+} from "@/features/chat/lib/model-catalog";
 
 interface ChatPanelProps {
   session: ExecutionSession | null;
@@ -156,11 +166,15 @@ export function ChatPanel({
   const lng = useLanguage();
   const { t } = useT("translation");
   const { refreshTasks, touchTask } = useTaskHistoryContext();
-  const { projects, pinnedTaskIds, toggleTaskPin, moveTask, removeTask } =
-    useAppShell();
+  const {
+    modelConfig,
+    modelOptions,
+    isLoading: isLoadingModelCatalog,
+  } = useModelCatalog({
+    enabled: Boolean(session?.session_id),
+  });
   const [isCancelling, setIsCancelling] = React.useState(false);
   const [isExportingImage, setIsExportingImage] = React.useState(false);
-  const [isRenameDialogOpen, setIsRenameDialogOpen] = React.useState(false);
   const [branchingMessageId, setBranchingMessageId] = React.useState<
     string | null
   >(null);
@@ -170,6 +184,8 @@ export function ChatPanel({
   const quoteButtonRef = React.useRef<HTMLButtonElement>(null);
   const [quoteSelection, setQuoteSelection] =
     React.useState<QuoteSelectionState | null>(null);
+  const [draftModelSelection, setDraftModelSelection] =
+    React.useState<ModelSelection | null>(null);
 
   // Message management hook
   const {
@@ -182,6 +198,7 @@ export function ChatPanel({
     beginOptimisticEditMessage,
     commitOptimisticHistoryMutation,
     rollbackOptimisticHistoryMutation,
+    reloadMessagesSnapshot,
     runUsageByUserMessageId,
   } = useChatMessages({ session });
 
@@ -199,6 +216,7 @@ export function ChatPanel({
   // Determine if session is running/active
   const isSessionActive =
     session?.status === "running" || session?.status === "pending";
+  const defaultModelId = (modelConfig?.default_model || "").trim();
 
   const {
     requests: userInputRequests,
@@ -207,6 +225,15 @@ export function ChatPanel({
   } = useUserInputRequests(
     session?.session_id,
     Boolean(session?.session_id) && isSessionActive,
+  );
+  const {
+    activeCreation: pendingSkillCreation,
+    isSubmitting: isSubmittingPendingSkillCreation,
+    confirmCreation: confirmPendingSkillCreation,
+    cancelCreation: cancelPendingSkillCreation,
+  } = usePendingSkillCreations(
+    session?.session_id,
+    Boolean(session?.session_id) && session?.status === "completed",
   );
 
   const activeUserInput = userInputRequests[0];
@@ -232,11 +259,102 @@ export function ChatPanel({
   React.useEffect(() => {
     setStickyUserInput(null);
     setQuoteSelection(null);
+    setDraftModelSelection(null);
     if (stickyTimerRef.current) {
       window.clearTimeout(stickyTimerRef.current);
       stickyTimerRef.current = null;
     }
   }, [session?.session_id]);
+
+  const defaultSelection = React.useMemo(() => {
+    const defaultOption = modelOptions.find((option) => option.isDefault);
+    return defaultOption
+      ? {
+          modelId: defaultOption.modelId,
+          providerId: defaultOption.providerId,
+        }
+      : null;
+  }, [modelOptions]);
+
+  const persistedModelSelection = React.useMemo(() => {
+    const snapshotModelId =
+      (session?.config_snapshot?.model || defaultModelId || "").trim() || null;
+    const inferredProviderId =
+      (session?.config_snapshot?.model_provider_id || "").trim() ||
+      modelOptions.find((option) => option.modelId === snapshotModelId)
+        ?.providerId ||
+      defaultSelection?.providerId ||
+      null;
+    return normalizeModelSelection({
+      modelId: snapshotModelId,
+      providerId: inferredProviderId,
+    });
+  }, [
+    defaultModelId,
+    defaultSelection?.providerId,
+    modelOptions,
+    session?.config_snapshot?.model,
+    session?.config_snapshot?.model_provider_id,
+  ]);
+
+  const selectedModelSelection = React.useMemo(
+    () =>
+      normalizeModelSelection(draftModelSelection ?? persistedModelSelection),
+    [draftModelSelection, persistedModelSelection],
+  );
+  const selectedModelId = selectedModelSelection.modelId;
+  const selectedModelLabel = React.useMemo(() => {
+    if (!selectedModelSelection.modelId) {
+      return null;
+    }
+    return (
+      modelOptions.find(
+        (option) =>
+          option.modelId === selectedModelSelection.modelId &&
+          (selectedModelSelection.providerId
+            ? option.providerId === selectedModelSelection.providerId
+            : true),
+      )?.displayName || selectedModelSelection.modelId
+    );
+  }, [
+    modelOptions,
+    selectedModelSelection.modelId,
+    selectedModelSelection.providerId,
+  ]);
+
+  React.useEffect(() => {
+    if (!draftModelSelection?.modelId) {
+      return;
+    }
+    if (
+      draftModelSelection.modelId === persistedModelSelection.modelId &&
+      (draftModelSelection.providerId || "") ===
+        (persistedModelSelection.providerId || "")
+    ) {
+      setDraftModelSelection(null);
+    }
+  }, [draftModelSelection, persistedModelSelection]);
+
+  const handleSelectModel = React.useCallback(
+    (selection: ModelSelection | null) => {
+      const nextSelection = normalizeModelSelection(
+        selection ?? defaultSelection,
+      );
+      if (!nextSelection.modelId || !defaultSelection?.modelId) {
+        return;
+      }
+      if (
+        nextSelection.modelId === persistedModelSelection.modelId &&
+        (nextSelection.providerId || "") ===
+          (persistedModelSelection.providerId || "")
+      ) {
+        setDraftModelSelection(null);
+        return;
+      }
+      setDraftModelSelection(nextSelection);
+    },
+    [defaultSelection, persistedModelSelection],
+  );
 
   const updateQuoteSelection = React.useCallback(() => {
     const container = conversationRef.current;
@@ -401,45 +519,6 @@ export function ChatPanel({
     [submitUserInputAnswer],
   );
 
-  const handleRename = React.useCallback(
-    async (newTitle: string) => {
-      if (!session?.session_id) return;
-      try {
-        await renameSessionTitleAction({
-          sessionId: session.session_id,
-          title: newTitle,
-        });
-        updateSession({ title: newTitle });
-        toast.success(t("task.toasts.renamed"));
-        await refreshTasks();
-      } catch (error) {
-        console.error("[ChatPanel] Failed to rename session title:", error);
-        toast.error(t("task.toasts.renameFailed"));
-      }
-    },
-    [refreshTasks, session?.session_id, t, updateSession],
-  );
-
-  const isCurrentSessionPinned = React.useMemo(() => {
-    if (!session?.session_id) return false;
-    return pinnedTaskIds.includes(session.session_id);
-  }, [pinnedTaskIds, session?.session_id]);
-
-  const handleMoveTaskToProject = React.useCallback(
-    async (taskId: string, projectId: string | null) => {
-      await moveTask(taskId, projectId);
-    },
-    [moveTask],
-  );
-
-  const handleDeleteTask = React.useCallback(
-    async (taskId: string) => {
-      await removeTask(taskId);
-      router.push(lng ? `/${lng}/home` : "/home");
-    },
-    [lng, removeTask, router],
-  );
-
   const userPromptHistory = React.useMemo(
     () =>
       messages
@@ -492,7 +571,10 @@ export function ChatPanel({
             sessionId: session.session_id,
             userMessageId,
             content: trimmedContent,
+            model: selectedModelSelection.modelId ?? undefined,
+            model_provider_id: selectedModelSelection.providerId ?? undefined,
           });
+          await reloadMessagesSnapshot();
           commitOptimisticHistoryMutation(mutationToken);
           void refreshTasks();
         } catch (error) {
@@ -510,7 +592,9 @@ export function ChatPanel({
       beginOptimisticEditMessage,
       commitOptimisticHistoryMutation,
       refreshTasks,
+      reloadMessagesSnapshot,
       rollbackOptimisticHistoryMutation,
+      selectedModelSelection,
       session?.session_id,
       session?.status,
       t,
@@ -560,7 +644,11 @@ export function ChatPanel({
         updateSession({ status: "pending" });
       }
 
-      const result = await sendMessage(content, attachments);
+      const result = await sendMessage(
+        content,
+        attachments,
+        selectedModelSelection,
+      );
 
       if (!result) {
         if (shouldMarkSessionPending) {
@@ -599,6 +687,7 @@ export function ChatPanel({
       refreshPendingMessages,
       refreshTasks,
       sendMessage,
+      selectedModelSelection,
       session?.next_queued_query_preview,
       session?.session_id,
       session?.status,
@@ -770,7 +859,10 @@ export function ChatPanel({
             sessionId: session.session_id,
             userMessageId: userMessageIdNumber,
             assistantMessageId: assistantMessageIdNumber,
+            model: selectedModelSelection.modelId ?? undefined,
+            model_provider_id: selectedModelSelection.providerId ?? undefined,
           });
+          await reloadMessagesSnapshot();
           commitOptimisticHistoryMutation(mutationToken);
           void refreshTasks();
         } catch (error) {
@@ -786,7 +878,9 @@ export function ChatPanel({
       beginOptimisticRegenerate,
       commitOptimisticHistoryMutation,
       refreshTasks,
+      reloadMessagesSnapshot,
       rollbackOptimisticHistoryMutation,
+      selectedModelSelection,
       session?.session_id,
       session?.status,
       t,
@@ -926,6 +1020,17 @@ export function ChatPanel({
           action={
             session?.session_id || onToggleRightPanel ? (
               <div className="flex items-center gap-1">
+                {selectedModelId ? (
+                  <ModelSelector
+                    options={modelOptions}
+                    selection={selectedModelSelection}
+                    defaultSelection={defaultSelection}
+                    fallbackLabel={selectedModelLabel || selectedModelId}
+                    onChange={handleSelectModel}
+                    disabled={isLoadingModelCatalog}
+                    triggerClassName="h-8 max-w-[220px] px-2"
+                  />
+                ) : null}
                 {session?.session_id ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -961,24 +1066,6 @@ export function ChatPanel({
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                ) : null}
-                {session?.session_id ? (
-                  <TaskActionsDropdown
-                    taskId={session.session_id}
-                    isPinned={isCurrentSessionPinned}
-                    projects={projects}
-                    onTogglePin={toggleTaskPin}
-                    onRename={() => setIsRenameDialogOpen(true)}
-                    onMoveToProject={handleMoveTaskToProject}
-                    onDelete={handleDeleteTask}
-                  >
-                    <PanelHeaderAction
-                      title={t("sidebar.settings")}
-                      className="focus-visible:ring-0 data-[state=open]:bg-accent data-[state=open]:text-accent-foreground"
-                    >
-                      <MoreHorizontal className="size-4" />
-                    </PanelHeaderAction>
-                  </TaskActionsDropdown>
                 ) : null}
                 {onToggleRightPanel ? (
                   <PanelHeaderAction
@@ -1096,6 +1183,37 @@ export function ChatPanel({
         </div>
       ) : null}
 
+      <Dialog
+        open={Boolean(pendingSkillCreation)}
+        onOpenChange={() => undefined}
+      >
+        <DialogContent
+          className="max-h-[90vh]   w-[calc(100vw-2rem)] sm:max-w-[90vw]
+ lg:max-w-[960px] xl:max-w-[1000px overflow-hidden p-0"
+          showCloseButton={false}
+        >
+          <DialogTitle className="sr-only">
+            {t("chat.skillCreationReview.title")}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("chat.skillCreationReview.subtitle")}
+          </DialogDescription>
+          {pendingSkillCreation ? (
+            <SkillCreationReviewCard
+              creation={pendingSkillCreation}
+              isSubmitting={isSubmittingPendingSkillCreation}
+              className="border-0 bg-transparent p-6 shadow-none"
+              onConfirm={(payload) =>
+                confirmPendingSkillCreation(pendingSkillCreation.id, payload)
+              }
+              onCancel={() =>
+                cancelPendingSkillCreation(pendingSkillCreation.id)
+              }
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
+
       {/* Status Bar - Skills and MCP */}
       {(hasConfigSnapshot || hasSkills || hasMcp || hasBrowser) && (
         <StatusBar
@@ -1131,13 +1249,6 @@ export function ChatPanel({
         disabled={!session?.session_id || hasActiveUserInput || isCancelling}
         history={userPromptHistory}
         className={isRightPanelCollapsed ? "px-[20%]" : undefined}
-      />
-
-      <RenameTaskDialog
-        open={isRenameDialogOpen}
-        onOpenChange={setIsRenameDialogOpen}
-        taskName={session?.title || ""}
-        onRename={handleRename}
       />
     </div>
   );

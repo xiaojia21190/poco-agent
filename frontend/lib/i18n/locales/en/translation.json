@@ -5,6 +5,7 @@
   "language": "Language",
   "sidebar": {
     "newTask": "New Task",
+    "newTaskWithShortcut": "New Task ({{shortcut}})",
     "search": "Search",
     "library": "Capabilities",
     "openMain": "Open main sidebar",
@@ -47,6 +48,15 @@
   },
   "hero": {
     "title": "What can I do for you?",
+    "rotatingWords": [
+      "Create slides",
+      "Search for information",
+      "Make mind maps",
+      "Analyze GitHub repos",
+      "Analyze data",
+      "Plan trips",
+      "Write code"
+    ],
     "subtitle": "Assign a task, or ask any question.",
     "uploadFile": "Upload file",
     "dragDrop": {
@@ -66,7 +76,7 @@
       "planDefault": "Plan first, then execute. Best for complex tasks.",
       "shortcutHint": "/ for Slash Command, Shift+Enter for new line, Enter to send"
     },
-    "tools": "Connect your tools to Poco",
+    "tools": "Give Poco more capabilities",
     "importFigma": "Import from Figma (coming soon)",
     "connect": "Connect",
     "configure": "Configure",
@@ -177,6 +187,20 @@
       "toggleServer": "Toggle {{name}}",
       "cancel": "Cancel",
       "confirm": "Confirm"
+    },
+    "capabilityRecommendations": {
+      "title": "Suggested capabilities",
+      "selectedTitle": "Enabled for this task",
+      "loading": "Finding matches...",
+      "empty": "No matching MCPs or skills found for this prompt.",
+      "useForTask": "Use for this task",
+      "added": "Added",
+      "enabledByDefault": "Already enabled",
+      "noDescription": "No description provided",
+      "remove": "Remove {{name}}",
+      "mcpLabel": "MCP",
+      "skillLabel": "Skill",
+      "hint": "Based on your task, Poco recommends the above capabilities for you. Click to load."
     },
     "warnings": {
       "tooManyMcps": "Too many MCP servers enabled ({{count}}). This may slow down system loading and reduce performance.",
@@ -483,6 +507,28 @@
         "structured": "Structured data",
         "empty": "No data"
       }
+    },
+    "skillCreationReview": {
+      "title": "Review created skill",
+      "subtitle": "The agent created a skill in this session. Review it before saving.",
+      "badge": "Created by agent",
+      "nameLabel": "Skill name",
+      "descriptionLabel": "Description",
+      "emptyDescription": "No description was generated.",
+      "pathLabel": "Workspace path",
+      "conflictWarning": "A skill with this name already exists.",
+      "overwriteLabel": "Overwrite the existing skill",
+      "filesTitle": "Generated files",
+      "loadingFiles": "Loading generated files…",
+      "emptyFiles": "No preview files are available yet.",
+      "selectFile": "Select a file to preview it.",
+      "cancel": "Cancel",
+      "confirm": "Create skill",
+      "confirmOverwrite": "Overwrite & create",
+      "createSuccess": "Skill created",
+      "createFailed": "Failed to create skill",
+      "cancelSuccess": "Skill creation dismissed",
+      "cancelFailed": "Failed to dismiss skill creation"
     }
   },
   "status": {
@@ -586,6 +632,7 @@
       "loadingDoc": "Reading document...",
       "parseError": "Failed to parse Excalidraw file",
       "fetchError": "Failed to fetch document content",
+      "frontMatter": "Front matter",
       "retry": "Retry",
       "selectFile": "Please select a file from the right to preview",
       "supportedFormats": "Supports PDF, Office documents, common image formats, MP4 videos, XMind files, .excalidraw files, and .drawio files",
@@ -1050,7 +1097,11 @@
       },
       "scope": {
         "system": "System",
-        "user": "User"
+        "user": "User",
+        "builtin": "Built-in"
+      },
+      "source": {
+        "skillCreator": "Created by agent"
       },
       "fields": {
         "id": "id",
@@ -1299,7 +1350,8 @@
       "zip": "ZIP",
       "system": "System",
       "manual": "Manual",
-      "unknown": "Unknown"
+      "unknown": "Unknown",
+      "skillCreator": "Skill Creator"
     },
     "presets": {
       "title": "Presets",
@@ -1401,6 +1453,22 @@
     "anthropicBaseUrl": "Anthropic Base URL",
     "anthropicBaseUrlHint": "Override the default Anthropic API endpoint.",
     "anthropicBaseUrlPlaceholder": "https://api.anthropic.com",
+    "providerConfigDescription": "Manage provider credentials and the model list exposed to the selector.",
+    "providerListEmpty": "No model providers available yet.",
+    "providerStatusNone": "Unconfigured",
+    "providerStatusSystem": "Preset Service",
+    "providerStatusUser": "Custom",
+    "providerModels": "Applies to: {{models}}",
+    "providerApiKeyLabel": "{{provider}} API Key",
+    "providerApiKeyHint": "Leave this blank to keep the existing custom key unchanged.",
+    "providerApiKeyPlaceholder": "Enter your {{provider}} API key",
+    "providerBaseUrlLabel": "Custom Base URL",
+    "providerBaseUrlHint": "Leave this blank to use the default API endpoint.",
+    "providerBaseUrlRequired": "Base URL is required when custom endpoint is enabled.",
+    "providerSaveSuccess": "Provider settings saved",
+    "providerSaveError": "Failed to save provider settings",
+    "providerClearSuccess": "Custom provider settings removed",
+    "providerClearCustom": "Remove custom",
     "claudeCode": "Claude Code",
     "language": "Language",
     "english": "English",
@@ -1466,6 +1534,10 @@
           "action": "Slash command",
           "hint": "Type / to open slash command suggestions."
         },
+        "newTask": {
+          "action": "New task",
+          "hint": "Create a new task and go to home."
+        },
         "search": {
           "action": "Global search",
           "hint": "Open or close global search dialog."
@@ -1483,7 +1555,16 @@
           "hint": "Open the settings dialog."
         }
       }
-    }
+    },
+    "providerDiscoverError": "Failed to discover provider models",
+    "providerModelsPlaceholder": "No custom models added yet",
+    "providerModelsSearchPlaceholder": "Enter a model name, then press Enter",
+    "providerModelsAdd": "Add model",
+    "providerModelsDiscovering": "Loading models...",
+    "providerModelsManualHint": "Discovery is unavailable for this provider. Enter the model names manually.",
+    "providerModelsEmpty": "No models found",
+    "providerModelsUseCustom": "Use custom model: {{model}}",
+    "providerFieldAnnotation": "Leave API Key blank to keep the current key. Leave Base URL blank to use the default endpoint. Enter model names manually and press Enter or click add."
   },
   "validation": {
     "projectNameRequired": "Please enter a project name",
@@ -1509,8 +1590,19 @@
   "fileSidebar": {
     "title": "File List",
     "fileList": "File List",
+    "actions": "Actions",
     "downloadAll": "Download all",
+    "download": "Download",
+    "downloadFile": "Download file",
     "noFiles": "No files yet",
+    "packageAsSkill": "Package as Skill",
+    "packageSkillTitle": "Package folder as skill",
+    "packageSkillDescription": "Submit this workspace folder for skill review.",
+    "skillName": "Skill name",
+    "skillNamePlaceholder": "Enter a skill name",
+    "submitSkill": "Submit for review",
+    "skillSubmitted": "Skill submitted for review",
+    "skillSubmitFailed": "Failed to submit skill for review",
     "downloadStarted": "Starting workspace archive download",
     "downloadStart": "Starting workspace archive download",
     "archiveNotAvailable": "Archive file not available yet",
@@ -1551,7 +1643,7 @@
     "apps": "Apps",
     "comingSoon": "Coming soon",
     "clickForDetails": "Click for details",
-    "connectTools": "Connect your tools to Poco"
+    "connectTools": "Give Poco more capabilities"
   },
   "fileChange": {
     "previewDisabled": "Executing, preview not available",
@@ -1713,7 +1805,17 @@
     },
     "gpt4Turbo": {
       "description": "Fast and efficient"
-    }
+    },
+    "customBadge": "Custom",
+    "customModelAction": "Custom model",
+    "customModelTitle": "Use a custom model",
+    "customModelDescription": "Add any model name supported by the configured provider.",
+    "customModelPlaceholder": "e.g. gpt-5 or claude-sonnet-4-5",
+    "customModelHint": "Supported prefixes: claude-, gpt, o1/o3/o4, glm-, MiniMax-, deepseek-.",
+    "customModelRequired": "Enter a model name.",
+    "customModelUnsupported": "This model name does not match a supported provider.",
+    "customModelProviderUnavailable": "Configure the provider credentials before using this model.",
+    "customModelSaved": "Custom model added"
   },
   "creditsPopover": {
     "proPlan": "Pro Plan",

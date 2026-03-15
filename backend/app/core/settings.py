@@ -30,10 +30,27 @@ class Settings(BaseSettings):
     internal_api_token: str = Field(
         default="change-this-token-in-production", alias="INTERNAL_API_TOKEN"
     )
+    bootstrap_on_startup: bool = Field(default=True, alias="BOOTSTRAP_ON_STARTUP")
 
     # External services
     executor_manager_url: str = Field(
         default="http://localhost:8001", alias="EXECUTOR_MANAGER_URL"
+    )
+    im_event_dispatch_enabled: bool = Field(
+        default=False, alias="IM_EVENT_DISPATCH_ENABLED"
+    )
+    im_event_callback_url: str | None = Field(
+        default=None, alias="IM_EVENT_CALLBACK_URL"
+    )
+    im_event_token: str | None = Field(default=None, alias="IM_EVENT_TOKEN")
+    im_event_dispatch_interval_seconds: float = Field(
+        default=0.5, alias="IM_EVENT_DISPATCH_INTERVAL_SECONDS"
+    )
+    im_event_dispatch_batch_size: int = Field(
+        default=20, alias="IM_EVENT_DISPATCH_BATCH_SIZE"
+    )
+    im_event_dispatch_lease_seconds: int = Field(
+        default=30, alias="IM_EVENT_DISPATCH_LEASE_SECONDS"
     )
     s3_endpoint: str | None = Field(default=None, alias="S3_ENDPOINT")
     s3_public_endpoint: str | None = Field(default=None, alias="S3_PUBLIC_ENDPOINT")
@@ -56,6 +73,16 @@ class Settings(BaseSettings):
     openai_base_url: str | None = Field(default=None, alias="OPENAI_BASE_URL")
     openai_audio_transcription_model: str = Field(
         default="whisper-1", alias="OPENAI_AUDIO_TRANSCRIPTION_MODEL"
+    )
+    siliconflow_api_key: str | None = Field(default=None, alias="SILICONFLOW_API_KEY")
+    siliconflow_base_url: str = Field(
+        default="https://api.siliconflow.cn/v1", alias="SILICONFLOW_BASE_URL"
+    )
+    siliconflow_rerank_model: str = Field(
+        default="BAAI/bge-reranker-v2-m3", alias="SILICONFLOW_RERANK_MODEL"
+    )
+    siliconflow_timeout_seconds: float = Field(
+        default=15.0, alias="SILICONFLOW_TIMEOUT_SECONDS"
     )
     default_model: str = Field(
         default="claude-sonnet-4-20250514", alias="DEFAULT_MODEL"
