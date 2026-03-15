@@ -10,11 +10,44 @@ import urllib.request
 from pathlib import Path
 
 
-def _load_task_context() -> dict[str, str]:
-    workspace_path = Path(os.environ.get("WORKSPACE_PATH", "/workspace"))
-    context_path = workspace_path / ".poco-task-context.json"
-    if not context_path.exists():
-        raise RuntimeError(f"Task context file not found: {context_path}")
+def _get_env_value(*keys: str) -> str:
+    for key in keys:
+        value = str(os.environ.get(key, "")).strip()
+        if value:
+            return value
+    return ""
+
+
+def _candidate_context_paths() -> list[Path]:
+    candidates: list[Path] = []
+
+    explicit_path = _get_env_value("POCO_TASK_CONTEXT_PATH")
+    if explicit_path:
+        candidates.append(Path(explicit_path))
+
+    workspace_path = _get_env_value("WORKSPACE_PATH")
+    if workspace_path:
+        candidates.append(Path(workspace_path) / ".poco-task-context.json")
+
+    cwd = Path.cwd().resolve()
+    candidates.extend(parent / ".poco-task-context.json" for parent in (cwd, *cwd.parents))
+
+    deduped: list[Path] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        key = str(candidate)
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(candidate)
+    return deduped
+
+
+def _load_task_context_from_file() -> dict[str, str]:
+    context_path = next((path for path in _candidate_context_paths() if path.exists()), None)
+    if context_path is None:
+        attempted = ", ".join(str(path) for path in _candidate_context_paths())
+        raise RuntimeError(f"Task context file not found. Checked: {attempted}")
 
     payload = json.loads(context_path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -31,6 +64,27 @@ def _load_task_context() -> dict[str, str]:
         "callback_base_url": callback_base_url.rstrip("/"),
         "callback_token": callback_token,
     }
+
+
+def _load_task_context() -> dict[str, str]:
+    session_id = _get_env_value("POCO_SESSION_ID", "SESSION_ID")
+    callback_base_url = _get_env_value(
+        "POCO_CALLBACK_BASE_URL",
+        "CALLBACK_BASE_URL",
+    )
+    callback_token = _get_env_value(
+        "POCO_CALLBACK_TOKEN",
+        "CALLBACK_TOKEN",
+    )
+
+    if session_id and callback_base_url and callback_token:
+        return {
+            "session_id": session_id,
+            "callback_base_url": callback_base_url.rstrip("/"),
+            "callback_token": callback_token,
+        }
+
+    return _load_task_context_from_file()
 
 
 def main() -> int:

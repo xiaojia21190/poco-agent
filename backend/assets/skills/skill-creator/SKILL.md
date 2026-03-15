@@ -21,6 +21,11 @@ At a high level, the process of creating a skill goes like this:
 
 Your job when using this skill is to figure out where the user is in this process and then jump in and help them progress through these stages. So for instance, maybe they're like "I want to make a skill for X". You can help narrow down what they mean, write a draft, write the test cases, figure out how they want to evaluate, run all the prompts, and repeat.
 
+Important: when a user says they want to "create a skill", do not assume the goal is only to leave files in the local workspace. In Poco, the normal end state is to get the skill reviewed and then persisted into the user's installed skills via the upload script / review flow. If the user only wants a local draft, that's fine, but otherwise guide the work toward either:
+
+- calling `upload_skill.py` yourself once the skill is ready, or
+- explicitly telling the user how to trigger that storage step manually.
+
 On the other hand, maybe they already have a draft of the skill. In this case you can go straight to the eval/iterate part of the loop.
 
 Of course, you should always be flexible and if the user is like "I don't need to run a bunch of evaluations, just vibe with me", you can do that instead.
@@ -41,6 +46,14 @@ python ~/.config/skills/skill-creator/scripts/upload_skill.py --folder .config/s
 Use `--name <override-name>` if the final installed skill name should differ from the folder
 name. The script submits a pending review request; after it succeeds, tell the user to confirm
 or cancel the skill in the UI review card.
+
+This step is the normal persistence path: it creates a pending review record that can later
+install or update the skill in the user's database-backed skill list. Do not present "skill
+created" as complete if you only wrote local files but did not submit them, unless the user
+explicitly asked to stop at the local-draft stage.
+
+If you are not the one triggering the upload, explicitly tell the user that they still need to
+run the upload step (or use the UI flow) to persist the skill beyond the current workspace.
 
 ## Communicating with the user
 
