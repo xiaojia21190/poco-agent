@@ -1,8 +1,7 @@
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.im.models.channel import Channel
+from app.models.im_channel import Channel
 
 
 class ChannelRepository:
@@ -18,27 +17,13 @@ class ChannelRepository:
         return db.execute(stmt).scalars().first()
 
     @staticmethod
-    def get_or_create(db: Session, *, provider: str, destination: str) -> Channel:
-        existing = ChannelRepository.get_by_provider_destination(
-            db, provider=provider, destination=destination
-        )
-        if existing:
-            return existing
+    def get_by_id(db: Session, *, channel_id: int) -> Channel | None:
+        return db.get(Channel, channel_id)
 
+    @staticmethod
+    def create(db: Session, *, provider: str, destination: str) -> Channel:
         channel = Channel(provider=provider, destination=destination)
         db.add(channel)
-        try:
-            db.commit()
-        except IntegrityError:
-            db.rollback()
-            # Concurrent create; load again.
-            existing = ChannelRepository.get_by_provider_destination(
-                db, provider=provider, destination=destination
-            )
-            if existing:
-                return existing
-            raise
-        db.refresh(channel)
         return channel
 
     @staticmethod
@@ -52,6 +37,4 @@ class ChannelRepository:
         if not channel:
             raise ValueError(f"Channel not found: {channel_id}")
         channel.subscribe_all = bool(enabled)
-        db.commit()
-        db.refresh(channel)
         return channel

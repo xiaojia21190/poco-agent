@@ -6,9 +6,9 @@ from dataclasses import dataclass
 
 from app.core.database import SessionLocal
 from app.core.settings import get_settings
-from app.im.schemas.backend_event import BackendEvent
-from app.im.services.backend_event_service import BackendEventService
 from app.repositories.im_event_outbox_repository import ImEventOutboxRepository
+from app.schemas.im_event import ImBackendEvent
+from app.services.im_backend_event_service import BackendEventService
 
 logger = logging.getLogger(__name__)
 
@@ -82,10 +82,13 @@ class ImEventDispatcher:
                 await asyncio.to_thread(self._mark_delivered, event.id)
 
     async def _deliver(self, event: ClaimedEvent) -> None:
-        parsed = BackendEvent.model_validate(event.payload)
+        parsed = ImBackendEvent.model_validate(event.payload)
         db = SessionLocal()
         try:
             await self._backend_event_service.process_event(db, event=parsed)
+        except Exception:
+            db.rollback()
+            raise
         finally:
             db.close()
 
@@ -98,6 +101,7 @@ class ImEventDispatcher:
                 limit=limit,
                 lease_seconds=lease_seconds,
             )
+            db.commit()
             claimed: list[ClaimedEvent] = []
             for row in rows:
                 payload = row.payload if isinstance(row.payload, dict) else {}
@@ -110,6 +114,9 @@ class ImEventDispatcher:
                     )
                 )
             return claimed
+        except Exception:
+            db.rollback()
+            raise
         finally:
             db.close()
 
@@ -118,6 +125,10 @@ class ImEventDispatcher:
         db = SessionLocal()
         try:
             ImEventOutboxRepository.mark_delivered(db, event_id=event_id)
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
         finally:
             db.close()
 
@@ -131,5 +142,9 @@ class ImEventDispatcher:
                 error_message=error_message,
                 delay_seconds=delay_seconds,
             )
+            db.commit()
+        except Exception:
+            db.rollback()
+            raise
         finally:
             db.close()

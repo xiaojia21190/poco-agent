@@ -7,8 +7,8 @@ from starlette.concurrency import run_in_threadpool
 
 from app.core.database import engine
 from app.core.settings import get_settings
-from app.im.services.dingtalk_stream_service import DingTalkStreamService
-from app.im.services.feishu_stream_service import FeishuStreamService
+from app.services.im_dingtalk_stream_service import DingTalkStreamService
+from app.services.im_feishu_stream_service import FeishuStreamService
 from app.lifecycle.bootstrap import LifecycleBootstrapService
 from app.services.im_event_dispatcher import ImEventDispatcher
 

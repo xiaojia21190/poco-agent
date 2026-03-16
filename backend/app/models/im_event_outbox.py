@@ -7,7 +7,7 @@ from typing import Any
 from sqlalchemy import BigInteger, DateTime, Index, Integer, JSON, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models import Base, TimestampMixin
+from app.core.database import Base, TimestampMixin
 
 
 class ImEventOutbox(Base, TimestampMixin):

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timedelta, timezone
+from typing import Any
 
 from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
@@ -29,7 +30,7 @@ class ImEventOutboxRepository:
         run_id: uuid.UUID | None,
         message_id: int | None,
         user_input_request_id: uuid.UUID | None,
-        payload: dict,
+        payload: dict[str, Any],
     ) -> ImEventOutbox:
         existing = ImEventOutboxRepository.get_by_event_key(
             session_db, event_key=event_key
@@ -51,7 +52,7 @@ class ImEventOutboxRepository:
         session_db.add(row)
         try:
             with session_db.begin_nested():
-                session_db.flush()
+                session_db.flush([row])
         except IntegrityError:
             existing = ImEventOutboxRepository.get_by_event_key(
                 session_db, event_key=event_key
@@ -63,7 +64,9 @@ class ImEventOutboxRepository:
 
     @staticmethod
     def get_by_event_key(
-        session_db: Session, *, event_key: str
+        session_db: Session,
+        *,
+        event_key: str,
     ) -> ImEventOutbox | None:
         stmt = select(ImEventOutbox).where(ImEventOutbox.event_key == event_key)
         return session_db.execute(stmt).scalars().first()
@@ -99,10 +102,6 @@ class ImEventOutboxRepository:
             row.status = "sending"
             row.attempt_count = int(row.attempt_count or 0) + 1
             row.lease_expires_at = lease_until
-        session_db.commit()
-
-        for row in rows:
-            session_db.refresh(row)
         return rows
 
     @staticmethod
@@ -117,7 +116,6 @@ class ImEventOutboxRepository:
         row.delivered_at = datetime.now(timezone.utc)
         row.lease_expires_at = None
         row.last_error = None
-        session_db.commit()
 
     @staticmethod
     def mark_retry(
@@ -139,4 +137,3 @@ class ImEventOutboxRepository:
         row.next_attempt_at = datetime.now(timezone.utc) + timedelta(
             seconds=max(0.5, delay_seconds)
         )
-        session_db.commit()

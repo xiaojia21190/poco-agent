@@ -4,8 +4,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from app.core.settings import get_settings
-from app.im.services.feishu_event_parser import parse_feishu_webhook_event
-from app.im.services.inbound_message_service import InboundMessageService
+from app.services.im_feishu_event_parser import parse_feishu_webhook_event
+from app.services.im_inbound_message_service import InboundMessageService
 from app.schemas.response import Response
 
 router = APIRouter(prefix="/webhooks/feishu", tags=["feishu"])

@@ -1,7 +1,7 @@
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from app.im.models.active_session import ActiveSession
+from app.models.im_active_session import ActiveSession
 
 
 class ActiveSessionRepository:
@@ -11,25 +11,16 @@ class ActiveSessionRepository:
         return db.execute(stmt).scalars().first()
 
     @staticmethod
-    def set_active(db: Session, *, channel_id: int, session_id: str) -> ActiveSession:
-        existing = ActiveSessionRepository.get_by_channel(db, channel_id=channel_id)
-        if existing:
-            existing.session_id = session_id
-            db.commit()
-            db.refresh(existing)
-            return existing
-
+    def create(db: Session, *, channel_id: int, session_id: str) -> ActiveSession:
         entry = ActiveSession(channel_id=channel_id, session_id=session_id)
         db.add(entry)
-        db.commit()
-        db.refresh(entry)
         return entry
 
     @staticmethod
-    def clear(db: Session, *, channel_id: int) -> None:
+    def delete_by_channel(db: Session, *, channel_id: int) -> int:
         stmt = delete(ActiveSession).where(ActiveSession.channel_id == channel_id)
-        db.execute(stmt)
-        db.commit()
+        result = db.execute(stmt)
+        return int(result.rowcount or 0)
 
     @staticmethod
     def list_by_session(db: Session, *, session_id: str) -> list[ActiveSession]:

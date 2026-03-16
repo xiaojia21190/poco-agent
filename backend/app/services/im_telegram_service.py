@@ -1,43 +1,29 @@
+import logging
 from typing import Any
-
-from fastapi import APIRouter, Header, Request
 
 from app.schemas.im_message import InboundMessage
 from app.services.im_inbound_message_service import InboundMessageService
-from app.core.settings import get_settings
-from app.schemas.response import Response
+from app.services.im_telegram_client import TelegramClient
 
-router = APIRouter(prefix="/webhooks/telegram", tags=["telegram"])
+logger = logging.getLogger(__name__)
 
 
-@router.post("")
-async def webhook(
-    request: Request,
-    x_telegram_bot_api_secret_token: str | None = Header(
-        default=None,
-        alias="X-Telegram-Bot-Api-Secret-Token",
-    ),
-):
-    settings = get_settings()
-    if settings.telegram_webhook_secret_token:
-        if (
-            not x_telegram_bot_api_secret_token
-            or x_telegram_bot_api_secret_token != settings.telegram_webhook_secret_token
-        ):
-            return Response.error(
-                code=403,
-                message="Invalid webhook token",
-                status_code=403,
-            )
+class TelegramService:
+    """Handle Telegram webhook updates and route commands."""
 
-    payload = await request.json()
-    inbound = _parse_telegram_update(payload)
-    if inbound is None:
-        return Response.success(data={"ok": True, "ignored": True})
+    def __init__(self) -> None:
+        self.client = TelegramClient()
+        self.inbound = InboundMessageService()
 
-    service = InboundMessageService()
-    await service.handle_message(message=inbound)
-    return Response.success(data={"ok": True})
+    async def handle_update(self, payload: dict[str, Any]) -> None:
+        if not self.client.enabled:
+            return
+
+        inbound = _parse_telegram_update(payload)
+        if inbound is None:
+            return
+
+        await self.inbound.handle_message(message=inbound)
 
 
 def _parse_telegram_update(payload: dict[str, Any]) -> InboundMessage | None:

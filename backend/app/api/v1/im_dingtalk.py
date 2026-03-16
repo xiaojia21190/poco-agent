@@ -3,9 +3,9 @@ from typing import Any
 from fastapi import APIRouter, Query, Request
 
 from app.core.settings import get_settings
-from app.im.schemas.im_message import InboundMessage
-from app.im.services.dingtalk_event_parser import clean_text, has_explicit_mention
-from app.im.services.inbound_message_service import InboundMessageService
+from app.schemas.im_message import InboundMessage
+from app.services.im_dingtalk_event_parser import clean_text, has_explicit_mention
+from app.services.im_inbound_message_service import InboundMessageService
 from app.schemas.response import Response
 
 router = APIRouter(prefix="/webhooks/dingtalk", tags=["dingtalk"])

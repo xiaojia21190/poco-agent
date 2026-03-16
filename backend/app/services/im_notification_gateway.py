@@ -1,9 +1,9 @@
 import logging
 
-from app.im.services.dingtalk_client import DingTalkClient
-from app.im.services.feishu_client import FeishuClient
-from app.im.services.provider_protocol import MessageProvider
-from app.im.services.telegram_client import TelegramClient
+from app.services.im_dingtalk_client import DingTalkClient
+from app.services.im_feishu_client import FeishuClient
+from app.services.im_provider_protocol import MessageProvider
+from app.services.im_telegram_client import TelegramClient
 
 logger = logging.getLogger(__name__)
 

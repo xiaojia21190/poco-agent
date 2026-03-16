@@ -4,13 +4,14 @@ import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.im.models.channel import Channel
-from app.im.repositories.active_session_repository import ActiveSessionRepository
-from app.im.repositories.watch_repository import WatchRepository
-from app.im.services.backend_client import BackendClient, BackendClientError
-from app.im.services.message_formatter import MessageFormatter
+from app.models.im_channel import Channel
+from app.repositories.im_active_session_repository import ActiveSessionRepository
+from app.repositories.im_watch_repository import WatchRepository
+from app.services.im_backend_client import BackendClient, BackendClientError
+from app.services.im_message_formatter import MessageFormatter
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,11 @@ class CommandService:
         }
 
     async def handle_text(
-        self, *, db: Session, channel: Channel, text: str
+        self,
+        *,
+        db: Session,
+        channel: Channel,
+        text: str,
     ) -> list[str]:
         clean = _normalize_incoming_text(text)
         if not clean:
@@ -82,7 +87,7 @@ class CommandService:
         session_id = str(result.get("session_id") or active.session_id)
         run_id = str(result.get("run_id") or "")
         status = str(result.get("status") or "")
-        WatchRepository.add_watch(db, channel_id=channel.id, session_id=session_id)
+        self._ensure_watch(db, channel_id=channel.id, session_id=session_id)
         return [
             self.formatter.format_task_created(
                 session_id=session_id,
@@ -155,12 +160,12 @@ class CommandService:
         run_id = str(result.get("run_id") or "")
         status = str(result.get("status") or "")
         if session_id:
-            ActiveSessionRepository.set_active(
+            self._set_active_session(
                 db,
                 channel_id=channel.id,
                 session_id=session_id,
             )
-            WatchRepository.add_watch(db, channel_id=channel.id, session_id=session_id)
+            self._ensure_watch(db, channel_id=channel.id, session_id=session_id)
 
         created_text = self.formatter.format_task_created(
             session_id=session_id,
@@ -182,12 +187,12 @@ class CommandService:
         except ValueError as exc:
             return [str(exc)]
 
-        ActiveSessionRepository.set_active(
+        self._set_active_session(
             db,
             channel_id=channel.id,
             session_id=session_id,
         )
-        WatchRepository.add_watch(db, channel_id=channel.id, session_id=session_id)
+        self._ensure_watch(db, channel_id=channel.id, session_id=session_id)
         return [
             f"🔗 已连接会话：{session_id}\n"
             f"🌐 前端查看: {self.formatter.session_url(session_id)}"
@@ -197,7 +202,7 @@ class CommandService:
         session_id = args.strip()
         if not session_id:
             return ["用法：/watch <session_id>"]
-        WatchRepository.add_watch(db, channel_id=channel.id, session_id=session_id)
+        self._ensure_watch(db, channel_id=channel.id, session_id=session_id)
         return [
             f"👀 已订阅会话：{session_id}\n"
             f"🌐 前端查看: {self.formatter.session_url(session_id)}"
@@ -235,7 +240,7 @@ class CommandService:
         except ValueError as exc:
             return [str(exc)]
 
-        removed = WatchRepository.remove_watch(
+        removed = WatchRepository.delete_by_channel_session(
             db,
             channel_id=channel.id,
             session_id=session_id,
@@ -258,7 +263,7 @@ class CommandService:
 
     async def _cmd_clear(self, db: Session, channel: Channel, args: str) -> list[str]:
         _ = args
-        ActiveSessionRepository.clear(db, channel_id=channel.id)
+        ActiveSessionRepository.delete_by_channel(db, channel_id=channel.id)
         return ["已清除当前会话绑定"]
 
     async def _cmd_answer(self, db: Session, channel: Channel, args: str) -> list[str]:
@@ -309,7 +314,9 @@ class CommandService:
                 raise ValueError("会话序号必须大于 0")
             limit = min(max(index, 10), 50)
             sessions = await self.backend.list_sessions(
-                limit=limit, offset=0, kind="chat"
+                limit=limit,
+                offset=0,
+                kind="chat",
             )
             if index > len(sessions):
                 raise ValueError(f"序号超出范围：当前仅有 {len(sessions)} 条可选")
@@ -337,6 +344,65 @@ class CommandService:
             return watches[index - 1].session_id
 
         return raw
+
+    def _set_active_session(
+        self,
+        db: Session,
+        *,
+        channel_id: int,
+        session_id: str,
+    ) -> None:
+        existing = ActiveSessionRepository.get_by_channel(db, channel_id=channel_id)
+        if existing is not None:
+            existing.session_id = session_id
+            return
+
+        entry = ActiveSessionRepository.create(
+            db,
+            channel_id=channel_id,
+            session_id=session_id,
+        )
+        try:
+            with db.begin_nested():
+                db.flush([entry])
+        except IntegrityError:
+            existing = ActiveSessionRepository.get_by_channel(db, channel_id=channel_id)
+            if existing is None:
+                raise
+            existing.session_id = session_id
+            db.flush([existing])
+
+    def _ensure_watch(
+        self,
+        db: Session,
+        *,
+        channel_id: int,
+        session_id: str,
+    ) -> None:
+        existing = WatchRepository.get_watch(
+            db,
+            channel_id=channel_id,
+            session_id=session_id,
+        )
+        if existing is not None:
+            return
+
+        entry = WatchRepository.create(
+            db,
+            channel_id=channel_id,
+            session_id=session_id,
+        )
+        try:
+            with db.begin_nested():
+                db.flush([entry])
+        except IntegrityError:
+            existing = WatchRepository.get_watch(
+                db,
+                channel_id=channel_id,
+                session_id=session_id,
+            )
+            if existing is None:
+                raise
 
     def _help_text(self) -> str:
         return (

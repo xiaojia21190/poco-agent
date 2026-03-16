@@ -3,7 +3,7 @@ import re
 from typing import Any
 
 from app.core.settings import get_settings
-from app.im.schemas.im_message import InboundMessage
+from app.schemas.im_message import InboundMessage
 
 _LEADING_MENTION_RE = re.compile(r"^(?:<at\s+[^>]*>.*?</at>\s*)+", re.IGNORECASE)
 _AT_TAG_RE = re.compile(r"<at\s+([^>]*?)>(.*?)</at>", re.IGNORECASE | re.DOTALL)

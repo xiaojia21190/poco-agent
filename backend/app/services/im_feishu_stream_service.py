@@ -7,9 +7,9 @@ from concurrent.futures import Future
 from typing import Any
 
 from app.core.settings import get_settings
-from app.im.schemas.im_message import InboundMessage
-from app.im.services.feishu_event_parser import parse_feishu_stream_event
-from app.im.services.inbound_message_service import InboundMessageService
+from app.schemas.im_message import InboundMessage
+from app.services.im_feishu_event_parser import parse_feishu_stream_event
+from app.services.im_inbound_message_service import InboundMessageService
 
 logger = logging.getLogger(__name__)
 
