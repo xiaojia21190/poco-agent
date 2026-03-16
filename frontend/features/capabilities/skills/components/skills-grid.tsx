@@ -136,9 +136,9 @@ export function SkillsGrid({
                       onClick={() => onOpenSkillSettings?.(skill)}
                       disabled={!onOpenSkillSettings}
                       className={cn(
-                        "max-w-full truncate text-left font-medium underline-offset-4 transition",
+                        "max-w-full truncate text-left font-medium underline underline-offset-4 decoration-transparent transition-[color,text-decoration-color] duration-200",
                         onOpenSkillSettings
-                          ? "cursor-pointer hover:underline"
+                          ? "cursor-pointer hover:decoration-muted-foreground"
                           : "cursor-default",
                       )}
                     >

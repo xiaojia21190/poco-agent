@@ -5,6 +5,7 @@ import {
   AlignLeft,
   FolderTree,
   Loader2,
+  PencilLine,
   Sparkles,
   TriangleAlert,
 } from "lucide-react";
@@ -12,14 +13,18 @@ import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/client";
 import { ApiError } from "@/lib/errors";
-import { CapabilityDialogContent } from "@/features/capabilities/components/capability-dialog-content";
 import { skillsService } from "@/features/capabilities/skills/api/skills-api";
 import type { Skill } from "@/features/capabilities/skills/types";
 import {
@@ -73,7 +78,6 @@ function getEntryS3Key(skill: Skill | null): string | null {
   }
 
   const rawValue = skill.entry.s3_key ?? skill.entry.key ?? null;
-
   return typeof rawValue === "string" && rawValue.trim() ? rawValue : null;
 }
 
@@ -277,36 +281,177 @@ export function SkillSettingsDialog({
     [refreshFiles],
   );
 
-  if (!skill) return null;
+  if (!skill) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
-      <CapabilityDialogContent
-        title={t("library.skillSettings.title")}
-        description={t("library.skillSettings.subtitle")}
-        size="lg"
-        maxWidth="76rem"
-        className="h-[72dvh] sm:h-[80dvh]"
-        maxHeight="72dvh"
-        desktopMaxHeight="80dvh"
-        bodyClassName="flex h-full min-h-0 flex-col overflow-hidden bg-background px-6 py-6"
-        footer={
-          <DialogFooter className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              disabled={isSaving}
-              className="w-full"
-            >
-              {isSystemSkill ? t("common.close") : t("common.cancel")}
-            </Button>
-            {!isSystemSkill ? (
+      <DialogContent
+        className="max-h-[90vh] w-[calc(100vw-2rem)] overflow-hidden p-0 sm:max-w-[90vw] lg:max-w-[960px] xl:max-w-[1000px]"
+        showCloseButton={false}
+      >
+        <DialogTitle className="sr-only">{skill.name}</DialogTitle>
+        <DialogDescription className="sr-only">
+          {t("library.skillSettings.title")}
+        </DialogDescription>
+        <div className="border-0 bg-transparent p-6 shadow-none">
+          <div className="flex flex-col overflow-visible rounded-lg border border-border bg-card/70 p-4 shadow-sm md:h-[60vh] md:max-h-[80vh] md:overflow-hidden">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Sparkles className="size-4" />
+                  </div>
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <div className="truncate text-sm font-medium text-foreground">
+                      {skill.name}
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="text-xs text-muted-foreground"
+                    >
+                      {isSystemSkill
+                        ? t("library.skillsManager.scope.system")
+                        : t("library.skillsManager.scope.user")}
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {getSourceLabel(skill, t)}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              {isSaving ? (
+                <Loader2 className="size-4 animate-spin text-muted-foreground" />
+              ) : null}
+            </div>
+
+            <div className="mt-4 grid gap-4 md:min-h-0 md:flex-1 md:grid-cols-[minmax(200px,0.6fr)_minmax(0,1.5fr)] md:overflow-hidden">
+              <div className="min-h-[220px] overflow-hidden rounded-lg border border-border/60 bg-background md:min-h-0">
+                {isLoadingFiles ? (
+                  <div className="flex h-full min-h-[320px] items-center justify-center text-sm text-muted-foreground">
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    {t("library.skillSettings.loadingFiles")}
+                  </div>
+                ) : files.length === 0 ? (
+                  <div className="flex h-full min-h-[320px] items-center justify-center px-4 text-center text-sm text-muted-foreground">
+                    {t("library.skillSettings.emptyFiles")}
+                  </div>
+                ) : (
+                  <FileSidebar
+                    files={files}
+                    onFileSelect={(file) => {
+                      setSelectedFile(file);
+                      setIsPreviewVisible(true);
+                    }}
+                    selectedFile={selectedFile}
+                    embedded
+                  />
+                )}
+              </div>
+
+              <div
+                className={cn(
+                  "min-h-[320px] overflow-hidden rounded-lg bg-background md:min-h-0",
+                  isPreviewVisible && selectedFile
+                    ? "bg-transparent"
+                    : "border border-border/60",
+                )}
+              >
+                {isPreviewVisible && selectedFile ? (
+                  <div className="h-[60vh] min-h-[360px] overflow-hidden md:h-full md:min-h-0">
+                    <DocumentViewer
+                      file={selectedFile}
+                      ensureFreshFile={ensureFreshFile}
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-4 p-4 md:min-h-0 md:overflow-y-auto">
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-2">
+                        <PencilLine className="size-4 text-muted-foreground" />
+                        {t("library.skillSettings.nameLabel")}
+                      </Label>
+                      <Input
+                        value={name}
+                        disabled={isSystemSkill || isSaving}
+                        onChange={(event) => {
+                          setName(event.target.value);
+                          if (saveError) {
+                            setSaveError(null);
+                          }
+                        }}
+                        placeholder={t("library.skillSettings.namePlaceholder")}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        <AlignLeft className="size-4" />
+                        {t("library.skillSettings.descriptionLabel")}
+                      </div>
+                      <Textarea
+                        value={description}
+                        disabled={isSystemSkill || isSaving}
+                        onChange={(event) => {
+                          setDescription(event.target.value);
+                          if (saveError) {
+                            setSaveError(null);
+                          }
+                        }}
+                        placeholder={t("library.skillSettings.descriptionPlaceholder")}
+                        className="min-h-28 resize-y"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        <FolderTree className="size-4" />
+                        {t("library.skillSettings.storagePathLabel")}
+                      </div>
+                      <code className="block rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+                        {storagePath || t("library.skillSettings.storagePathUnavailable")}
+                      </code>
+                    </div>
+
+                    {isSystemSkill ? (
+                      <div className="rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-sm text-muted-foreground">
+                        {t("library.skillSettings.readonlyHint")}
+                      </div>
+                    ) : null}
+
+                    {nameConflict ? (
+                      <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
+                        <div className="flex items-start gap-2">
+                          <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+                          <div>{t("library.skillSettings.nameConflict")}</div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {saveError ? (
+                      <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                        {saveError}
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <Button variant="outline" disabled={isSaving} onClick={onClose}>
+                {t("common.cancel")}
+              </Button>
               <Button
-                onClick={handleSave}
                 disabled={
-                  isSaving || !trimmedName || nameConflict || !hasChanges
+                  isSaving ||
+                  isSystemSkill ||
+                  !trimmedName ||
+                  nameConflict ||
+                  !hasChanges
                 }
-                className="w-full"
+                onClick={handleSave}
               >
                 {isSaving ? (
                   <>
@@ -317,150 +462,10 @@ export function SkillSettingsDialog({
                   t("common.save")
                 )}
               </Button>
-            ) : null}
-          </DialogFooter>
-        }
-      >
-        <div className="flex h-full min-h-0 flex-col gap-4">
-          <div className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border/60 bg-card/70 px-4 py-3 shadow-sm">
-            <div className="flex min-w-0 items-start gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Sparkles className="size-4" />
-              </div>
-              <div className="min-w-0 space-y-1">
-                <div className="text-sm font-medium text-foreground">
-                  {skill.name}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {t("library.skillSettings.previewHint")}
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="text-xs text-muted-foreground">
-                {isSystemSkill
-                  ? t("library.skillsManager.scope.system")
-                  : t("library.skillsManager.scope.user")}
-              </Badge>
-              <Badge variant="secondary" className="text-xs">
-                {getSourceLabel(skill, t)}
-              </Badge>
-            </div>
-          </div>
-
-          <div className="grid min-h-0 flex-1 gap-4 md:grid-cols-[minmax(220px,0.6fr)_minmax(0,1.5fr)] md:overflow-hidden">
-            <div className="min-h-[220px] overflow-hidden rounded-lg border border-border/60 bg-background md:min-h-0">
-              {isLoadingFiles ? (
-                <div className="flex h-full min-h-[320px] items-center justify-center text-sm text-muted-foreground">
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  {t("library.skillSettings.loadingFiles")}
-                </div>
-              ) : files.length === 0 ? (
-                <div className="flex h-full min-h-[320px] items-center justify-center px-4 text-center text-sm text-muted-foreground">
-                  {t("library.skillSettings.emptyFiles")}
-                </div>
-              ) : (
-                <FileSidebar
-                  files={files}
-                  onFileSelect={(file) => {
-                    setSelectedFile(file);
-                    setIsPreviewVisible(true);
-                  }}
-                  selectedFile={selectedFile}
-                  embedded
-                />
-              )}
-            </div>
-
-            <div
-              className={cn(
-                "min-h-[320px] overflow-hidden rounded-lg bg-background md:min-h-0",
-                isPreviewVisible && selectedFile
-                  ? "bg-transparent"
-                  : "border border-border/60",
-              )}
-            >
-              {isPreviewVisible && selectedFile ? (
-                <div className="h-[60vh] min-h-[360px] overflow-hidden md:h-full md:min-h-0">
-                  <DocumentViewer
-                    file={selectedFile}
-                    ensureFreshFile={ensureFreshFile}
-                  />
-                </div>
-              ) : (
-                <div className="space-y-4 p-4 md:h-full md:overflow-y-auto">
-                  <div className="space-y-2">
-                    <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      {t("library.skillSettings.nameLabel")}
-                    </Label>
-                    <Input
-                      value={name}
-                      disabled={isSystemSkill || isSaving}
-                      onChange={(event) => {
-                        setName(event.target.value);
-                        if (saveError) {
-                          setSaveError(null);
-                        }
-                      }}
-                      placeholder={t("library.skillSettings.namePlaceholder")}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      <AlignLeft className="size-4" />
-                      {t("library.skillSettings.descriptionLabel")}
-                    </div>
-                    <Textarea
-                      value={description}
-                      disabled={isSystemSkill || isSaving}
-                      onChange={(event) => {
-                        setDescription(event.target.value);
-                        if (saveError) {
-                          setSaveError(null);
-                        }
-                      }}
-                      placeholder={t("library.skillSettings.descriptionPlaceholder")}
-                      className="min-h-28 resize-y"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      <FolderTree className="size-4" />
-                      {t("library.skillSettings.storagePathLabel")}
-                    </div>
-                    <code className="block rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-                      {storagePath || t("library.skillSettings.storagePathUnavailable")}
-                    </code>
-                  </div>
-
-                  {isSystemSkill ? (
-                    <div className="rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-sm text-muted-foreground">
-                      {t("library.skillSettings.readonlyHint")}
-                    </div>
-                  ) : null}
-
-                  {nameConflict ? (
-                    <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
-                      <div className="flex items-start gap-2">
-                        <TriangleAlert className="mt-0.5 size-4 shrink-0" />
-                        <div>{t("library.skillSettings.nameConflict")}</div>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {saveError ? (
-                    <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                      {saveError}
-                    </div>
-                  ) : null}
-                </div>
-              )}
             </div>
           </div>
         </div>
-      </CapabilityDialogContent>
+      </DialogContent>
     </Dialog>
   );
 }
