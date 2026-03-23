@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     retry_attempts: int = Field(default=3)
     retry_delay_seconds: int = Field(default=60)
     callback_token: str = Field(default="change-this-token-in-production")
+    deployment_mode: Literal["local", "cloud"] = Field(
+        default="local", alias="DEPLOYMENT_MODE"
+    )
     internal_api_token: str = Field(
         default="change-this-token-in-production", alias="INTERNAL_API_TOKEN"
     )

@@ -414,9 +414,11 @@ class RunPullService:
             (
                 executor_url,
                 container_id,
+                _,
             ) = await self.container_pool.get_or_create_container(
                 session_id=session_id,
                 user_id=user_id,
+                task_config=resolved_config,
                 browser_enabled=browser_enabled,
                 container_mode=container_mode,
                 container_id=container_id,
