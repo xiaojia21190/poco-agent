@@ -8,6 +8,7 @@ from app.models import Base, TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.agent_session import AgentSession
+    from app.models.project_preset import ProjectPreset
 
 
 class Project(Base, TimestampMixin):
@@ -29,3 +30,7 @@ class Project(Base, TimestampMixin):
     )
 
     sessions: Mapped[list["AgentSession"]] = relationship(back_populates="project")
+    project_presets: Mapped[list["ProjectPreset"]] = relationship(
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )

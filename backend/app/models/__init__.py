@@ -20,7 +20,9 @@ from app.models.model_provider_setting import UserModelProviderSetting
 from app.models.pending_skill_creation import PendingSkillCreation
 from app.models.plugin import Plugin
 from app.models.plugin_import_job import PluginImportJob
+from app.models.preset import Preset
 from app.models.project import Project
+from app.models.project_preset import ProjectPreset
 from app.models.session_queue_item import AgentSessionQueueItem
 from app.models.skill import Skill
 from app.models.skill_import_job import SkillImportJob
@@ -54,7 +56,9 @@ __all__ = [
     "PendingSkillCreation",
     "Plugin",
     "PluginImportJob",
+    "Preset",
     "Project",
+    "ProjectPreset",
     "Skill",
     "SkillImportJob",
     "SlashCommand",
