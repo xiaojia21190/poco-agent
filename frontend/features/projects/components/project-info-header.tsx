@@ -29,8 +29,8 @@ export function ProjectInfoHeader({
   }, [renameSignal]);
 
   const handleRename = React.useCallback(
-    async (name: string) => {
-      await onUpdate({ name });
+    async (name: string, description?: string | null) => {
+      await onUpdate({ name, description });
     },
     [onUpdate],
   );
@@ -104,8 +104,10 @@ export function ProjectInfoHeader({
         open={isRenameDialogOpen}
         onOpenChange={setIsRenameDialogOpen}
         projectName={project.name}
-        onRename={(name) => {
-          void handleRename(name);
+        projectDescription={project.description}
+        allowDescriptionEdit
+        onRename={(name, description) => {
+          void handleRename(name, description);
         }}
       />
     </>

@@ -1527,7 +1527,7 @@
     "settings": "Projekteinstellungen",
     "settingsAction": "Vorlagen verwalten",
     "rename": "Projekt umbenennen",
-    "renameDescription": "Gib einen neuen Projektnamen ein",
+    "renameDescription": "Gib einen neuen Projektnamen und eine Beschreibung ein",
     "nameLabel": "Projektname",
     "descriptionLabel": "Projektbeschreibung",
     "namePlaceholder": "Projektnamen eingeben",
@@ -1536,7 +1536,7 @@
     "deleteConfirm": "Löschen",
     "detail": {
       "overview": "Projektübersicht",
-      "renameAction": "Namen bearbeiten",
+      "renameAction": "Projekt bearbeiten",
       "descriptionPlaceholder": "Projektbeschreibung hinzufügen...",
       "editDescription": "Beschreibung bearbeiten",
       "emptyDescription": "Dieses Projekt hat noch keine Zusammenfassung. Starte eine neue Sitzung, um Kontext aufzubauen.",

@@ -1527,7 +1527,7 @@
     "settings": "Paramètres du projet",
     "settingsAction": "Gérer les préréglages",
     "rename": "Renommer le projet",
-    "renameDescription": "Entrez un nouveau nom de projet",
+    "renameDescription": "Entrez un nouveau nom et une description de projet",
     "nameLabel": "Nom du projet",
     "descriptionLabel": "Description du projet",
     "namePlaceholder": "Entrez le nom du projet",
@@ -1536,7 +1536,7 @@
     "deleteConfirm": "Supprimer",
     "detail": {
       "overview": "Vue d’ensemble du projet",
-      "renameAction": "Modifier le nom",
+      "renameAction": "Modifier le projet",
       "descriptionPlaceholder": "Ajouter une description du projet...",
       "editDescription": "Modifier la description",
       "emptyDescription": "Ce projet n’a pas encore de résumé. Démarrez une nouvelle session pour créer du contexte.",

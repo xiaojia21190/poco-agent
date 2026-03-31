@@ -1527,7 +1527,7 @@
     "settings": "Настройки проекта",
     "settingsAction": "Управлять пресетами",
     "rename": "Переименовать проект",
-    "renameDescription": "Введите новое имя проекта",
+    "renameDescription": "Введите новое имя и описание проекта",
     "nameLabel": "Имя проекта",
     "descriptionLabel": "Описание проекта",
     "namePlaceholder": "Введите имя проекта",
@@ -1536,7 +1536,7 @@
     "deleteConfirm": "Удалить",
     "detail": {
       "overview": "Обзор проекта",
-      "renameAction": "Изменить имя",
+      "renameAction": "Изменить проект",
       "descriptionPlaceholder": "Добавить описание проекта...",
       "editDescription": "Редактировать описание",
       "emptyDescription": "У этого проекта пока нет описания. Запустите новую сессию, чтобы собрать контекст.",

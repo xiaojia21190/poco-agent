@@ -1527,7 +1527,7 @@
     "settings": "项目设置",
     "settingsAction": "管理预设",
     "rename": "重命名项目",
-    "renameDescription": "请输入新的项目名称",
+    "renameDescription": "请输入新的项目名称和描述",
     "nameLabel": "项目名称",
     "descriptionLabel": "项目描述",
     "namePlaceholder": "请输入项目名称",
@@ -1536,7 +1536,7 @@
     "deleteConfirm": "删除",
     "detail": {
       "overview": "项目概览",
-      "renameAction": "编辑名称",
+      "renameAction": "编辑项目",
       "descriptionPlaceholder": "添加项目描述...",
       "editDescription": "编辑描述",
       "emptyDescription": "这个项目还没有补充说明，可以先从一次新对话开始。",
