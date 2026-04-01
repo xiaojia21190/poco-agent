@@ -52,7 +52,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
   const [projectPresets, setProjectPresets] = React.useState<ProjectPreset[]>(
     [],
   );
-  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(true);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   useAutosizeTextarea(textareaRef, inputValue);

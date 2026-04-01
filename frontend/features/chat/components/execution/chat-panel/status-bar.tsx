@@ -56,7 +56,7 @@ interface StatusBarProps {
 
 function PresetGlyph({ preset }: { preset: Preset }) {
   return React.createElement(getPresetIcon(preset.icon), {
-    className: "size-3.5 transition-colors",
+    className: "size-4 shrink-0",
     style: preset.color ? { color: preset.color } : undefined,
   });
 }
@@ -261,7 +261,7 @@ export function StatusBar({
             <button
               type="button"
               onClick={() => setPresetDialogOpen(true)}
-              className="group flex min-w-0 shrink-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm"
+              className="group flex h-9 min-w-0 shrink-0 max-w-[220px] items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 text-foreground transition-colors hover:bg-primary/15 cursor-pointer"
             >
               <PresetGlyph preset={preset} />
               <span className="min-w-0 truncate text-xs font-medium text-foreground">
@@ -281,7 +281,7 @@ export function StatusBar({
 
         {/* Browser Card */}
         {hasBrowser && (
-          <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
+          <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-colors hover:border-border cursor-pointer">
             <AppWindow className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
             <span className="min-w-0 truncate text-xs font-medium text-foreground">
               {t("chat.statusBar.browser")}
@@ -298,7 +298,7 @@ export function StatusBar({
         {/* Skills Card */}
         {hasSkills &&
           renderInteractiveCard(
-            <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
+            <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-colors hover:border-border cursor-pointer">
               <Zap className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
               <span className="min-w-0 truncate text-xs font-medium text-foreground">
                 {configuredSkills.length > 0
@@ -329,7 +329,7 @@ export function StatusBar({
         {hasPresets && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
+              <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-colors hover:border-border cursor-pointer">
                 <Plug className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
                 <span className="min-w-0 truncate text-xs font-medium text-foreground">
                   {t("chat.statusBar.pluginsConfigured")}
@@ -365,7 +365,7 @@ export function StatusBar({
         {/* MCP Card */}
         {hasMcp &&
           renderInteractiveCard(
-            <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
+            <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-colors hover:border-border cursor-pointer">
               <Server className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
               <span className="min-w-0 truncate text-xs font-medium text-foreground">
                 {configuredMcpServers.length > 0
