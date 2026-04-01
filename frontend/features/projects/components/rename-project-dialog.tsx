@@ -64,8 +64,10 @@ function serializeLocalMounts(mounts: LocalMountConfig[]): string {
   );
 }
 
-function hasMeaningfulMountInput(rows: LocalMountDraftRow[]): boolean {
-  return rows.some((row) => row.name.trim() || row.host_path.trim());
+function toProjectMountDraftRows(
+  mounts: LocalMountConfig[] | null | undefined,
+): LocalMountDraftRow[] {
+  return mounts?.length ? toLocalMountDraftRows(mounts) : [];
 }
 
 interface RenameProjectDialogProps {
@@ -109,7 +111,7 @@ export function RenameProjectDialog({
     (projectLocalMounts?.length ?? 0) > 0,
   );
   const [mountRows, setMountRows] = React.useState<LocalMountDraftRow[]>(() =>
-    toLocalMountDraftRows(projectLocalMounts),
+    toProjectMountDraftRows(projectLocalMounts),
   );
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -142,7 +144,7 @@ export function RenameProjectDialog({
     setDescription(projectDescription ?? "");
     setModelSelection(projectModelSelection);
     setMountsEnabled((projectLocalMounts?.length ?? 0) > 0);
-    setMountRows(toLocalMountDraftRows(projectLocalMounts));
+    setMountRows(toProjectMountDraftRows(projectLocalMounts));
     setAdvancedOpen(false);
   }, [
     projectDescription,
@@ -176,59 +178,43 @@ export function RenameProjectDialog({
     [],
   );
 
-  const handleAddRow = React.useCallback(() => {
+  const handleAddRow = React.useCallback(async () => {
+    if (!supportsNativeDirectoryPicker()) {
+      toast.error(t("filesystem.picker.notSupported"));
+      return;
+    }
+
     setMountsEnabled(true);
-    setMountRows((prev) => [...prev, createEmptyLocalMountDraftRow()]);
-  }, []);
-
-  const handleRemoveRow = React.useCallback((clientId: string) => {
-    setMountRows((prev) => {
-      const nextRows = prev.filter((row) => row.client_id !== clientId);
-      return nextRows.length > 0 ? nextRows : [createEmptyLocalMountDraftRow()];
-    });
-  }, []);
-
-  const handlePickMountDirectory = React.useCallback(
-    async (clientId: string) => {
-      if (!supportsNativeDirectoryPicker()) {
-        toast.error(t("filesystem.picker.notSupported"));
+    try {
+      const pickedDirectory = await pickLocalDirectory();
+      if (!pickedDirectory) {
         return;
       }
 
-      try {
-        const pickedDirectory = await pickLocalDirectory();
-        if (!pickedDirectory) {
-          return;
-        }
+      setMountRows((prev) => [
+        ...prev,
+        createEmptyLocalMountDraftRow({
+          host_path: pickedDirectory.hostPath ?? "",
+          name: pickedDirectory.displayName,
+        }),
+      ]);
 
-        setMountRows((prev) =>
-          prev.map((row) =>
-            row.client_id === clientId
-              ? {
-                  ...row,
-                  name: row.name.trim() || pickedDirectory.displayName,
-                  host_path: pickedDirectory.hostPath ?? "",
-                }
-              : row,
-          ),
-        );
-
-        if (!pickedDirectory.hostPath) {
-          toast.warning(t("filesystem.picker.resolveFailed"));
-        }
-      } catch {
-        // User cancelled the native picker — do nothing
+      if (!pickedDirectory.hostPath) {
+        toast.warning(t("filesystem.picker.resolveFailed"));
       }
-    },
-    [t],
-  );
+    } catch {
+      // User cancelled the native picker — do nothing
+    }
+  }, [t]);
+
+  const handleRemoveRow = React.useCallback((clientId: string) => {
+    setMountRows((prev) => prev.filter((row) => row.client_id !== clientId));
+  }, []);
 
   const handleMountToggle = React.useCallback((checked: boolean) => {
     setMountsEnabled(checked);
-    if (checked) {
-      setMountRows((prev) =>
-        hasMeaningfulMountInput(prev) ? prev : [createEmptyLocalMountDraftRow()],
-      );
+    if (!checked) {
+      setMountRows([]);
     }
   }, []);
 
@@ -286,7 +272,7 @@ export function RenameProjectDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[640px]">
+      <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-[640px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{t("project.rename")}</DialogTitle>
@@ -404,7 +390,9 @@ export function RenameProjectDialog({
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={handleAddRow}
+                            onClick={() => {
+                              void handleAddRow();
+                            }}
                           >
                             <FolderPlus className="size-4" />
                             {t("filesystem.actions.addMount")}
@@ -412,30 +400,11 @@ export function RenameProjectDialog({
                         </div>
 
                         <div className="max-h-80 space-y-3 overflow-y-auto pr-1">
-                          {mountRows.map((row, index) => (
+                          {mountRows.map((row) => (
                             <div
                               key={row.client_id}
                               className="rounded-xl border border-border/60 bg-muted/20 p-3"
                             >
-                              <div className="mb-3 flex items-center justify-between gap-3">
-                                <p className="text-sm font-medium text-foreground">
-                                  {t("filesystem.mounts.itemTitle", {
-                                    index: index + 1,
-                                  })}
-                                </p>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  className="size-8 text-muted-foreground"
-                                  onClick={() => handleRemoveRow(row.client_id)}
-                                  aria-label={t("filesystem.actions.removeMount")}
-                                  title={t("filesystem.actions.removeMount")}
-                                >
-                                  <Trash2 className="size-4" />
-                                </Button>
-                              </div>
-
                               <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_10rem]">
                                 <div className="grid gap-2">
                                   <Label htmlFor={`project-mount-name-${row.client_id}`}>
@@ -455,9 +424,24 @@ export function RenameProjectDialog({
                                   />
                                 </div>
                                 <div className="grid gap-2">
-                                  <Label htmlFor={`project-mount-access-${row.client_id}`}>
-                                    {t("filesystem.fields.access")}
-                                  </Label>
+                                  <div className="flex items-center justify-between gap-2">
+                                    <Label
+                                      htmlFor={`project-mount-access-${row.client_id}`}
+                                    >
+                                      {t("filesystem.fields.access")}
+                                    </Label>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="size-7 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                                      onClick={() => handleRemoveRow(row.client_id)}
+                                      aria-label={t("filesystem.actions.removeMount")}
+                                      title={t("filesystem.actions.removeMount")}
+                                    >
+                                      <Trash2 className="size-4" />
+                                    </Button>
+                                  </div>
                                   <Select
                                     value={row.access_mode}
                                     onValueChange={(value) =>
@@ -489,32 +473,18 @@ export function RenameProjectDialog({
                                 <Label htmlFor={`project-mount-path-${row.client_id}`}>
                                   {t("filesystem.fields.path")}
                                 </Label>
-                                <div className="flex flex-col gap-2 sm:flex-row">
-                                  <Input
-                                    id={`project-mount-path-${row.client_id}`}
-                                    value={row.host_path}
-                                    onChange={(event) =>
-                                      handleRowChange(
-                                        row.client_id,
-                                        "host_path",
-                                        event.target.value,
-                                      )
-                                    }
-                                    placeholder={t("filesystem.placeholders.path")}
-                                    className="flex-1"
-                                  />
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="shrink-0"
-                                    onClick={() => {
-                                      void handlePickMountDirectory(row.client_id);
-                                    }}
-                                  >
-                                    <FolderPlus className="size-4" />
-                                    {t("project.advanced.chooseFolder")}
-                                  </Button>
-                                </div>
+                                <Input
+                                  id={`project-mount-path-${row.client_id}`}
+                                  value={row.host_path}
+                                  onChange={(event) =>
+                                    handleRowChange(
+                                      row.client_id,
+                                      "host_path",
+                                      event.target.value,
+                                    )
+                                  }
+                                  placeholder={t("filesystem.placeholders.path")}
+                                />
                               </div>
                             </div>
                           ))}
