@@ -83,6 +83,18 @@ class ProjectService:
         token_key = cls._normalize_optional_str(git_token_env_key)
         return normalized_url, branch, token_key
 
+    @classmethod
+    def _normalize_runtime_settings(
+        cls,
+        *,
+        default_model: str | None,
+        mount_enabled: bool | None,
+        mount_path: str | None,
+    ) -> tuple[str | None, bool, str | None]:
+        normalized_model = cls._normalize_optional_str(default_model)
+        normalized_mount_path = cls._normalize_optional_str(mount_path)
+        return normalized_model, bool(mount_enabled), normalized_mount_path
+
     def list_projects(self, db: Session, user_id: str) -> list[ProjectResponse]:
         projects = ProjectRepository.list_by_user(db, user_id)
         return [ProjectResponse.model_validate(p) for p in projects]
@@ -102,6 +114,11 @@ class ProjectService:
         self, db: Session, user_id: str, request: ProjectCreateRequest
     ) -> ProjectResponse:
         description = self._normalize_optional_str(request.description)
+        default_model, mount_enabled, mount_path = self._normalize_runtime_settings(
+            default_model=request.default_model,
+            mount_enabled=request.mount_enabled,
+            mount_path=request.mount_path,
+        )
         repo_url, git_branch, git_token_env_key = self._normalize_repo_settings(
             repo_url=request.repo_url,
             git_branch=request.git_branch,
@@ -111,6 +128,9 @@ class ProjectService:
             user_id=user_id,
             name=request.name,
             description=description,
+            default_model=default_model,
+            mount_enabled=mount_enabled,
+            mount_path=mount_path,
             repo_url=repo_url,
             git_branch=git_branch,
             git_token_env_key=git_token_env_key,
@@ -139,6 +159,12 @@ class ProjectService:
             project.name = request.name
         if "description" in update:
             project.description = self._normalize_optional_str(request.description)
+        if "default_model" in update:
+            project.default_model = self._normalize_optional_str(request.default_model)
+        if "mount_enabled" in update:
+            project.mount_enabled = bool(request.mount_enabled)
+        if "mount_path" in update:
+            project.mount_path = self._normalize_optional_str(request.mount_path)
 
         if "repo_url" in update:
             repo_url, git_branch, git_token_env_key = self._normalize_repo_settings(
