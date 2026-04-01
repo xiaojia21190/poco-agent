@@ -2,6 +2,9 @@ export interface ProjectItem {
   id: string;
   name: string;
   icon?: string;
+  defaultModel?: string | null;
+  mountEnabled?: boolean;
+  mountPath?: string | null;
   /** Default git repository context (GitHub-only in v1). */
   repoUrl?: string | null;
   gitBranch?: string | null;

@@ -1531,6 +1531,16 @@
     "nameLabel": "项目名称",
     "descriptionLabel": "项目描述",
     "namePlaceholder": "请输入项目名称",
+    "advanced": {
+      "title": "高级配置",
+      "description": "为这个项目的新运行设置默认模型和本地挂载路径。",
+      "defaultModelLabel": "默认模型",
+      "defaultModelPlaceholder": "使用工作区默认模型",
+      "mountTitle": "挂载项目路径",
+      "mountDescription": "为这个项目的新运行附加一个本地目录。",
+      "mountPathLabel": "挂载路径",
+      "mountPathPlaceholder": "例如：/Users/alice/Workspace/my-project"
+    },
     "delete": "删除项目",
     "deleteDescription": "删除项目后，项目中的所有任务将回到任务清单。",
     "deleteConfirm": "删除",

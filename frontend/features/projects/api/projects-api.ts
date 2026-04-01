@@ -8,6 +8,9 @@ interface ProjectApiResponse {
   user_id?: string;
   name: string;
   description?: string | null;
+  default_model?: string | null;
+  mount_enabled?: boolean;
+  mount_path?: string | null;
   repo_url?: string | null;
   git_branch?: string | null;
   git_token_env_key?: string | null;
@@ -22,6 +25,9 @@ function mapProject(project: ProjectApiResponse): ProjectItem {
     name: project.name,
     userId: project.user_id,
     description: project.description ?? null,
+    defaultModel: project.default_model ?? null,
+    mountEnabled: project.mount_enabled ?? false,
+    mountPath: project.mount_path ?? null,
     repoUrl: project.repo_url ?? null,
     gitBranch: project.git_branch ?? null,
     gitTokenEnvKey: project.git_token_env_key ?? null,
@@ -83,6 +89,9 @@ export const projectsService = {
   createProject: async (payload: {
     name: string;
     description?: string | null;
+    default_model?: string | null;
+    mount_enabled?: boolean;
+    mount_path?: string | null;
     repo_url?: string;
     git_branch?: string;
     git_token_env_key?: string | null;
@@ -99,6 +108,9 @@ export const projectsService = {
     payload: {
       name?: string;
       description?: string | null;
+      default_model?: string | null;
+      mount_enabled?: boolean;
+      mount_path?: string | null;
       repo_url?: string | null;
       git_branch?: string | null;
       git_token_env_key?: string | null;

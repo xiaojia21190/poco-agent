@@ -87,6 +87,7 @@ interface TaskComposerProps {
   }) => void | Promise<void>;
   bottomAddon?: React.ReactNode;
   initialPresetId?: number | null;
+  initialLocalFilesystemDraft?: LocalFilesystemDraft;
   onFocus?: () => void;
   onBlur?: () => void;
 }
@@ -117,6 +118,7 @@ export function TaskComposer({
   onRepoDefaultsSave,
   bottomAddon,
   initialPresetId = null,
+  initialLocalFilesystemDraft,
   onFocus,
   onBlur,
 }: TaskComposerProps) {
@@ -174,8 +176,8 @@ export function TaskComposer({
   const [filesystemDialogOpen, setFilesystemDialogOpen] = React.useState(false);
   const [localFilesystemDraft, setLocalFilesystemDraft] =
     React.useState<LocalFilesystemDraft>({
-      filesystem_mode: "sandbox",
-      local_mounts: [],
+      filesystem_mode: initialLocalFilesystemDraft?.filesystem_mode ?? "sandbox",
+      local_mounts: initialLocalFilesystemDraft?.local_mounts ?? [],
     });
   const [trackedCapabilityItems, setTrackedCapabilityItems] = React.useState<
     TrackedCapabilityItem[]
@@ -185,6 +187,13 @@ export function TaskComposer({
   const [selectedPresetId, setSelectedPresetId] = React.useState<number | null>(
     null,
   );
+
+  React.useEffect(() => {
+    if (!initialLocalFilesystemDraft) {
+      return;
+    }
+    setLocalFilesystemDraft(initialLocalFilesystemDraft);
+  }, [initialLocalFilesystemDraft]);
 
   const effectiveMcpConfig = React.useMemo(
     () => toCapabilityToggleConfig(capabilityToggle?.mcpEnabledMap),

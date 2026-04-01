@@ -1531,6 +1531,16 @@
     "nameLabel": "Nom du projet",
     "descriptionLabel": "Description du projet",
     "namePlaceholder": "Entrez le nom du projet",
+    "advanced": {
+      "title": "Configuration avancée",
+      "description": "Définissez un modèle par défaut et un chemin de montage local pour les nouvelles exécutions de ce projet.",
+      "defaultModelLabel": "Modèle par défaut",
+      "defaultModelPlaceholder": "Utiliser le modèle par défaut de l'espace de travail",
+      "mountTitle": "Monter le chemin du projet",
+      "mountDescription": "Ajoutez un répertoire local aux nouvelles exécutions de ce projet.",
+      "mountPathLabel": "Chemin de montage",
+      "mountPathPlaceholder": "ex. /Users/alice/Workspace/my-project"
+    },
     "delete": "Supprimer le projet",
     "deleteDescription": "La suppression de ce projet déplacera toutes ses tâches vers la liste principale.",
     "deleteConfirm": "Supprimer",

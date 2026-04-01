@@ -29,8 +29,20 @@ export function ProjectInfoHeader({
   }, [renameSignal]);
 
   const handleRename = React.useCallback(
-    async (name: string, description?: string | null) => {
-      await onUpdate({ name, description });
+    async (
+      name: string,
+      description?: string | null,
+      defaultModel?: string | null,
+      mountEnabled?: boolean,
+      mountPath?: string | null,
+    ) => {
+      await onUpdate({
+        name,
+        description,
+        defaultModel,
+        mountEnabled,
+        mountPath,
+      });
     },
     [onUpdate],
   );
@@ -105,9 +117,18 @@ export function ProjectInfoHeader({
         onOpenChange={setIsRenameDialogOpen}
         projectName={project.name}
         projectDescription={project.description}
+        projectDefaultModel={project.defaultModel}
+        projectMountEnabled={project.mountEnabled}
+        projectMountPath={project.mountPath}
         allowDescriptionEdit
-        onRename={(name, description) => {
-          void handleRename(name, description);
+        onRename={(name, description, defaultModel, mountEnabled, mountPath) => {
+          void handleRename(
+            name,
+            description,
+            defaultModel,
+            mountEnabled,
+            mountPath,
+          );
         }}
       />
     </>

@@ -6,6 +6,7 @@ import { ConnectorsBar } from "@/features/connectors";
 import {
   TaskEntrySection,
   type ComposerMode,
+  type LocalFilesystemDraft,
   type TaskSendOptions,
 } from "@/features/task-composer";
 
@@ -19,6 +20,7 @@ interface ProjectDetailPanelProps {
   onSendTask: (options?: TaskSendOptions) => Promise<void>;
   isSubmitting: boolean;
   initialPresetId: number | null;
+  initialLocalFilesystemDraft?: LocalFilesystemDraft;
   onRepoDefaultsSave: (payload: {
     repo_url?: string | null;
     git_branch?: string | null;
@@ -36,6 +38,7 @@ export function ProjectDetailPanel({
   onSendTask,
   isSubmitting,
   initialPresetId,
+  initialLocalFilesystemDraft,
   onRepoDefaultsSave,
 }: ProjectDetailPanelProps) {
   return (
@@ -52,6 +55,7 @@ export function ProjectDetailPanel({
         isSubmitting,
         allowProjectize: false,
         initialPresetId,
+        initialLocalFilesystemDraft,
         onRepoDefaultsSave,
       }}
     />

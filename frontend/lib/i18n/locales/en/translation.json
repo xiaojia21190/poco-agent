@@ -1531,6 +1531,16 @@
     "nameLabel": "Project name",
     "descriptionLabel": "Description",
     "namePlaceholder": "Enter project name",
+    "advanced": {
+      "title": "Advanced config",
+      "description": "Set a default model and local mount path for new runs in this project.",
+      "defaultModelLabel": "Default model",
+      "defaultModelPlaceholder": "Use workspace default model",
+      "mountTitle": "Mount project path",
+      "mountDescription": "Apply one local directory to new runs in this project.",
+      "mountPathLabel": "Mount path",
+      "mountPathPlaceholder": "e.g. /Users/alice/Workspace/my-project"
+    },
     "delete": "Delete Project",
     "deleteDescription": "Deleting this project will move all of its tasks back to the main list.",
     "deleteConfirm": "Delete",

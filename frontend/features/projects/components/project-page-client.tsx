@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 
 import {
   type ComposerMode,
+  type LocalFilesystemDraft,
   type TaskSendOptions,
   submitScheduledTask,
   submitTask,
@@ -16,6 +17,7 @@ import {
 } from "@/features/task-composer";
 import type { ProjectPreset } from "@/features/capabilities/presets";
 import type { ProjectItem, TaskHistoryItem } from "@/features/projects/types";
+import type { ModelSelection } from "@/features/chat/lib/model-catalog";
 
 import { ProjectDetailPanel } from "@/features/projects/components/project-detail-panel";
 import { ProjectHeader } from "@/features/projects/components/project-header";
@@ -95,6 +97,43 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
     return getDefaultProjectPresetId(projectPresets);
   }, [projectPresets]);
 
+  const projectModelSelection = React.useMemo<ModelSelection | null>(() => {
+    const modelId = (currentProject?.defaultModel || "").trim();
+    if (!modelId) {
+      return null;
+    }
+    return {
+      modelId,
+      providerId: null,
+    };
+  }, [currentProject?.defaultModel]);
+
+  const projectFilesystemDraft = React.useMemo<LocalFilesystemDraft>(() => {
+    const mountPath = (currentProject?.mountPath || "").trim();
+    if (!currentProject?.mountEnabled || !mountPath) {
+      return {
+        filesystem_mode: "sandbox",
+        local_mounts: [],
+      };
+    }
+
+    return {
+      filesystem_mode: "local_mount",
+      local_mounts: [
+        {
+          id: "project-default",
+          name: currentProject.name || "Project workspace",
+          host_path: mountPath,
+          access_mode: "rw",
+        },
+      ],
+    };
+  }, [
+    currentProject?.mountEnabled,
+    currentProject?.mountPath,
+    currentProject?.name,
+  ]);
+
   const handleSendTask = React.useCallback(
     async (options?: TaskSendOptions) => {
       const inputFiles = options?.attachments ?? [];
@@ -103,6 +142,15 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
       const gitTokenEnvKey = (options?.git_token_env_key || "").trim();
       const runSchedule = options?.run_schedule ?? null;
       const scheduledTask = options?.scheduled_task ?? null;
+      const effectiveFilesystemMode =
+        options?.filesystem_mode ??
+        (currentProject?.mountEnabled ? projectFilesystemDraft.filesystem_mode : null);
+      const effectiveLocalMounts =
+        options?.local_mounts && options.local_mounts.length > 0
+          ? options.local_mounts
+          : currentProject?.mountEnabled
+            ? projectFilesystemDraft.local_mounts
+            : null;
       if (
         (mode === "scheduled"
           ? inputValue.trim() === ""
@@ -128,7 +176,12 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
           await submitScheduledTask({
             prompt: inputValue,
             mode,
-            options,
+            options: {
+              ...options,
+              filesystem_mode: effectiveFilesystemMode,
+              local_mounts: effectiveLocalMounts,
+            },
+            selectedModel: projectModelSelection,
             projectId,
           });
           toast.success(t("library.scheduledTasks.toasts.created"));
@@ -143,9 +196,12 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
             mode,
             options: {
               ...options,
+              filesystem_mode: effectiveFilesystemMode,
+              local_mounts: effectiveLocalMounts,
               run_schedule: runSchedule,
               scheduled_task: scheduledTask,
             },
+            selectedModel: projectModelSelection,
             projectId,
           },
           { addTask },
@@ -167,9 +223,13 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
       lng,
       mode,
       projectId,
+      projectFilesystemDraft.filesystem_mode,
+      projectFilesystemDraft.local_mounts,
+      projectModelSelection,
       router,
       t,
       updateProject,
+      currentProject?.mountEnabled,
     ],
   );
 
@@ -220,6 +280,9 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                       await updateProject(projectId, {
                         name: updates.name,
                         description: updates.description,
+                        default_model: updates.defaultModel,
+                        mount_enabled: updates.mountEnabled,
+                        mount_path: updates.mountPath,
                       });
                     }}
                     onOpenSettings={() => setSettingsOpen(true)}
@@ -254,6 +317,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                 onSendTask={handleSendTask}
                 isSubmitting={isSubmitting}
                 initialPresetId={defaultPresetId}
+                initialLocalFilesystemDraft={projectFilesystemDraft}
                 onRepoDefaultsSave={async (payload) => {
                   await updateProject(projectId, payload);
                 }}

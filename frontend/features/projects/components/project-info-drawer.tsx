@@ -140,10 +140,19 @@ export function ProjectInfoDrawer({
   ];
 
   const handleRename = React.useCallback(
-    (newName: string, newDescription?: string | null) => {
+    (
+      newName: string,
+      newDescription?: string | null,
+      defaultModel?: string | null,
+      mountEnabled?: boolean,
+      mountPath?: string | null,
+    ) => {
       void onUpdateProject({
         name: newName,
         description: newDescription,
+        defaultModel,
+        mountEnabled,
+        mountPath,
       });
     },
     [onUpdateProject],
@@ -261,6 +270,9 @@ export function ProjectInfoDrawer({
         onOpenChange={setIsRenameDialogOpen}
         projectName={project.name}
         projectDescription={project.description}
+        projectDefaultModel={project.defaultModel}
+        projectMountEnabled={project.mountEnabled}
+        projectMountPath={project.mountPath}
         allowDescriptionEdit
         onRename={handleRename}
       />

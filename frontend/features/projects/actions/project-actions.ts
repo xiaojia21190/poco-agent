@@ -15,10 +15,19 @@ const VALIDATION_ERRORS = {
 const createProjectSchema = z.object({
   name: z.string().trim().min(1, VALIDATION_ERRORS.projectNameRequired),
   description: z.string().trim().max(2000).optional().nullable(),
+  default_model: z.string().trim().max(255).optional().nullable(),
+  mount_enabled: z.boolean().optional().nullable(),
+  mount_path: z.string().trim().max(4000).optional().nullable(),
   repo_url: z.string().trim().optional().nullable(),
   git_branch: z.string().trim().optional().nullable(),
   git_token_env_key: z.string().trim().optional().nullable(),
-});
+}).refine(
+  (data) => !data.mount_enabled || Boolean((data.mount_path || "").trim()),
+  {
+    message: VALIDATION_ERRORS.projectNameRequired,
+    path: ["mount_path"],
+  },
+);
 
 const listProjectsSchema = z.object({
   revalidate: z.number().int().positive().optional(),
@@ -36,10 +45,19 @@ const updateProjectSchema = z.object({
     .min(1, VALIDATION_ERRORS.projectNameRequired)
     .optional(),
   description: z.string().trim().max(2000).optional().nullable(),
+  default_model: z.string().trim().max(255).optional().nullable(),
+  mount_enabled: z.boolean().optional().nullable(),
+  mount_path: z.string().trim().max(4000).optional().nullable(),
   repo_url: z.string().trim().optional().nullable(),
   git_branch: z.string().trim().optional().nullable(),
   git_token_env_key: z.string().trim().optional().nullable(),
-});
+}).refine(
+  (data) => !data.mount_enabled || Boolean((data.mount_path || "").trim()),
+  {
+    message: VALIDATION_ERRORS.projectNameRequired,
+    path: ["mount_path"],
+  },
+);
 
 const deleteProjectSchema = z.object({
   projectId: z.string().trim().min(1, VALIDATION_ERRORS.selectProject),
@@ -58,11 +76,23 @@ export type DeleteProjectInput = z.infer<typeof deleteProjectSchema>;
 export type MoveTaskToProjectInput = z.infer<typeof moveTaskToProjectSchema>;
 
 export async function createProjectAction(input: CreateProjectInput) {
-  const { name, description, repo_url, git_branch, git_token_env_key } =
+  const {
+    name,
+    description,
+    default_model,
+    mount_enabled,
+    mount_path,
+    repo_url,
+    git_branch,
+    git_token_env_key,
+  } =
     createProjectSchema.parse(input);
   return projectsService.createProject({
     name,
     description,
+    default_model: default_model ?? undefined,
+    mount_enabled: mount_enabled ?? undefined,
+    mount_path: mount_path ?? undefined,
     repo_url: repo_url ?? undefined,
     git_branch: git_branch ?? undefined,
     git_token_env_key: git_token_env_key ?? undefined,
@@ -84,6 +114,9 @@ export async function updateProjectAction(input: UpdateProjectInput) {
     projectId,
     name,
     description,
+    default_model,
+    mount_enabled,
+    mount_path,
     repo_url,
     git_branch,
     git_token_env_key,
@@ -92,9 +125,12 @@ export async function updateProjectAction(input: UpdateProjectInput) {
   return projectsService.updateProject(projectId, {
     name,
     description,
-    repo_url,
-    git_branch,
-    git_token_env_key,
+    default_model: default_model ?? undefined,
+    mount_enabled: mount_enabled ?? undefined,
+    mount_path: mount_path ?? undefined,
+    repo_url: repo_url ?? undefined,
+    git_branch: git_branch ?? undefined,
+    git_token_env_key: git_token_env_key ?? undefined,
   });
 }
 

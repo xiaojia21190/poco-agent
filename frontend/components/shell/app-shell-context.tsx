@@ -18,11 +18,17 @@ export type ProjectRepoDefaultsInput = {
 export type ProjectCreateInput = {
   name: string;
   description?: string | null;
+  default_model?: string | null;
+  mount_enabled?: boolean;
+  mount_path?: string | null;
 } & ProjectRepoDefaultsInput;
 
 export type ProjectUpdatesInput = {
   name?: string;
   description?: string | null;
+  default_model?: string | null;
+  mount_enabled?: boolean;
+  mount_path?: string | null;
 } & ProjectRepoDefaultsInput;
 
 export interface AppShellContextValue {

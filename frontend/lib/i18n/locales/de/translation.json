@@ -1531,6 +1531,16 @@
     "nameLabel": "Projektname",
     "descriptionLabel": "Projektbeschreibung",
     "namePlaceholder": "Projektnamen eingeben",
+    "advanced": {
+      "title": "Erweiterte Konfiguration",
+      "description": "Lege ein Standardmodell und einen lokalen Mount-Pfad für neue Ausführungen in diesem Projekt fest.",
+      "defaultModelLabel": "Standardmodell",
+      "defaultModelPlaceholder": "Standardmodell des Arbeitsbereichs verwenden",
+      "mountTitle": "Projektpfad einbinden",
+      "mountDescription": "Hänge für neue Ausführungen in diesem Projekt ein lokales Verzeichnis an.",
+      "mountPathLabel": "Mount-Pfad",
+      "mountPathPlaceholder": "z. B. /Users/alice/Workspace/my-project"
+    },
     "delete": "Projekt löschen",
     "deleteDescription": "Das Löschen dieses Projekts verschiebt alle seine Aufgaben zurück in die Hauptliste.",
     "deleteConfirm": "Löschen",

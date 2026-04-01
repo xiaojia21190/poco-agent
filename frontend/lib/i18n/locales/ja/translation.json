@@ -1531,6 +1531,16 @@
     "nameLabel": "プロジェクト名",
     "descriptionLabel": "プロジェクトの説明",
     "namePlaceholder": "プロジェクト名を入力",
+    "advanced": {
+      "title": "詳細設定",
+      "description": "このプロジェクトの新しい実行に既定モデルとローカルマウントパスを設定します。",
+      "defaultModelLabel": "既定モデル",
+      "defaultModelPlaceholder": "ワークスペースの既定モデルを使用",
+      "mountTitle": "プロジェクトパスをマウント",
+      "mountDescription": "このプロジェクトの新しい実行にローカルディレクトリを追加します。",
+      "mountPathLabel": "マウントパス",
+      "mountPathPlaceholder": "例: /Users/alice/Workspace/my-project"
+    },
     "delete": "プロジェクトを削除",
     "deleteDescription": "このプロジェクトを削除すると、すべてのタスクがメインリストに戻ります。",
     "deleteConfirm": "削除",

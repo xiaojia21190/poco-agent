@@ -1531,6 +1531,16 @@
     "nameLabel": "Имя проекта",
     "descriptionLabel": "Описание проекта",
     "namePlaceholder": "Введите имя проекта",
+    "advanced": {
+      "title": "Расширенные настройки",
+      "description": "Задайте модель по умолчанию и локальный путь монтирования для новых запусков в этом проекте.",
+      "defaultModelLabel": "Модель по умолчанию",
+      "defaultModelPlaceholder": "Использовать модель рабочего пространства по умолчанию",
+      "mountTitle": "Смонтировать путь проекта",
+      "mountDescription": "Добавьте локальный каталог для новых запусков в этом проекте.",
+      "mountPathLabel": "Путь монтирования",
+      "mountPathPlaceholder": "например: /Users/alice/Workspace/my-project"
+    },
     "delete": "Удалить проект",
     "deleteDescription": "Удаление этого проекта переместит все его задачи обратно в основной список.",
     "deleteConfirm": "Удалить",
