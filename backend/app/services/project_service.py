@@ -8,6 +8,7 @@ from app.core.errors.error_codes import ErrorCode
 from app.core.errors.exceptions import AppException
 from app.models.project import Project
 from app.models.project_local_mount import ProjectLocalMount
+from app.repositories.preset_repository import PresetRepository
 from app.repositories.project_file_repository import ProjectFileRepository
 from app.repositories.project_repository import ProjectRepository
 from app.repositories.session_repository import SessionRepository
@@ -156,6 +157,7 @@ class ProjectService:
             name=project.name,
             description=project.description,
             default_model=project.default_model,
+            default_preset_id=project.default_preset_id,
             local_mounts=local_mounts,
             repo_url=project.repo_url,
             git_branch=project.git_branch,
@@ -163,6 +165,24 @@ class ProjectService:
             created_at=project.created_at,
             updated_at=project.updated_at,
         )
+
+    @staticmethod
+    def _validate_default_preset(
+        db: Session,
+        *,
+        user_id: str,
+        default_preset_id: int | None,
+    ) -> int | None:
+        if default_preset_id is None:
+            return None
+
+        preset = PresetRepository.get_by_id(db, default_preset_id, user_id)
+        if preset is None:
+            raise AppException(
+                error_code=ErrorCode.PRESET_NOT_FOUND,
+                message=f"Preset not found: {default_preset_id}",
+            )
+        return preset.id
 
     def list_projects(self, db: Session, user_id: str) -> list[ProjectResponse]:
         projects = ProjectRepository.list_by_user(db, user_id)
@@ -184,6 +204,11 @@ class ProjectService:
     ) -> ProjectResponse:
         description = self._normalize_optional_str(request.description)
         default_model = self._normalize_optional_str(request.default_model)
+        default_preset_id = self._validate_default_preset(
+            db,
+            user_id=user_id,
+            default_preset_id=request.default_preset_id,
+        )
         local_mounts = self._normalize_local_mounts(request.local_mounts)
         repo_url, git_branch, git_token_env_key = self._normalize_repo_settings(
             repo_url=request.repo_url,
@@ -195,6 +220,7 @@ class ProjectService:
             name=request.name,
             description=description,
             default_model=default_model,
+            default_preset_id=default_preset_id,
             repo_url=repo_url,
             git_branch=git_branch,
             git_token_env_key=git_token_env_key,
@@ -226,6 +252,12 @@ class ProjectService:
             project.description = self._normalize_optional_str(request.description)
         if "default_model" in update:
             project.default_model = self._normalize_optional_str(request.default_model)
+        if "default_preset_id" in update:
+            project.default_preset_id = self._validate_default_preset(
+                db,
+                user_id=user_id,
+                default_preset_id=request.default_preset_id,
+            )
         if "local_mounts" in update:
             local_mounts = self._normalize_local_mounts(request.local_mounts)
             project.project_local_mounts.clear()

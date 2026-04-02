@@ -15,7 +15,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models import Base, TimestampMixin
 
 if TYPE_CHECKING:
-    from app.models.project_preset import ProjectPreset
+    from app.models.project import Project
 
 
 class Preset(Base, TimestampMixin):
@@ -81,7 +81,7 @@ class Preset(Base, TimestampMixin):
         server_default=text("false"),
     )
 
-    project_presets: Mapped[list["ProjectPreset"]] = relationship(
-        back_populates="preset",
-        cascade="all, delete-orphan",
+    default_projects: Mapped[list["Project"]] = relationship(
+        back_populates="default_preset",
+        foreign_keys="Project.default_preset_id",
     )

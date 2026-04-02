@@ -1,12 +1,12 @@
 import unittest
-import uuid
 from datetime import UTC, datetime
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
 from app.main import create_app
-from app.schemas.preset import PresetResponse, ProjectPresetResponse
+from app.schemas.preset import PresetResponse
+from app.schemas.project import ProjectResponse
 
 
 def build_preset_response(preset_id: int = 1, name: str = "Frontend") -> PresetResponse:
@@ -30,20 +30,16 @@ def build_preset_response(preset_id: int = 1, name: str = "Frontend") -> PresetR
     )
 
 
-def build_project_preset_response(
-    project_id: uuid.UUID,
-    preset_id: int = 1,
-    *,
-    is_default: bool = True,
-) -> ProjectPresetResponse:
+def build_project_response(project_id: str, *, default_preset_id: int | None) -> ProjectResponse:
     now = datetime.now(UTC)
-    return ProjectPresetResponse(
-        project_preset_id=11,
+    return ProjectResponse(
         project_id=project_id,
-        preset_id=preset_id,
-        is_default=is_default,
-        sort_order=0,
-        preset=build_preset_response(preset_id=preset_id),
+        user_id="user-1",
+        name="Project",
+        description="Reusable project",
+        default_model=None,
+        default_preset_id=default_preset_id,
+        local_mounts=[],
         created_at=now,
         updated_at=now,
     )
@@ -106,58 +102,33 @@ class PresetApiTests(unittest.TestCase):
         delete_preset.assert_called_once()
 
 
-class ProjectPresetApiTests(unittest.TestCase):
+class ProjectApiTests(unittest.TestCase):
     def setUp(self) -> None:
         self.app = create_app()
         self.client = TestClient(self.app)
         self.headers = {"X-User-Id": "user-1"}
-        self.project_id = uuid.uuid4()
+        self.project_id = "f219f040-6ec9-4d2f-9cd3-7d2f93f75368"
 
-    @patch("app.api.v1.project_presets.service.add_preset_to_project")
-    def test_add_project_preset_returns_nested_preset_payload(
-        self, add_preset_to_project
+    @patch("app.api.v1.projects.service.update_project")
+    def test_update_project_returns_default_preset_id(
+        self, update_project
     ) -> None:
-        add_preset_to_project.return_value = build_project_preset_response(
+        update_project.return_value = build_project_response(
             self.project_id,
-            preset_id=3,
-            is_default=True,
+            default_preset_id=3,
         )
 
-        response = self.client.post(
-            f"/api/v1/projects/{self.project_id}/presets",
+        response = self.client.patch(
+            f"/api/v1/projects/{self.project_id}",
             headers=self.headers,
-            json={"preset_id": 3},
+            json={"default_preset_id": 3},
         )
 
         self.assertEqual(response.status_code, 200)
         body = response.json()
         self.assertEqual(body["code"], 0)
-        self.assertEqual(body["data"]["preset_id"], 3)
-        self.assertTrue(body["data"]["is_default"])
-        self.assertEqual(body["data"]["preset"]["name"], "Frontend")
-        add_preset_to_project.assert_called_once()
-
-    @patch("app.api.v1.project_presets.service.set_default_preset")
-    def test_set_default_project_preset_returns_updated_payload(
-        self, set_default_preset
-    ) -> None:
-        set_default_preset.return_value = build_project_preset_response(
-            self.project_id,
-            preset_id=5,
-            is_default=True,
-        )
-
-        response = self.client.put(
-            f"/api/v1/projects/{self.project_id}/presets/5/default",
-            headers=self.headers,
-        )
-
-        self.assertEqual(response.status_code, 200)
-        body = response.json()
-        self.assertEqual(body["code"], 0)
-        self.assertEqual(body["data"]["preset_id"], 5)
-        self.assertTrue(body["data"]["is_default"])
-        set_default_preset.assert_called_once()
+        self.assertEqual(body["data"]["default_preset_id"], 3)
+        update_project.assert_called_once()
 
 
 if __name__ == "__main__":

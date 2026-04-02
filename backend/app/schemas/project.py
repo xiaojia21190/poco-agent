@@ -10,6 +10,7 @@ class ProjectCreateRequest(BaseModel):
     name: str
     description: str | None = None
     default_model: str | None = None
+    default_preset_id: int | None = Field(default=None, gt=0)
     local_mounts: list[LocalMountConfig] | None = None
     repo_url: str | None = None
     git_branch: str | None = None
@@ -20,6 +21,7 @@ class ProjectUpdateRequest(BaseModel):
     name: str | None = None
     description: str | None = None
     default_model: str | None = None
+    default_preset_id: int | None = Field(default=None, gt=0)
     local_mounts: list[LocalMountConfig] | None = None
     repo_url: str | None = None
     git_branch: str | None = None
@@ -32,6 +34,7 @@ class ProjectResponse(BaseModel):
     name: str
     description: str | None = None
     default_model: str | None = None
+    default_preset_id: int | None = None
     local_mounts: list[LocalMountConfig] = Field(default_factory=list)
     repo_url: str | None = None
     git_branch: str | None = None

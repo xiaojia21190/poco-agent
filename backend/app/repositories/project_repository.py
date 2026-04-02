@@ -20,7 +20,10 @@ class ProjectRepository:
     ) -> Project | None:
         query = (
             session_db.query(Project)
-            .options(selectinload(Project.project_local_mounts))
+            .options(
+                selectinload(Project.project_local_mounts),
+                selectinload(Project.default_preset),
+            )
             .filter(Project.id == project_id)
         )
         if not include_deleted:
@@ -36,7 +39,10 @@ class ProjectRepository:
     ) -> list[Project]:
         query = (
             session_db.query(Project)
-            .options(selectinload(Project.project_local_mounts))
+            .options(
+                selectinload(Project.project_local_mounts),
+                selectinload(Project.default_preset),
+            )
             .filter(Project.user_id == user_id)
         )
         if not include_deleted:

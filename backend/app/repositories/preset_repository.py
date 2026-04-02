@@ -3,6 +3,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from app.models.preset import Preset
+from app.models.project import Project
 
 
 class PresetRepository:
@@ -71,3 +72,14 @@ class PresetRepository:
         if exclude_id is not None:
             query = query.filter(Preset.id != exclude_id)
         return query.first() is not None
+
+    @staticmethod
+    def count_projects_using_as_default(
+        session_db: Session,
+        preset_id: int,
+    ) -> int:
+        return (
+            session_db.query(Project)
+            .filter(Project.default_preset_id == preset_id)
+            .count()
+        )

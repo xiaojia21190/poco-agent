@@ -11,7 +11,6 @@ from app.models.skill import Skill
 from app.repositories.mcp_server_repository import McpServerRepository
 from app.repositories.plugin_repository import PluginRepository
 from app.repositories.preset_repository import PresetRepository
-from app.repositories.project_preset_repository import ProjectPresetRepository
 from app.repositories.skill_repository import SkillRepository
 from app.schemas.preset import (
     PresetCreateRequest,
@@ -141,11 +140,11 @@ class PresetService:
                 message=f"Preset not found: {preset_id}",
             )
 
-        usage_count = ProjectPresetRepository.count_projects_using_preset(db, preset_id)
+        usage_count = PresetRepository.count_projects_using_as_default(db, preset_id)
         if usage_count > 0:
             raise AppException(
                 error_code=ErrorCode.BAD_REQUEST,
-                message="Preset is still assigned to one or more projects",
+                message="Preset is still used as a project default preset",
             )
 
         PresetRepository.soft_delete(db, preset)

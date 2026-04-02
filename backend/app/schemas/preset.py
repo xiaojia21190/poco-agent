@@ -1,7 +1,5 @@
 from datetime import datetime
 from enum import StrEnum
-from uuid import UUID
-
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.sub_agent import SubAgentModel
@@ -105,23 +103,3 @@ class PresetResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
-
-class ProjectPresetAddRequest(BaseModel):
-    preset_id: int = Field(gt=0)
-
-
-class PresetOrderUpdateRequest(BaseModel):
-    sort_order: int = Field(ge=0)
-
-
-class ProjectPresetResponse(BaseModel):
-    project_preset_id: int = Field(validation_alias="id")
-    project_id: UUID
-    preset_id: int
-    is_default: bool
-    sort_order: int
-    preset: PresetResponse
-    created_at: datetime
-    updated_at: datetime
-
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
