@@ -42,6 +42,8 @@ import type {
 } from "@/features/chat/types";
 import { useT } from "@/lib/i18n/client";
 import { toast } from "sonner";
+import { useAppShell } from "@/components/shell/app-shell-context";
+import { persistSessionLocalFilesystem } from "@/features/chat/lib/local-filesystem-persistence";
 import { useTaskHistoryContext } from "@/features/projects/contexts/task-history-context";
 import { SkeletonCircle, SkeletonItem } from "@/components/ui/skeleton-shimmer";
 import { cn } from "@/lib/utils";
@@ -1008,6 +1010,7 @@ export function ChatPanel({
   const headerDescription = session?.title?.trim() || t("chat.emptyStateDesc");
   const contentPaddingClass = isRightPanelCollapsed ? "px-[20%]" : "px-4";
   const messagePaddingClass = isRightPanelCollapsed ? "px-[20%]" : "px-6";
+  const { updateProject } = useAppShell();
   const canExportConversationImage =
     !isLoadingHistory &&
     (displayMessages.length > 0 || showTypingIndicator) &&
@@ -1077,12 +1080,16 @@ export function ChatPanel({
 
       setIsSavingFilesystem(true);
       try {
-        await chatService.updateSession(session.session_id, {
-          config: {
-            filesystem_mode: nextValue.filesystem_mode,
-            local_mounts: nextValue.local_mounts,
-          },
+        const projectResult = await persistSessionLocalFilesystem({
+          sessionId: session.session_id,
+          projectId: session.project_id,
+          draft: nextValue,
+          persistSession: chatService.updateSession,
+          persistProject: updateProject,
         });
+        if (session.project_id && projectResult === null) {
+          throw new Error("Failed to sync project local mounts");
+        }
         updateSession({
           config_snapshot: {
             ...(session.config_snapshot ?? {}),
@@ -1095,7 +1102,14 @@ export function ChatPanel({
         setIsSavingFilesystem(false);
       }
     },
-    [session?.config_snapshot, session?.session_id, t, updateSession],
+    [
+      session?.config_snapshot,
+      session?.project_id,
+      session?.session_id,
+      t,
+      updateProject,
+      updateSession,
+    ],
   );
 
   return (

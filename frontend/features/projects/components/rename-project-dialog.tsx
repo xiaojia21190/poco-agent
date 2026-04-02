@@ -44,7 +44,6 @@ import type {
 } from "@/features/chat/types/api/session";
 import {
   createEmptyLocalMountDraftRow,
-  toLocalMountDraftRows,
   validateLocalFilesystemDraft,
 } from "@/features/task-composer/lib/local-filesystem";
 import type { LocalMountDraftRow } from "@/features/task-composer/types/local-filesystem";
@@ -52,6 +51,7 @@ import {
   pickLocalDirectory,
   supportsNativeDirectoryPicker,
 } from "@/lib/local-directory-picker";
+import { createRenameProjectDialogState } from "@/features/projects/lib/rename-project-dialog-state";
 
 function serializeLocalMounts(mounts: LocalMountConfig[]): string {
   return JSON.stringify(
@@ -62,12 +62,6 @@ function serializeLocalMounts(mounts: LocalMountConfig[]): string {
       access_mode: mount.access_mode ?? "ro",
     })),
   );
-}
-
-function toProjectMountDraftRows(
-  mounts: LocalMountConfig[] | null | undefined,
-): LocalMountDraftRow[] {
-  return mounts?.length ? toLocalMountDraftRows(mounts) : [];
 }
 
 interface RenameProjectDialogProps {
@@ -100,18 +94,27 @@ export function RenameProjectDialog({
   const { modelOptions, isLoading: isLoadingModelCatalog } = useModelCatalog({
     enabled: open,
   });
-  const [name, setName] = React.useState(projectName);
-  const [description, setDescription] = React.useState(
-    projectDescription ?? "",
+  const initialState = React.useMemo(
+    () =>
+      createRenameProjectDialogState({
+        projectName,
+        projectDescription,
+        projectDefaultModel,
+        projectLocalMounts,
+      }),
+    [projectDefaultModel, projectDescription, projectLocalMounts, projectName],
   );
+  const [name, setName] = React.useState(initialState.name);
+  const [description, setDescription] = React.useState(initialState.description);
   const [advancedOpen, setAdvancedOpen] = React.useState(false);
-  const [modelSelection, setModelSelection] =
-    React.useState<ModelSelection | null>(null);
-  const [mountsEnabled, setMountsEnabled] = React.useState(
-    (projectLocalMounts?.length ?? 0) > 0,
+  const [modelSelection, setModelSelection] = React.useState<ModelSelection | null>(
+    initialState.modelSelection,
   );
-  const [mountRows, setMountRows] = React.useState<LocalMountDraftRow[]>(() =>
-    toProjectMountDraftRows(projectLocalMounts),
+  const [mountsEnabled, setMountsEnabled] = React.useState(
+    initialState.mountsEnabled,
+  );
+  const [mountRows, setMountRows] = React.useState<LocalMountDraftRow[]>(
+    initialState.mountRows,
   );
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -125,33 +128,18 @@ export function RenameProjectDialog({
       : null;
   }, [modelOptions]);
 
-  const projectModelSelection = React.useMemo(() => {
-    const modelId = (projectDefaultModel || "").trim();
-    if (!modelId) {
-      return null;
-    }
-    const matchingOption = modelOptions.find(
-      (option) => option.modelId === modelId,
-    );
-    return {
-      modelId,
-      providerId: matchingOption?.providerId ?? null,
-    };
-  }, [modelOptions, projectDefaultModel]);
-
   React.useEffect(() => {
-    setName(projectName);
-    setDescription(projectDescription ?? "");
-    setModelSelection(projectModelSelection);
-    setMountsEnabled((projectLocalMounts?.length ?? 0) > 0);
-    setMountRows(toProjectMountDraftRows(projectLocalMounts));
+    if (!open) {
+      return;
+    }
+
+    setName(initialState.name);
+    setDescription(initialState.description);
+    setModelSelection(initialState.modelSelection);
+    setMountsEnabled(initialState.mountsEnabled);
+    setMountRows(initialState.mountRows);
     setAdvancedOpen(false);
-  }, [
-    projectDescription,
-    projectLocalMounts,
-    projectModelSelection,
-    projectName,
-  ]);
+  }, [initialState, open]);
 
   React.useEffect(() => {
     if (open) {
@@ -181,6 +169,7 @@ export function RenameProjectDialog({
   const handleAddRow = React.useCallback(async () => {
     if (!supportsNativeDirectoryPicker()) {
       toast.error(t("filesystem.picker.notSupported"));
+      setMountRows((prev) => [...prev, createEmptyLocalMountDraftRow()]);
       return;
     }
 
@@ -349,7 +338,7 @@ export function RenameProjectDialog({
                         selection={modelSelection}
                         defaultSelection={defaultSelection}
                         fallbackLabel={
-                          projectModelSelection?.modelId ||
+                          initialState.modelSelection?.modelId ||
                           t("project.advanced.defaultModelPlaceholder")
                         }
                         onChange={setModelSelection}
