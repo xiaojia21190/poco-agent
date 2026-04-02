@@ -25,7 +25,9 @@ A safer, more beautiful, and easier-to-use OpenClaw alternative
   - **Local Directory Mounting** — mount host directories into the sandbox so the agent can work with your real project files directly (self-hosted only)
 - **More Than a Chatbot**
   - Supports Plan Mode, conversation queueing, conversation termination ...
-  - **Project management**: organize and switch between tasks and contexts more effectively
+  - **Project management**: organize work across tasks and contexts, and set
+    project-level defaults for model, preset, Git repo, local mounts, and
+    project files
   - **File uploads**: accept and work with multiple file formats
 - **Polished, Productive UI**
   - **Artifacts view**: render and preview many formats (HTML, PDF, Markdown, images, videos, Xmind, Excalidraw, Drawio, and more)
@@ -33,6 +35,8 @@ A safer, more beautiful, and easier-to-use OpenClaw alternative
   - **Light/Dark mode** support
 - **Agentic Experience**
   - **native Claude Code experience** - Slash Commands, Plan Mode, AskQuestion ...
+  - **Preset runtime config** - reuse model, capability, tool, and
+    sub-agent settings across projects and sessions
   - **MCP & Skills** - easy to import and infinitely extensible
   - **Browser** - Built-in browser for autonomous web research
   - **GitHub repo integration** for code search and editing
