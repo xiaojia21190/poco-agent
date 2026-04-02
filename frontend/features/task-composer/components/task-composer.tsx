@@ -25,6 +25,7 @@ import { SlashAutocompleteDropdown } from "@/features/task-composer/components/s
 import { presetsService } from "@/features/capabilities/presets/api/presets-api";
 import { getPresetIcon } from "@/features/capabilities/presets/lib/preset-visuals";
 import { useCapabilityRecommendations } from "@/features/task-composer/hooks/use-capability-recommendations";
+import { saveLocalFilesystemDraft } from "@/features/task-composer/lib/local-filesystem-save";
 import { getNextComposerMode } from "@/features/task-composer/lib/mode-utils";
 import { resolveInitialPresetSelection } from "@/features/task-composer/lib/preset-selection";
 import { useSlashCommandAutocomplete } from "@/features/chat/hooks/use-slash-command-autocomplete";
@@ -88,6 +89,9 @@ interface TaskComposerProps {
   bottomAddon?: React.ReactNode;
   initialPresetId?: number | null;
   initialLocalFilesystemDraft?: LocalFilesystemDraft;
+  onLocalFilesystemDraftSave?: (
+    value: LocalFilesystemDraft,
+  ) => Promise<void> | void;
   onFocus?: () => void;
   onBlur?: () => void;
 }
@@ -119,6 +123,7 @@ export function TaskComposer({
   bottomAddon,
   initialPresetId = null,
   initialLocalFilesystemDraft,
+  onLocalFilesystemDraftSave,
   onFocus,
   onBlur,
 }: TaskComposerProps) {
@@ -587,8 +592,12 @@ export function TaskComposer({
           onOpenChange={setFilesystemDialogOpen}
           value={localFilesystemDraft}
           saveBehavior="draft"
-          onSave={(nextValue) => {
-            setLocalFilesystemDraft(nextValue);
+          onSave={async (nextValue) => {
+            await saveLocalFilesystemDraft({
+              draft: nextValue,
+              persistDraft: onLocalFilesystemDraftSave,
+              applyDraft: setLocalFilesystemDraft,
+            });
           }}
         />
 

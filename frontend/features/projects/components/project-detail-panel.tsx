@@ -21,6 +21,9 @@ interface ProjectDetailPanelProps {
   isSubmitting: boolean;
   initialPresetId: number | null;
   initialLocalFilesystemDraft?: LocalFilesystemDraft;
+  onLocalFilesystemDraftSave?: (
+    value: LocalFilesystemDraft,
+  ) => Promise<void>;
   onRepoDefaultsSave: (payload: {
     repo_url?: string | null;
     git_branch?: string | null;
@@ -39,6 +42,7 @@ export function ProjectDetailPanel({
   isSubmitting,
   initialPresetId,
   initialLocalFilesystemDraft,
+  onLocalFilesystemDraftSave,
   onRepoDefaultsSave,
 }: ProjectDetailPanelProps) {
   return (
@@ -56,6 +60,7 @@ export function ProjectDetailPanel({
         allowProjectize: false,
         initialPresetId,
         initialLocalFilesystemDraft,
+        onLocalFilesystemDraftSave,
         onRepoDefaultsSave,
       }}
     />

@@ -125,6 +125,15 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
     };
   }, [currentProject?.localMounts]);
 
+  const handleSaveProjectFilesystemDraft = React.useCallback(
+    async (nextValue: LocalFilesystemDraft) => {
+      await updateProject(projectId, {
+        local_mounts: nextValue.local_mounts,
+      });
+    },
+    [projectId, updateProject],
+  );
+
   const handleSendTask = React.useCallback(
     async (options?: TaskSendOptions) => {
       const inputFiles = options?.attachments ?? [];
@@ -310,6 +319,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                 isSubmitting={isSubmitting}
                 initialPresetId={defaultPresetId}
                 initialLocalFilesystemDraft={projectFilesystemDraft}
+                onLocalFilesystemDraftSave={handleSaveProjectFilesystemDraft}
                 onRepoDefaultsSave={async (payload) => {
                   await updateProject(projectId, payload);
                 }}
