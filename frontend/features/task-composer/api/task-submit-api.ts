@@ -39,11 +39,14 @@ function buildTaskConfig(
       config.git_token_env_key = gitTokenEnvKey;
     }
   }
-  if (options.browser_enabled) {
-    config.browser_enabled = true;
+  if (typeof options.preset_id === "number") {
+    config.preset_id = options.preset_id;
   }
-  if (options.memory_enabled) {
-    config.memory_enabled = true;
+  if (typeof options.browser_enabled === "boolean") {
+    config.browser_enabled = options.browser_enabled;
+  }
+  if (typeof options.memory_enabled === "boolean") {
+    config.memory_enabled = options.memory_enabled;
   }
   if (options.mcp_config && Object.keys(options.mcp_config).length > 0) {
     config.mcp_config = options.mcp_config;

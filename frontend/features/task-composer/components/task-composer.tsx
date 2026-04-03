@@ -1,7 +1,13 @@
 import * as React from "react";
-import { Upload } from "lucide-react";
+import { Sparkles, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n/client";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { ScheduledTaskSettingsDialog } from "@/features/scheduled-tasks/components/scheduled-task-settings-dialog";
 import {
@@ -13,10 +19,15 @@ import { ComposerAttachments } from "@/features/task-composer/components/compose
 import { CapabilityRecommendations } from "@/features/task-composer/components/capability-recommendations";
 import { ComposerToolbar } from "@/features/task-composer/components/composer-toolbar";
 import { LocalFilesystemDialog } from "@/features/task-composer/components/local-filesystem-dialog";
+import { PresetPickerDialog } from "@/features/task-composer/components/preset-picker-dialog";
 import { RepoDialog } from "@/features/task-composer/components/repo-dialog";
 import { SlashAutocompleteDropdown } from "@/features/task-composer/components/slash-autocomplete-dropdown";
+import { presetsService } from "@/features/capabilities/presets/api/presets-api";
+import { getPresetIcon } from "@/features/capabilities/presets/lib/preset-visuals";
 import { useCapabilityRecommendations } from "@/features/task-composer/hooks/use-capability-recommendations";
+import { saveLocalFilesystemDraft } from "@/features/task-composer/lib/local-filesystem-save";
 import { getNextComposerMode } from "@/features/task-composer/lib/mode-utils";
+import { resolveInitialPresetSelection } from "@/features/task-composer/lib/preset-selection";
 import { useSlashCommandAutocomplete } from "@/features/chat/hooks/use-slash-command-autocomplete";
 import { useAppShell } from "@/components/shell/app-shell-context";
 import { useMemoryFeatureEnabled } from "@/hooks/use-memory-feature-enabled";
@@ -33,6 +44,7 @@ import type {
   TaskSendOptions,
 } from "@/features/task-composer/types";
 import type { CapabilityRecommendation } from "@/features/task-composer/types/capability-recommendation";
+import type { Preset } from "@/features/capabilities/presets/lib/preset-types";
 
 interface TrackedCapabilityItem {
   item: CapabilityRecommendation;
@@ -75,6 +87,11 @@ interface TaskComposerProps {
     git_token_env_key: string | null;
   }) => void | Promise<void>;
   bottomAddon?: React.ReactNode;
+  initialPresetId?: number | null;
+  initialLocalFilesystemDraft?: LocalFilesystemDraft;
+  onLocalFilesystemDraftSave?: (
+    value: LocalFilesystemDraft,
+  ) => Promise<void> | void;
   onFocus?: () => void;
   onBlur?: () => void;
 }
@@ -104,6 +121,9 @@ export function TaskComposer({
   allowProjectize = true,
   onRepoDefaultsSave,
   bottomAddon,
+  initialPresetId = null,
+  initialLocalFilesystemDraft,
+  onLocalFilesystemDraftSave,
   onFocus,
   onBlur,
 }: TaskComposerProps) {
@@ -113,6 +133,7 @@ export function TaskComposer({
   const capabilityToggle = useCapabilityToggle();
   const isComposing = React.useRef(false);
   const memoryInitializedRef = React.useRef(false);
+  const hasTouchedPresetRef = React.useRef(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const latestValueRef = React.useRef(value);
   const trackedCapabilityItemsRef = React.useRef<TrackedCapabilityItem[]>([]);
@@ -160,12 +181,25 @@ export function TaskComposer({
   const [filesystemDialogOpen, setFilesystemDialogOpen] = React.useState(false);
   const [localFilesystemDraft, setLocalFilesystemDraft] =
     React.useState<LocalFilesystemDraft>({
-      filesystem_mode: "sandbox",
-      local_mounts: [],
+      filesystem_mode:
+        initialLocalFilesystemDraft?.filesystem_mode ?? "sandbox",
+      local_mounts: initialLocalFilesystemDraft?.local_mounts ?? [],
     });
   const [trackedCapabilityItems, setTrackedCapabilityItems] = React.useState<
     TrackedCapabilityItem[]
   >([]);
+  const [presets, setPresets] = React.useState<Preset[]>([]);
+  const [presetDialogOpen, setPresetDialogOpen] = React.useState(false);
+  const [selectedPresetId, setSelectedPresetId] = React.useState<number | null>(
+    null,
+  );
+
+  React.useEffect(() => {
+    if (!initialLocalFilesystemDraft) {
+      return;
+    }
+    setLocalFilesystemDraft(initialLocalFilesystemDraft);
+  }, [initialLocalFilesystemDraft]);
 
   const effectiveMcpConfig = React.useMemo(
     () => toCapabilityToggleConfig(capabilityToggle?.mcpEnabledMap),
@@ -176,6 +210,35 @@ export function TaskComposer({
     () => toCapabilityToggleConfig(capabilityToggle?.skillEnabledMap),
     [capabilityToggle],
   );
+
+  React.useEffect(() => {
+    let active = true;
+
+    const loadPresets = async () => {
+      try {
+        const data = await presetsService.listPresets({ revalidate: 0 });
+        if (!active) return;
+        setPresets(data);
+      } catch (error) {
+        console.error("[TaskComposer] Failed to load presets", error);
+      }
+    };
+
+    void loadPresets();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  React.useEffect(() => {
+    setSelectedPresetId((currentSelectedPresetId) =>
+      resolveInitialPresetSelection({
+        initialPresetId,
+        hasTouchedPreset: hasTouchedPresetRef.current,
+        currentSelectedPresetId,
+      }),
+    );
+  }, [initialPresetId]);
 
   // ---- Repo state ----
   const [repoDialogOpen, setRepoDialogOpen] = React.useState(false);
@@ -203,6 +266,12 @@ export function TaskComposer({
   const [scheduledEnabled, setScheduledEnabled] = React.useState(true);
   const [scheduledReuseSession, setScheduledReuseSession] =
     React.useState(true);
+
+  const selectedPreset = React.useMemo(
+    () =>
+      presets.find((preset) => preset.preset_id === selectedPresetId) ?? null,
+    [presets, selectedPresetId],
+  );
 
   const capabilityRecommendations = useCapabilityRecommendations(value, {
     enabled: !isSubmitting,
@@ -344,6 +413,7 @@ export function TaskComposer({
         allowProjectize && repoUsage === "create_project"
           ? projectName.trim() || null
           : null,
+      preset_id: selectedPresetId,
       browser_enabled: browserEnabled,
       memory_enabled: memoryFeatureEnabled ? memoryEnabled : false,
       mcp_config:
@@ -399,6 +469,7 @@ export function TaskComposer({
     projectName,
     repoUrl,
     repoUsage,
+    selectedPresetId,
     runScheduleMode,
     runScheduledAt,
     runTimezone,
@@ -522,8 +593,12 @@ export function TaskComposer({
           onOpenChange={setFilesystemDialogOpen}
           value={localFilesystemDraft}
           saveBehavior="draft"
-          onSave={(nextValue) => {
-            setLocalFilesystemDraft(nextValue);
+          onSave={async (nextValue) => {
+            await saveLocalFilesystemDraft({
+              draft: nextValue,
+              persistDraft: onLocalFilesystemDraftSave,
+              applyDraft: setLocalFilesystemDraft,
+            });
           }}
         />
 
@@ -560,6 +635,17 @@ export function TaskComposer({
             setRunScheduleMode(next.schedule_mode);
             setRunTimezone(next.timezone);
             setRunScheduledAt(next.scheduled_at);
+          }}
+        />
+
+        <PresetPickerDialog
+          open={presetDialogOpen}
+          onOpenChange={setPresetDialogOpen}
+          presets={presets}
+          value={selectedPresetId}
+          onChange={(nextValue) => {
+            hasTouchedPresetRef.current = true;
+            setSelectedPresetId(nextValue);
           }}
         />
 
@@ -639,6 +725,54 @@ export function TaskComposer({
               onToggleVoiceInput={() => {
                 void voiceInput.toggleRecording();
               }}
+              leadingAddon={
+                presets.length > 0 ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        disabled={Boolean(isSubmitting) || upload.isUploading}
+                        className={cn(
+                          "rounded-xl border text-sm",
+                          selectedPreset
+                            ? "h-9 max-w-[220px] items-center gap-2 border-primary/20 bg-primary/10 px-3 text-foreground hover:bg-primary/15"
+                            : "size-9 border-border/70 p-0 text-muted-foreground hover:bg-accent",
+                        )}
+                        onClick={() => setPresetDialogOpen(true)}
+                        aria-label={
+                          selectedPreset?.name ??
+                          t("library.presetsPage.picker.placeholder")
+                        }
+                      >
+                        {selectedPreset ? (
+                          React.createElement(
+                            getPresetIcon(selectedPreset.icon),
+                            {
+                              className: "size-4 shrink-0",
+                              style: selectedPreset.color
+                                ? { color: selectedPreset.color }
+                                : undefined,
+                            },
+                          )
+                        ) : (
+                          <Sparkles className="size-4 shrink-0" />
+                        )}
+                        {selectedPreset ? (
+                          <span className="truncate">
+                            {selectedPreset.name}
+                          </span>
+                        ) : null}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={8}>
+                      {selectedPreset
+                        ? t("library.presetsPage.picker.change")
+                        : t("library.presetsPage.picker.placeholder")}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : null
+              }
               onSubmit={handleSubmit}
               scheduledSummary={
                 mode === "scheduled" ? scheduledSummary : undefined

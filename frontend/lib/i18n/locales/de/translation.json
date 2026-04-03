@@ -8,6 +8,7 @@
     "newTaskWithShortcut": "Neue Aufgabe ({{shortcut}})",
     "search": "Suche",
     "library": "Funktionen",
+    "presets": "Voreinstellungen",
     "openMain": "Hauptseitenleiste öffnen",
     "scheduledTasks": "Geplante Aufgaben",
     "memories": "Erinnerungen",
@@ -325,7 +326,7 @@
       "skillsUsed": "Skills",
       "mcpConfigured": "MCP-Server (konfiguriert)",
       "mcp": "MCP-Server",
-      "pluginsConfigured": "Voreinstellungen (konfiguriert)"
+      "pluginsConfigured": "Plugins (konfiguriert)"
     },
     "typingWords": [
       "Accomplishing",
@@ -666,7 +667,7 @@
   },
   "library": {
     "title": "Funktionen",
-    "subtitle": "Verwalte deine Skills, Vorlagen und Tools",
+    "subtitle": "Verwalte deine Skills, Plugins und Tools",
     "comingSoon": "Demnächst",
     "mobile": {
       "back": "Zurück zu den Funktionen"
@@ -704,8 +705,8 @@
       "action": "Server verwalten"
     },
     "pluginsStore": {
-      "title": "Voreinstellungen",
-      "description": "Fähigkeits-Voreinstellungen durchsuchen und installieren"
+      "title": "Plugins",
+      "description": "Plugins durchsuchen und installieren"
     },
     "envVars": {
       "title": "Umgebungsvariablen",
@@ -1088,8 +1089,8 @@
       }
     },
     "pluginsPage": {
-      "searchPlaceholder": "Vorlagen durchsuchen...",
-      "addCard": "Vorlage hinzufügen"
+      "searchPlaceholder": "Plugins durchsuchen...",
+      "addCard": "Plugin hinzufügen"
     },
     "skillsManager": {
       "stats": {
@@ -1254,21 +1255,21 @@
         "uninstall": "Deinstallieren"
       },
       "toasts": {
-        "loadError": "Voreinstellungen konnten nicht geladen werden",
+        "loadError": "Plugins konnten nicht geladen werden",
         "actionError": "Aktion fehlgeschlagen, bitte versuche es später erneut",
-        "installed": "Voreinstellung installiert",
-        "uninstalled": "Voreinstellung deinstalliert",
-        "enabled": "Voreinstellung aktiviert",
-        "disabled": "Voreinstellung deaktiviert",
+        "installed": "Plugin installiert",
+        "uninstalled": "Plugin deinstalliert",
+        "enabled": "Plugin aktiviert",
+        "disabled": "Plugin deaktiviert",
         "actionFailed": "Aktion fehlgeschlagen, bitte versuche es später erneut",
-        "exclusiveEnabled": "(Andere Vorlagen wurden deaktiviert)"
+        "exclusiveEnabled": "(Andere Plugins wurden deaktiviert)"
       },
-      "empty": "Noch keine Voreinstellungen",
-      "unknownPlugin": "Unbekannte Voreinstellung"
+      "empty": "Noch keine Plugins",
+      "unknownPlugin": "Unbekanntes Plugin"
     },
     "pluginsImport": {
-      "title": "Voreinstellungen importieren",
-      "description": "Lade eine Preset-ZIP hoch oder importiere aus einem öffentlichen GitHub-Repository.",
+      "title": "Plugins importieren",
+      "description": "Lade eine Plugin-ZIP hoch oder importiere aus einem öffentlichen GitHub-Repository.",
       "relativePath": "Relativer Pfad",
       "tabs": {
         "zip": "ZIP hochladen",
@@ -1277,11 +1278,11 @@
       "fields": {
         "zip": "ZIP-Datei",
         "githubUrl": "Öffentliche GitHub-Repo-URL",
-        "nameOverride": "Name der Voreinstellung"
+        "nameOverride": "Plugin-Name"
       },
       "placeholders": {
         "githubUrl": "https://github.com/owner/repo",
-        "name": "z. B. mein-preset"
+        "name": "z. B. mein-plugin"
       },
       "hints": {
         "github": "Standardmäßig main/master (nur öffentliche github.com-Repos)"
@@ -1295,9 +1296,9 @@
       },
       "preview": {
         "found": "Gefunden",
-        "items": "Preset-Definitionen",
+        "items": "Plugin-Definitionen",
         "overwrite": "werden überschrieben",
-        "overwriteItems": "vorhandene Voreinstellungen",
+        "overwriteItems": "vorhandene Plugins",
         "willOverwrite": "Überschreiben",
         "root": "Wurzel",
         "path": "Pfad",
@@ -1326,7 +1327,7 @@
         "discoverError": "Erkennung fehlgeschlagen, bitte versuche es später erneut",
         "committed": "Import erfolgreich",
         "commitError": "Import fehlgeschlagen, bitte versuche es später erneut",
-        "partialFailed": "Einige Voreinstellungen konnten nicht importiert werden. Bitte prüfe die Details.",
+        "partialFailed": "Einige Plugins konnten nicht importiert werden. Bitte prüfe die Details.",
         "commitTimeout": "Import-Zeitüberschreitung, bitte versuche es später erneut"
       },
       "progress": {
@@ -1403,6 +1404,81 @@
     "presetsPage": {
       "header": {
         "title": "Vorlagen"
+      },
+      "summary": "{{count}} wiederverwendbare Vorlagen",
+      "searchPlaceholder": "Vorlagen durchsuchen...",
+      "addCard": "Vorlage erstellen",
+      "empty": "Noch keine Vorlagen",
+      "emptySearch": "Keine Vorlagen entsprechen deiner Suche",
+      "emptyDescription": "Noch keine Beschreibung",
+      "emptySkills": "Keine Skills verfügbar",
+      "emptyMcp": "Keine MCP-Server verfügbar",
+      "emptyPlugins": "Keine Plugins verfuegbar",
+      "loadingCapabilities": "Fähigkeiten werden geladen...",
+      "flags": {
+        "browser": "Browser",
+        "memory": "Speicher"
+      },
+      "tabs": {
+        "general": "Allgemein",
+        "capabilities": "Fähigkeiten",
+        "subagents": "Subagents"
+      },
+      "picker": {
+        "placeholder": "Vorlage auswählen",
+        "none": "Keine Vorlage",
+        "change": "Vorlage wechseln",
+        "selected": "Ausgewählt",
+        "dialogTitle": "Vorlage auswählen",
+        "dialogDescription": "Wende für diesen Lauf eine wiederverwendbare Konfiguration an oder fahre ohne Vorlage fort.",
+        "noneDescription": "Diesen Lauf unabhängig halten und keine Vorlage anwenden."
+      },
+      "selectors": {
+        "skills": "Wähle die wiederverwendbaren Skills für diese Vorlage aus.",
+        "mcp": "Wähle die MCP-Server aus, die diese Vorlage aktivieren soll.",
+        "plugins": "Waehle die Plugins aus, die diese Vorlage enthalten soll."
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Zum Beispiel: Frontend-Auslieferung",
+        "description": "Beschreibung",
+        "descriptionPlaceholder": "Beschreibe, wann diese Vorlage verwendet werden soll",
+        "promptTemplate": "Prompt-Vorlage",
+        "promptTemplatePlaceholder": "Optionale Basisanweisungen für Läufe, die aus dieser Vorlage erstellt werden",
+        "icon": "Symbol",
+        "color": "Farbe",
+        "colorInvalid": "Verwende eine gültige Hex-Farbe wie #0ea5e9",
+        "browserEnabled": "Browser aktivieren",
+        "browserEnabledHint": "Fügt Browser-Fähigkeit hinzu, wenn diese Vorlage angewendet wird.",
+        "memoryEnabled": "Speicher aktivieren",
+        "memoryEnabledHint": "Übernimmt die Speicher-Fähigkeit in Läufe, die mit dieser Vorlage erstellt werden."
+      },
+      "dialog": {
+        "createTitle": "Vorlage erstellen",
+        "editTitle": "Vorlage bearbeiten"
+      },
+      "subagents": {
+        "title": "Inline-Subagents",
+        "description": "Definiere zusätzliche Subagents, die mit dieser Vorlage injiziert werden.",
+        "add": "Subagent hinzufügen",
+        "empty": "Keine Subagents konfiguriert",
+        "itemTitle": "Subagent {{index}}",
+        "fields": {
+          "name": "Name",
+          "model": "Modell",
+          "description": "Beschreibung",
+          "tools": "Werkzeuge",
+          "toolsPlaceholder": "Read, Edit, Bash",
+          "prompt": "Prompt"
+        }
+      },
+      "toasts": {
+        "loadError": "Vorlagen konnten nicht geladen werden",
+        "created": "Vorlage erstellt",
+        "updated": "Vorlage aktualisiert",
+        "deleted": "Vorlage gelöscht",
+        "saveFailed": "Vorlage konnte nicht gespeichert werden",
+        "deleteFailed": "Vorlage konnte nicht gelöscht werden"
       }
     },
     "skillSettings": {
@@ -1449,13 +1525,137 @@
     "titleWithCount": "{{name}} · {{count}} Aufgaben",
     "share": "Projekt teilen",
     "settings": "Projekteinstellungen",
+    "settingsAction": "Vorlagen verwalten",
+    "edit": "Projekt bearbeiten",
     "rename": "Projekt umbenennen",
-    "renameDescription": "Gib einen neuen Projektnamen ein",
     "nameLabel": "Projektname",
+    "descriptionLabel": "Projektbeschreibung",
     "namePlaceholder": "Projektnamen eingeben",
+    "advanced": {
+      "title": "Erweiterte Konfiguration",
+      "defaultModelLabel": "Standardmodell",
+      "defaultModelPlaceholder": "Standardmodell des Arbeitsbereichs verwenden",
+      "gitTitle": "Git-Repository",
+      "gitDescription": "Konfiguriere die Standard-Git-Repository-URL, den Branch und die Authentifizierung für dieses Projekt.",
+      "gitRepoUrlLabel": "Repository-URL",
+      "gitRepoUrlPlaceholder": "https://github.com/user/repo.git",
+      "gitBranchLabel": "Branch",
+      "gitBranchPlaceholder": "main",
+      "gitTokenEnvKeyLabel": "Auth-Umgebungsvariable",
+      "gitTokenEnvKeyPlaceholder": "GITHUB_TOKEN",
+      "mountTitle": "Projekt-Mounts",
+      "mountDescription": "Hänge für neue Ausführungen in diesem Projekt ein oder mehrere lokale Verzeichnisse an.",
+      "chooseFolder": "Ordner auswählen",
+      "mountPathLabel": "Mount-Pfad",
+      "mountPathPlaceholder": "z. B. /Users/alice/Workspace/my-project"
+    },
     "delete": "Projekt löschen",
     "deleteDescription": "Das Löschen dieses Projekts verschiebt alle seine Aufgaben zurück in die Hauptliste.",
-    "deleteConfirm": "Löschen"
+    "deleteConfirm": "Löschen",
+    "detail": {
+      "overview": "Projektübersicht",
+      "renameAction": "Projekt bearbeiten",
+      "descriptionPlaceholder": "Projektbeschreibung hinzufügen...",
+      "editDescription": "Beschreibung bearbeiten",
+      "emptyDescription": "Dieses Projekt hat noch keine Zusammenfassung. Starte eine neue Sitzung, um Kontext aufzubauen.",
+      "unknownUpdatedAt": "Noch keine Aktivität",
+      "composerTitle": "Poco in {{name}} weiter steuern",
+      "infoDrawer": {
+        "title": "Projektinfos"
+      },
+      "files": {
+        "title": "Projektdateien",
+        "description": "Dateien, die {{name}} hinzugefügt werden, stehen in jedem Lauf dieses Projekts zur Verfügung.",
+        "uploadTitle": "Dateien hochladen",
+        "uploadDescription": "Hänge Dokumente, Notizen oder Ausschnitte an, damit der Projektkontext jederzeit griffbereit ist.",
+        "uploadButton": "Dateien hinzufügen",
+        "loading": "Projektdateien werden geladen...",
+        "emptyTitle": "Noch keine Projektdateien",
+        "emptyDescription": "Füge hier Dateien hinzu, damit jeder Lauf dieses Projekts sie als Kontext nutzen kann.",
+        "count": "{{count}} Dateien",
+        "unknownSize": "Unbekannte Größe",
+        "toasts": {
+          "loadFailed": "Projektdateien konnten nicht geladen werden",
+          "added": "{{name}} zu den Projektdateien hinzugefügt",
+          "addFailed": "Datei konnte dem Projekt nicht hinzugefügt werden",
+          "removed": "{{name}} aus den Projektdateien entfernt",
+          "removeFailed": "Projektdatei konnte nicht entfernt werden"
+        }
+      },
+      "notFoundTitle": "Projekt nicht gefunden",
+      "notFoundDescription": "Dieses Projekt ist nicht verfügbar oder du hast keinen Zugriff mehr darauf.",
+      "backHome": "Zur Startseite",
+      "stats": {
+        "sessions": "Sitzungen",
+        "presets": "Vorlagen",
+        "updated": "Zuletzt aktualisiert"
+      },
+      "sessionList": {
+        "title": "Sitzungsverlauf",
+        "subtitle": "{{count}} Sitzungen in diesem Projekt",
+        "emptyTitle": "Noch keine Projektsitzungen",
+        "emptyDescription": "Der nächste Lauf in diesem Projekt erscheint hier, damit du schnell wieder in den Kontext springen kannst."
+      },
+      "quickActions": {
+        "title": "Schnellaktionen",
+        "subtitle": "Die wichtigsten Projektaktionen an einem Ort im Detailbereich halten.",
+        "soon": "Bald",
+        "presets": {
+          "title": "Vorlagen verwalten",
+          "description": "Lege die Standardvorlage fest und steuere, womit neue Sitzungen starten."
+        },
+        "rename": {
+          "title": "Projekt bearbeiten",
+          "description": "Aktualisiere den Projektnamen, ohne die Detailansicht zu verlassen."
+        },
+        "files": {
+          "title": "Projektdateien",
+          "description": "Lade Dateien hoch, die jeder Lauf in diesem Projekt nutzen kann."
+        },
+        "docs": {
+          "title": "Projektdokumente",
+          "description": "Reservierter Einstiegspunkt für Dokumentation und gemeinsame Kontextressourcen."
+        }
+      }
+    },
+    "settingsPanel": {
+      "dialogTitle": "{{name}} Einstellungen",
+      "dialogDescription": "Durchsuche alle Vorlagen und wähle die Standardvorlage für neue Läufe in diesem Projekt.",
+      "git": {
+        "title": "Git-Repository",
+        "repoUrlLabel": "Repository-URL",
+        "repoUrlPlaceholder": "https://github.com/user/repo.git",
+        "branchLabel": "Branch",
+        "branchPlaceholder": "main",
+        "tokenEnvKeyLabel": "Auth-Umgebungsvariable",
+        "tokenEnvKeyPlaceholder": "GITHUB_TOKEN",
+        "toasts": {
+          "updated": "Git-Konfiguration aktualisiert",
+          "failed": "Git-Konfiguration konnte nicht aktualisiert werden"
+        }
+      },
+      "presets": {
+        "title": "Standardvorlage",
+        "description": "Wähle eine Vorlage für dieses Projekt oder entferne den Standardwert, damit neue Läufe ohne Vorlage starten.",
+        "searchPlaceholder": "Vorlagen suchen...",
+        "clearDefault": "Standard löschen",
+        "loading": "Vorlagen werden geladen...",
+        "empty": "Keine Standardvorlage ausgewählt",
+        "emptySearch": "Keine Vorlage entspricht deiner Suche",
+        "default": "Standard",
+        "emptyDescription": "Noch keine Beschreibung",
+        "stats": {
+          "skills": "{{count}} Skills",
+          "mcp": "{{count}} MCP",
+          "plugins": "{{count}} Plugins"
+        },
+        "toasts": {
+          "loadError": "Vorlagen konnten nicht geladen werden",
+          "defaultUpdated": "Standardvorlage aktualisiert",
+          "defaultFailed": "Standardvorlage konnte nicht aktualisiert werden"
+        }
+      }
+    }
   },
   "userMenu": {
     "credits": "Guthaben",
@@ -1736,16 +1936,17 @@
     "turnOnAll": "Alle einschalten",
     "noMcpInstalled": "Kein MCP installiert",
     "noSkillsInstalled": "Keine Skills installiert",
-    "noPluginsInstalled": "Keine Presets installiert",
+    "noPluginsInstalled": "Keine Plugins installiert",
     "fallbackMcp": "MCP #{{id}}",
     "fallbackSkill": "Skill #{{id}}",
+    "fallbackPlugin": "Plugin #{{id}}",
     "fallbackPreset": "Voreinstellung #{{id}}",
     "oneClickClose": "Alle ausschalten",
     "notInstalledMcp": "Kein MCP installiert",
     "notInstalledSkill": "Keine Skills installiert",
     "mcp": "MCP",
     "skills": "Skills",
-    "plugins": "Voreinstellungen",
+    "plugins": "Plugins",
     "apps": "Apps",
     "comingSoon": "Demnächst",
     "clickForDetails": "Für Details klicken",
@@ -2065,13 +2266,12 @@
     },
     "mode": {
       "sandboxTitle": "Nur Sandbox",
-      "sandboxDescription": "Für diese Aufgabe werden nur Dateien in /workspace verwendet.",
+      "sandboxDescription": "Für diese Aufgabe wird nur die integrierte Sandbox-Umgebung verwendet.",
       "localMountTitle": "Lokale Verzeichnisse freigeben",
       "localMountDescription": "Erlaube dem Agenten, ausgewählte Host-Verzeichnisse zu lesen oder zu bearbeiten."
     },
     "mounts": {
       "title": "Freigegebene Verzeichnisse",
-      "description": "Jedes Verzeichnis wird während der Ausführung unter /mnt/local/<id> eingehängt.",
       "itemTitle": "Verzeichnis {{index}}"
     },
     "actions": {
@@ -2111,7 +2311,8 @@
     },
     "picker": {
       "notSupported": "Der native Ordnerwähler wird in diesem Browser nicht unterstützt. Bitte gib den Pfad manuell ein.",
-      "resolveFailed": "Der Pfad konnte nicht automatisch erkannt werden. Bitte gib den Hostpfad manuell ein."
+      "resolveFailed": "Der Pfad konnte nicht automatisch erkannt werden. Bitte gib den Hostpfad manuell ein.",
+      "searchLimitation": "Aus Sicherheitsgründen sucht das automatische Ausfüllen des Hostpfads nur nach dem ausgewählten Ordnernamen. Wenn mehrere Ordner denselben Namen haben, kann die Auflösung fehlschlagen und du musst den absoluten Pfad manuell eingeben."
     }
   }
 }
