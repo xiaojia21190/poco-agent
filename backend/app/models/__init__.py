@@ -21,6 +21,7 @@ from app.models.pending_skill_creation import PendingSkillCreation
 from app.models.plugin import Plugin
 from app.models.plugin_import_job import PluginImportJob
 from app.models.preset import Preset
+from app.models.preset_visual import PresetVisual
 from app.models.project import Project
 from app.models.project_file import ProjectFile
 from app.models.project_local_mount import ProjectLocalMount
@@ -58,6 +59,7 @@ __all__ = [
     "Plugin",
     "PluginImportJob",
     "Preset",
+    "PresetVisual",
     "Project",
     "ProjectFile",
     "ProjectLocalMount",
