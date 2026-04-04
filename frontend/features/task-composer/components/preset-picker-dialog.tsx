@@ -12,12 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { getPresetIcon } from "@/features/capabilities/presets/lib/preset-visuals";
+import { PresetGlyph } from "@/features/capabilities/presets/components/preset-glyph";
 import type { Preset } from "@/features/capabilities/presets/lib/preset-types";
-import {
-  getPresetIconForegroundColor,
-  getPresetIconSurfaceColor,
-} from "@/features/task-composer/lib/preset-icon-tones";
 import { useT } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +32,6 @@ interface PresetOptionRowProps {
   selected: boolean;
   onSelect: () => void;
   icon: React.ReactNode;
-  iconBackgroundColor?: string;
 }
 
 function PresetOptionRow({
@@ -46,7 +41,6 @@ function PresetOptionRow({
   selected,
   onSelect,
   icon,
-  iconBackgroundColor,
 }: PresetOptionRowProps) {
   return (
     <button
@@ -59,14 +53,7 @@ function PresetOptionRow({
           : "border-border/70 bg-background hover:border-border hover:bg-accent/40",
       )}
     >
-      <div
-        className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/60 text-foreground"
-        style={
-          iconBackgroundColor
-            ? { backgroundColor: iconBackgroundColor }
-            : undefined
-        }
-      >
+      <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center">
         {icon}
       </div>
       <div className="min-w-0 flex-1">
@@ -124,12 +111,10 @@ export function PresetPickerDialog({
               selectedLabel={t("library.presetsPage.picker.selected")}
               selected={value === null}
               onSelect={() => handleSelect(null)}
-              iconBackgroundColor="color-mix(in srgb, var(--muted) 80%, transparent)"
               icon={<Sparkles className="size-4" />}
             />
 
             {presets.map((preset) => {
-              const Icon = getPresetIcon(preset.icon);
               return (
                 <PresetOptionRow
                   key={preset.preset_id}
@@ -141,15 +126,7 @@ export function PresetPickerDialog({
                   selectedLabel={t("library.presetsPage.picker.selected")}
                   selected={preset.preset_id === value}
                   onSelect={() => handleSelect(preset.preset_id)}
-                  iconBackgroundColor={getPresetIconSurfaceColor(preset.color)}
-                  icon={
-                    <Icon
-                      className="size-4"
-                      style={{
-                        color: getPresetIconForegroundColor(preset.color),
-                      }}
-                    />
-                  }
+                  icon={<PresetGlyph preset={preset} variant="picker" />}
                 />
               );
             })}

@@ -23,14 +23,10 @@ import { PresetPickerDialog } from "@/features/task-composer/components/preset-p
 import { RepoDialog } from "@/features/task-composer/components/repo-dialog";
 import { SlashAutocompleteDropdown } from "@/features/task-composer/components/slash-autocomplete-dropdown";
 import { presetsService } from "@/features/capabilities/presets/api/presets-api";
-import { getPresetIcon } from "@/features/capabilities/presets/lib/preset-visuals";
+import { PresetGlyph } from "@/features/capabilities/presets/components/preset-glyph";
 import { useCapabilityRecommendations } from "@/features/task-composer/hooks/use-capability-recommendations";
 import { saveLocalFilesystemDraft } from "@/features/task-composer/lib/local-filesystem-save";
 import { getNextComposerMode } from "@/features/task-composer/lib/mode-utils";
-import {
-  getPresetIconForegroundColor,
-  getPresetIconSurfaceColor,
-} from "@/features/task-composer/lib/preset-icon-tones";
 import { resolveInitialPresetSelection } from "@/features/task-composer/lib/preset-selection";
 import { useSlashCommandAutocomplete } from "@/features/chat/hooks/use-slash-command-autocomplete";
 import { useAppShell } from "@/components/shell/app-shell-context";
@@ -750,26 +746,10 @@ export function TaskComposer({
                         }
                       >
                         {selectedPreset ? (
-                          <span
-                            className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-border/50"
-                            style={{
-                              backgroundColor: getPresetIconSurfaceColor(
-                                selectedPreset.color,
-                              ),
-                            }}
-                          >
-                            {React.createElement(
-                              getPresetIcon(selectedPreset.icon),
-                              {
-                                className: "size-4 shrink-0",
-                                style: {
-                                  color: getPresetIconForegroundColor(
-                                    selectedPreset.color,
-                                  ),
-                                },
-                              },
-                            )}
-                          </span>
+                          <PresetGlyph
+                            preset={selectedPreset}
+                            variant="composer"
+                          />
                         ) : (
                           <Sparkles className="size-4 shrink-0" />
                         )}

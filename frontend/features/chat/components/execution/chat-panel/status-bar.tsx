@@ -26,7 +26,7 @@ import { mcpService } from "@/features/capabilities/mcp/api/mcp-api";
 import { skillsService } from "@/features/capabilities/skills/api/skills-api";
 import { pluginsService } from "@/features/capabilities/plugins/api/plugins-api";
 import { presetsService } from "@/features/capabilities/presets/api/presets-api";
-import { getPresetIcon } from "@/features/capabilities/presets/lib/preset-visuals";
+import { PresetGlyph } from "@/features/capabilities/presets/components/preset-glyph";
 import type { McpServer } from "@/features/capabilities/mcp/types";
 import type { Skill } from "@/features/capabilities/skills/types";
 import type { Plugin } from "@/features/capabilities/plugins/types";
@@ -38,10 +38,6 @@ import type {
   BrowserState,
 } from "@/features/chat/types";
 import { PresetPickerDialog } from "@/features/task-composer/components/preset-picker-dialog";
-import {
-  getPresetIconForegroundColor,
-  getPresetIconSurfaceColor,
-} from "@/features/task-composer/lib/preset-icon-tones";
 import { useT } from "@/lib/i18n/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -56,22 +52,6 @@ interface StatusBarProps {
   preset?: Preset | null;
   onPresetChange?: (preset: Preset | null) => void;
   className?: string;
-}
-
-function PresetGlyph({ preset }: { preset: Preset }) {
-  return (
-    <span
-      className="flex size-6 shrink-0 items-center justify-center rounded-lg border border-border/50"
-      style={{
-        backgroundColor: getPresetIconSurfaceColor(preset.color),
-      }}
-    >
-      {React.createElement(getPresetIcon(preset.icon), {
-        className: "size-4 shrink-0",
-        style: { color: getPresetIconForegroundColor(preset.color) },
-      })}
-    </span>
-  );
 }
 
 export function StatusBar({
@@ -283,7 +263,7 @@ export function StatusBar({
               onClick={() => setPresetDialogOpen(true)}
               className="group flex h-9 min-w-0 shrink-0 max-w-[220px] items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 text-foreground transition-colors hover:bg-primary/15 cursor-pointer"
             >
-              <PresetGlyph preset={preset} />
+              <PresetGlyph preset={preset} variant="status" />
               <span className="min-w-0 truncate text-xs font-medium text-foreground">
                 {preset.name}
               </span>

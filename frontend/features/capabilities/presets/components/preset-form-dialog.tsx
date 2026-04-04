@@ -15,8 +15,10 @@ import { pluginsService } from "@/features/capabilities/plugins/api/plugins-api"
 import { skillsService } from "@/features/capabilities/skills/api/skills-api";
 import { mcpService } from "@/features/capabilities/mcp/api/mcp-api";
 import { CapabilitySelector } from "@/features/capabilities/presets/components/capability-selector";
-import { ColorSelector } from "@/features/capabilities/presets/components/color-selector";
-import { IconSelector } from "@/features/capabilities/presets/components/icon-selector";
+import {
+  getPresetFormInitialVisualKey,
+  isPresetFormValid,
+} from "@/features/capabilities/presets/lib/preset-form";
 import type {
   Preset,
   PresetCapabilityItem,
@@ -81,8 +83,9 @@ export function PresetFormDialog({
 
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [icon, setIcon] = React.useState<Preset["icon"]>("default");
-  const [color, setColor] = React.useState("#0ea5e9");
+  const [visualKey, setVisualKey] = React.useState(
+    getPresetFormInitialVisualKey(),
+  );
   const [promptTemplate, setPromptTemplate] = React.useState("");
   const [browserEnabled, setBrowserEnabled] = React.useState(false);
   const [memoryEnabled, setMemoryEnabled] = React.useState(false);
@@ -99,8 +102,7 @@ export function PresetFormDialog({
     if (mode === "edit" && initialPreset) {
       setName(initialPreset.name);
       setDescription(initialPreset.description || "");
-      setIcon(initialPreset.icon);
-      setColor(initialPreset.color || "#0ea5e9");
+      setVisualKey(getPresetFormInitialVisualKey(initialPreset.visual_key));
       setPromptTemplate(initialPreset.prompt_template || "");
       setBrowserEnabled(initialPreset.browser_enabled);
       setMemoryEnabled(initialPreset.memory_enabled);
@@ -115,8 +117,7 @@ export function PresetFormDialog({
 
     setName("");
     setDescription("");
-    setIcon("default");
-    setColor("#0ea5e9");
+    setVisualKey(getPresetFormInitialVisualKey());
     setPromptTemplate("");
     setBrowserEnabled(false);
     setMemoryEnabled(false);
@@ -179,10 +180,7 @@ export function PresetFormDialog({
       ? savingKey === "create"
       : savingKey === String(initialPreset?.preset_id);
 
-  const isValidColor = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(
-    color.trim(),
-  );
-  const isValid = Boolean(name.trim()) && isValidColor;
+  const isValid = isPresetFormValid({ name, visualKey });
   const formId = "preset-form-dialog";
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -192,8 +190,7 @@ export function PresetFormDialog({
     const payload: PresetCreateInput = {
       name: name.trim(),
       description: description.trim() || null,
-      icon,
-      color: color.trim(),
+      visual_key: visualKey.trim(),
       prompt_template: promptTemplate.trim() || null,
       browser_enabled: browserEnabled,
       memory_enabled: memoryEnabled,
@@ -333,17 +330,21 @@ export function PresetFormDialog({
 
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>{t("library.presetsPage.form.icon")}</Label>
-                    <IconSelector value={icon} onChange={setIcon} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t("library.presetsPage.form.color")}</Label>
-                    <ColorSelector value={color} onChange={setColor} />
-                    {!isValidColor ? (
-                      <p className="text-xs text-destructive">
-                        {t("library.presetsPage.form.colorInvalid")}
-                      </p>
-                    ) : null}
+                    <Label htmlFor="preset-visual-key">
+                      {t("library.presetsPage.form.visualKey")}
+                    </Label>
+                    <Input
+                      id="preset-visual-key"
+                      value={visualKey}
+                      onChange={(event) => setVisualKey(event.target.value)}
+                      placeholder={t(
+                        "library.presetsPage.form.visualKeyPlaceholder",
+                      )}
+                      className="font-mono"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {t("library.presetsPage.form.visualKeyHint")}
+                    </p>
                   </div>
                   <div className="space-y-3 rounded-2xl border border-border/60 p-4">
                     <div className="flex items-center justify-between gap-4">
