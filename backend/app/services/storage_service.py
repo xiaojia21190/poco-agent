@@ -553,7 +553,9 @@ class S3StorageService:
         return normalized_key
 
     def _build_public_url(self, key: str) -> str:
-        encoded_segments = [quote(segment, safe="") for segment in key.split("/") if segment]
+        encoded_segments = [
+            quote(segment, safe="") for segment in key.split("/") if segment
+        ]
         path = "/".join(encoded_segments)
         if not path:
             return self.presign_client.meta.endpoint_url.rstrip("/")
