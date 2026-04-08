@@ -187,6 +187,10 @@ export const API_ENDPOINTS = {
   projectFile: (projectId: string, fileId: number) =>
     `/projects/${projectId}/files/${fileId}`,
 
+  // Auth
+  authMe: "/auth/me",
+  authLogout: "/auth/logout",
+
   // Health
   health: "/health",
   root: "/",
@@ -197,6 +201,8 @@ export const API_ENDPOINTS = {
 // ---------------------------------------------------------------------------
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const AUTH_SESSION_COOKIE_NAME =
+  process.env.NEXT_PUBLIC_AUTH_COOKIE_NAME || "poco_session";
 
 function normalizeBaseUrl(baseUrl: string): string {
   return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
@@ -227,35 +233,21 @@ export function getApiBaseUrl(): string {
 }
 
 // ---------------------------------------------------------------------------
-// Auth token resolution
+// Server-side auth session forwarding
 // ---------------------------------------------------------------------------
 
 async function resolveAuthToken(): Promise<string | null> {
   if (typeof window === "undefined") {
-    // Server-side: read from cookies via next/headers
     try {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
-      return (
-        cookieStore.get("access_token")?.value ||
-        cookieStore.get("token")?.value ||
-        null
-      );
+      return cookieStore.get(AUTH_SESSION_COOKIE_NAME)?.value || null;
     } catch {
       return null;
     }
   }
 
-  // Client-side: read from localStorage
-  try {
-    return (
-      window.localStorage.getItem("access_token") ||
-      window.localStorage.getItem("token") ||
-      null
-    );
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -344,6 +336,7 @@ export async function apiFetch<T>(
     const response = await fetch(fullUrl, {
       ...fetchOptions,
       headers,
+      credentials: fetchOptions.credentials ?? "include",
       signal: fetchOptions.signal ?? controller?.signal,
       body: normalizeBody(fetchOptions.body),
     });
