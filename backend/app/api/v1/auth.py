@@ -13,6 +13,16 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 service = AuthService()
 
 
+def _extract_bearer_token(authorization: str | None) -> str | None:
+    if authorization is None:
+        return None
+    scheme, _, value = authorization.partition(" ")
+    if scheme.lower() != "bearer":
+        return None
+    token = value.strip()
+    return token or None
+
+
 @router.get("/google/login")
 async def login_with_google(
     request: Request,
@@ -58,7 +68,9 @@ async def logout(
     request: Request,
     db: Session = Depends(get_db),
 ) -> JSONResponse:
-    session_token = request.cookies.get(service._get_settings().auth_cookie_name)
+    session_token = request.cookies.get(
+        service._get_settings().auth_cookie_name
+    ) or _extract_bearer_token(request.headers.get("authorization"))
     service.logout(db, session_token)
     response = Response.success(
         data={"ok": True},
