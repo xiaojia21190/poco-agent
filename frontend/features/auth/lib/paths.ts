@@ -21,6 +21,19 @@ export function buildLoginPath(lng: string, nextPath?: string): string {
   return `/${lng}/login?${search.toString()}`;
 }
 
+export function buildLogoutPath(lng: string, nextPath?: string): string {
+  const normalizedNext = normalizeNextPath(nextPath, lng);
+  const search = new URLSearchParams({ next: normalizedNext });
+  return `/${lng}/logout?${search.toString()}`;
+}
+
+export function buildSessionRecoveryPath(
+  lng: string,
+  nextPath?: string,
+): string {
+  return buildLogoutPath(lng, buildLoginPath(lng, nextPath));
+}
+
 export function buildProviderLoginPath(
   provider: "google" | "github",
   nextPath: string,
