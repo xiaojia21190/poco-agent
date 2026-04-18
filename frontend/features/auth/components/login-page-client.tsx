@@ -17,8 +17,7 @@ import {
   normalizeNextPath,
 } from "@/features/auth/lib/paths";
 import { LoginPageRuntimeGuard } from "@/features/auth/components/login-page-runtime-guard";
-
-type AuthProvider = "google" | "github";
+import type { AuthProvider } from "@/features/auth/model/types";
 
 interface LoginPageClientProps {
   lng: string;
@@ -57,6 +56,42 @@ function GoogleIcon() {
   );
 }
 
+function FeishuIcon() {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAbCAYAAABvCO8sAAABzUlEQVR4Ab2WA4xdURCGazsootq2gxpBbduNGlRRbZvRi2tFte12bducfV+SWd89ZznJf33nG11Um7B1ajURaeXWPreipXLsu1szYAGr69YNqRobqNlVlT0G2MfpbFxWlpVSM62B/gAHOsHWBH2X0f9eyhSv10Z9TIktH1Chu0L/SLXfj00iMKDlA6qdj/S2gRIc5bUFlh/a2eOZZmkJLD+Ua+yA9CsoqkQe5TL2lAG6fPuHHLv+MVcPn3tzb0EgsA2nRb54csbRCAynxcIa7nNJm3E3pcWIi0jqD7mQu95x/EVR4MpjIu3WmaH0iX4pqMaze9Jw9jUFoALQ6ZtuS1hUUvEZ9tokMmCryP33QjamfiqsCEhFxpQUcwSq9ro47lza2a9eOMI0u9U7Hml2JWeI2F56kGyLAol6xDIXTm2zMwOR7tNf7S1TiLP8MEPv7IH5wajb6ihpPPa+E0hhBKQBWgINAtxlkQdwnBcQx248yRCsfEADHLHNsGGVBkR6H5kxwUYgxjRyEw9/aUBcP3m3cH+pvxZkSklwZCXNyhlkAOYHEzFwSr30oIp9jpszMgMNXwqV0QzA9lJ19qyq/0tn6J830G2V/Oc9F1YOHN8DQeBeXjEAAAAASUVORK5CYII="
+      alt=""
+      className="size-5"
+      aria-hidden="true"
+    />
+  );
+}
+
+interface ProviderUiConfig {
+  labelKey: string;
+  icon: React.ComponentType;
+  variant: "default" | "outline";
+}
+
+const PROVIDER_UI_CONFIG: Record<AuthProvider, ProviderUiConfig> = {
+  google: {
+    labelKey: "auth.login.google",
+    icon: GoogleIcon,
+    variant: "default",
+  },
+  github: {
+    labelKey: "auth.login.github",
+    icon: GithubIcon,
+    variant: "outline",
+  },
+  feishu: {
+    labelKey: "auth.login.feishu",
+    icon: FeishuIcon,
+    variant: "outline",
+  },
+};
+
 export function LoginPageClient({
   lng,
   nextPath,
@@ -77,14 +112,13 @@ export function LoginPageClient({
           defaultValue: t("auth.login.errors.default"),
         })
       : null);
-  const availableProviders = new Set(configuredProviders ?? []);
   const isLoading = configuredProviders === null && !setupRequired;
   const subtitle = setupRequired
     ? t("auth.login.setupRequiredSubtitle")
     : configuredProviders?.length === 1
-      ? configuredProviders[0] === "google"
-        ? t("auth.login.subtitleGoogleOnly")
-        : t("auth.login.subtitleGithubOnly")
+      ? t("auth.login.subtitleSingle", {
+          provider: t(`auth.login.providers.${configuredProviders[0]}`),
+        })
       : t("auth.login.subtitleMultiple");
 
   const handleResolved = React.useCallback(
@@ -149,26 +183,33 @@ export function LoginPageClient({
                 </div>
               ) : null}
 
-              {availableProviders.has("google") ? (
-                <Button asChild size="lg" className="w-full gap-2">
-                  <a href={buildProviderLoginPath("google", targetPath)}>
-                    <GoogleIcon />
-                    <span>{t("auth.login.google")}</span>
-                  </a>
-                </Button>
-              ) : null}
+              {configuredProviders?.map((provider) => {
+                const config = PROVIDER_UI_CONFIG[provider];
+                const Icon = config.icon;
+                return (
+                  <Button
+                    key={provider}
+                    asChild
+                    size="lg"
+                    variant={config.variant}
+                    className="w-full gap-2"
+                  >
+                    <a href={buildProviderLoginPath(provider, targetPath)}>
+                      <Icon />
+                      <span>{t(config.labelKey)}</span>
+                    </a>
+                  </Button>
+                );
+              })}
 
-              {availableProviders.has("github") ? (
+              {!isLoading && configuredProviders?.length === 0 ? (
                 <Button
-                  asChild
                   size="lg"
                   variant="outline"
                   className="w-full gap-2"
+                  disabled
                 >
-                  <a href={buildProviderLoginPath("github", targetPath)}>
-                    <GithubIcon />
-                    <span>{t("auth.login.github")}</span>
-                  </a>
+                  {t("auth.login.noProviders")}
                 </Button>
               ) : null}
             </div>
