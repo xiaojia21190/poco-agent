@@ -5,14 +5,30 @@ import { useT } from "@/lib/i18n/client";
  * Empty state component for artifacts panel
  */
 interface ArtifactsEmptyProps {
-  sessionStatus?: "pending" | "running" | "completed" | "failed" | "canceled";
+  legacySessionArtifactsAvailable?: boolean;
+  sessionStatus?:
+    | "queued"
+    | "claimed"
+    | "pending"
+    | "running"
+    | "canceling"
+    | "completed"
+    | "failed"
+    | "canceled";
 }
 
 /**
  * Empty state component for artifacts panel
  */
-export function ArtifactsEmpty({ sessionStatus }: ArtifactsEmptyProps) {
-  const isRunning = sessionStatus === "running" || sessionStatus === "pending";
+export function ArtifactsEmpty({
+  legacySessionArtifactsAvailable = false,
+  sessionStatus,
+}: ArtifactsEmptyProps) {
+  const isRunning =
+    sessionStatus === "queued" ||
+    sessionStatus === "claimed" ||
+    sessionStatus === "running" ||
+    sessionStatus === "pending";
   const { t } = useT("translation");
 
   if (isRunning) {
@@ -51,6 +67,11 @@ export function ArtifactsEmpty({ sessionStatus }: ArtifactsEmptyProps) {
         <File className="size-12 mx-auto mb-3 opacity-50" />
         <p className="text-sm">{t("artifacts.empty.noChanges")}</p>
         <p className="text-xs mt-1">{t("artifacts.empty.description")}</p>
+        {legacySessionArtifactsAvailable ? (
+          <p className="text-xs mt-2 text-muted-foreground/80">
+            {t("artifacts.empty.legacyHint")}
+          </p>
+        ) : null}
       </div>
     </div>
   );

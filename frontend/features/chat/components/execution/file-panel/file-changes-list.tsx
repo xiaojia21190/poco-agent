@@ -8,7 +8,15 @@ import type { FileChange } from "@/features/chat/types";
 
 interface FileChangesListProps {
   fileChanges?: FileChange[];
-  sessionStatus?: "pending" | "running" | "completed" | "failed" | "canceled";
+  sessionStatus?:
+    | "queued"
+    | "claimed"
+    | "pending"
+    | "running"
+    | "canceling"
+    | "completed"
+    | "failed"
+    | "canceled";
   onFileClick?: (filePath: string) => void;
 }
 

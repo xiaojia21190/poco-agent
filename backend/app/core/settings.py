@@ -28,6 +28,22 @@ class Settings(BaseSettings):
     )
 
     secret_key: str = Field(default="change-this-secret-key-in-production")
+    auth_cookie_name: str = Field(default="poco_session", alias="AUTH_COOKIE_NAME")
+    auth_cookie_secure: bool = Field(default=False, alias="AUTH_COOKIE_SECURE")
+    auth_session_ttl_days: int = Field(default=30, alias="AUTH_SESSION_TTL_DAYS")
+    oauth_session_cookie_name: str = Field(
+        default="poco_oauth", alias="OAUTH_SESSION_COOKIE_NAME"
+    )
+    auth_mode: Literal["oauth_required", "oauth_optional", "single_user"] = Field(
+        default="oauth_required",
+        alias="AUTH_MODE",
+    )
+    google_client_id: str | None = Field(default=None, alias="GOOGLE_CLIENT_ID")
+    google_client_secret: str | None = Field(default=None, alias="GOOGLE_CLIENT_SECRET")
+    github_client_id: str | None = Field(default=None, alias="GITHUB_CLIENT_ID")
+    github_client_secret: str | None = Field(default=None, alias="GITHUB_CLIENT_SECRET")
+    single_user_id: str = Field(default="default", alias="SINGLE_USER_ID")
+    single_user_name: str = Field(default="Local User", alias="SINGLE_USER_NAME")
     internal_api_token: str = Field(
         default="change-this-token-in-production", alias="INTERNAL_API_TOKEN"
     )
@@ -88,6 +104,28 @@ class Settings(BaseSettings):
     feishu_stream_enabled: bool = Field(default=True, alias="FEISHU_STREAM_ENABLED")
     feishu_app_id: str | None = Field(default=None, alias="FEISHU_APP_ID")
     feishu_app_secret: str | None = Field(default=None, alias="FEISHU_APP_SECRET")
+    feishu_oauth_client_id: str | None = Field(
+        default=None, alias="FEISHU_OAUTH_CLIENT_ID"
+    )
+    feishu_oauth_client_secret: str | None = Field(
+        default=None, alias="FEISHU_OAUTH_CLIENT_SECRET"
+    )
+    feishu_oauth_region: Literal["cn", "global"] = Field(
+        default="cn", alias="FEISHU_OAUTH_REGION"
+    )
+    feishu_oauth_scope: str = Field(default="", alias="FEISHU_OAUTH_SCOPE")
+    feishu_oauth_authorize_url: str | None = Field(
+        default=None, alias="FEISHU_OAUTH_AUTHORIZE_URL"
+    )
+    feishu_oauth_token_url: str | None = Field(
+        default=None, alias="FEISHU_OAUTH_TOKEN_URL"
+    )
+    feishu_oauth_userinfo_url: str | None = Field(
+        default=None, alias="FEISHU_OAUTH_USERINFO_URL"
+    )
+    feishu_oauth_email_verified: bool = Field(
+        default=True, alias="FEISHU_OAUTH_EMAIL_VERIFIED"
+    )
     feishu_verification_token: str | None = Field(
         default=None, alias="FEISHU_VERIFICATION_TOKEN"
     )
@@ -106,6 +144,12 @@ class Settings(BaseSettings):
     s3_secret_key: str | None = Field(default=None, alias="S3_SECRET_KEY")
     s3_region: str = Field(default="us-east-1", alias="S3_REGION")
     s3_bucket: str | None = Field(default=None, alias="S3_BUCKET")
+    s3_key_prefix: str | None = Field(default=None, alias="S3_KEY_PREFIX")
+    s3_public_read: bool = Field(default=False, alias="S3_PUBLIC_READ")
+    s3_public_endpoint_bucket_bound: bool = Field(
+        default=False, alias="S3_PUBLIC_ENDPOINT_BUCKET_BOUND"
+    )
+    s3_signature_version: str | None = Field(default=None, alias="S3_SIGNATURE_VERSION")
     s3_force_path_style: bool = Field(default=True, alias="S3_FORCE_PATH_STYLE")
     s3_presign_expires: int = Field(default=300, alias="S3_PRESIGN_EXPIRES")
     s3_connect_timeout_seconds: int = Field(
